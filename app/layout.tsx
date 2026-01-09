@@ -5,6 +5,7 @@ import "./globals.css";
 import AutoLogoutProvider from '@/components/AutoLogoutProvider'
 import { ProfileProvider } from './contexts/ProfileContext'
 import { FinancialConfigProvider } from '@/app/contexts/FinancialConfigContext'
+import AIChatInterface from '@/components/AIChatInterface'
 import FeedbackWidget from '@/components/FeedbackWidget'
 
 const inter = Inter({ subsets: ['latin'] });
@@ -28,6 +29,7 @@ export default function RootLayout({
               <ProfileProvider>
                 <FinancialConfigProvider> {/* <--- BURAYI EKLEDİK */}
                   {children}
+                  <AIChatInterface />
                   <FeedbackWidget /> {/* Geri Bildirim Bileşenini Ekliyoruz */}
                 </FinancialConfigProvider>
                 </ProfileProvider>

@@ -6,7 +6,6 @@ import DashboardHeader from '@/components/DashboardHeader'
 import KPISection from '@/components/KPISection'
 import SmartSummary from '@/components/SmartSummary'
 import TransactionList from '@/components/TransactionList'
-import AIChatWidget from '@/components/AIChatWidget'
 import { DEMO_DATA } from '@/utils/demoData'
 
 export default function DemoPage() {
@@ -53,8 +52,6 @@ export default function DemoPage() {
             </div>
         </div>
       </main>
-      
-      <AIChatWidget />
     </div>
   )
 }

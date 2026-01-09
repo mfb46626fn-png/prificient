@@ -5,7 +5,6 @@ import FileUpload from '@/components/FileUpload'
 import ManualEntryForm from '@/components/ManualEntryForm'
 import { FileSpreadsheet, Keyboard } from 'lucide-react'
 import DashboardHeader from '@/components/DashboardHeader' // Header Eklendi
-import AIChatWidget from '@/components/AIChatWidget' // AI Widget Eklendi
 
 export default function DataEntryPage() {
   const [activeTab, setActiveTab] = useState<'manual' | 'upload'>('manual')
@@ -67,9 +66,6 @@ export default function DataEntryPage() {
         </div>
 
       </main>
-
-      {/* 2. AI ASİSTAN EKLENDİ */}
-      <AIChatWidget />
     </div>
   )
 }
