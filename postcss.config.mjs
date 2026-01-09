@@ -1,7 +1,6 @@
-const config = {
+export default {
   plugins: {
-    "@tailwindcss/postcss": {},
+    '@tailwindcss/postcss': {}, // Hata mesajının istediği eklenti tam olarak bu
+    'autoprefixer': {},
   },
 };
-
-export default config;
