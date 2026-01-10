@@ -16,14 +16,15 @@ export type FinancialConfig = {
     profitTargetPercent: number
     minMargin: number
     monthlyFixedCost: number // Liste toplamından otomatik hesaplanacak
-    fixedExpenses: FixedExpense[] // <--- YENİ LİSTE
+    fixedExpenses: FixedExpense[] 
 
     // 2. Platform & Maliyet
     selectedPlatform: string 
     platformCommission: number 
     paymentProcessorFee: number 
     fixedPerOrderFee: number 
-    logisticsCost: number 
+    logisticsCost: number
+    taxRate: number // <--- DÜZELTME: Vergi Oranı Eklendi
 
     // 3. Öngörü
     stockWarningDays: number
@@ -35,13 +36,14 @@ const DEFAULT_CONFIG: FinancialConfig = {
     profitTargetPercent: 25,
     minMargin: 10,
     monthlyFixedCost: 0,
-    fixedExpenses: [], // Boş liste ile başla
+    fixedExpenses: [], 
 
     selectedPlatform: 'Shopify',
     platformCommission: 2.0, 
     paymentProcessorFee: 2.9, 
     fixedPerOrderFee: 0.30, 
     logisticsCost: 0,
+    taxRate: 20, // <--- DÜZELTME: Varsayılan %20 (KDV) olarak eklendi
 
     stockWarningDays: 14,
     riskAppetite: 'moderate'
