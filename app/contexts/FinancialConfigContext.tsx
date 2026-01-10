@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { createClient } from '@/utils/supabase/client'
 
-// YENİ: Sabit Gider Kalemi Tipi
+// Sabit Gider Kalemi Tipi
 export type FixedExpense = {
     id: string
     title: string // Örn: Ofis Kirası
@@ -24,9 +24,13 @@ export type FinancialConfig = {
     paymentProcessorFee: number 
     fixedPerOrderFee: number 
     logisticsCost: number
-    taxRate: number // <--- DÜZELTME: Vergi Oranı Eklendi
+    taxRate: number // Vergi Oranı (KDV)
 
-    // 3. Öngörü
+    // 3. Reklam Modeli (YENİ EKLENDİ)
+    adSpendModel: 'fixed_monthly' | 'per_order' | 'per_product'
+    adSpendAmount: number // Model başı maliyet veya toplam bütçe
+
+    // 4. Öngörü
     stockWarningDays: number
     riskAppetite: 'conservative' | 'moderate' | 'aggressive'
 }
@@ -43,7 +47,11 @@ const DEFAULT_CONFIG: FinancialConfig = {
     paymentProcessorFee: 2.9, 
     fixedPerOrderFee: 0.30, 
     logisticsCost: 0,
-    taxRate: 20, // <--- DÜZELTME: Varsayılan %20 (KDV) olarak eklendi
+    taxRate: 20, // Varsayılan KDV
+
+    // Reklam Varsayılanları (YENİ)
+    adSpendModel: 'fixed_monthly', // Varsayılan model
+    adSpendAmount: 0, // Varsayılan tutar
 
     stockWarningDays: 14,
     riskAppetite: 'moderate'
