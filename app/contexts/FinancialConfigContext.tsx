@@ -25,10 +25,11 @@ export type FinancialConfig = {
     fixedPerOrderFee: number 
     logisticsCost: number
     taxRate: number // Vergi Oranı (KDV)
+    vatIncluded: boolean // <--- DÜZELTME: KDV Dahil/Hariç Ayarı Eklendi
 
-    // 3. Reklam Modeli (YENİ EKLENDİ)
+    // 3. Reklam Modeli
     adSpendModel: 'fixed_monthly' | 'per_order' | 'per_product'
-    adSpendAmount: number // Model başı maliyet veya toplam bütçe
+    adSpendAmount: number 
 
     // 4. Öngörü
     stockWarningDays: number
@@ -47,11 +48,12 @@ const DEFAULT_CONFIG: FinancialConfig = {
     paymentProcessorFee: 2.9, 
     fixedPerOrderFee: 0.30, 
     logisticsCost: 0,
-    taxRate: 20, // Varsayılan KDV
+    taxRate: 20, 
+    vatIncluded: true, // <--- DÜZELTME: Varsayılan olarak KDV Dahil (True)
 
-    // Reklam Varsayılanları (YENİ)
-    adSpendModel: 'fixed_monthly', // Varsayılan model
-    adSpendAmount: 0, // Varsayılan tutar
+    // Reklam Varsayılanları
+    adSpendModel: 'fixed_monthly', 
+    adSpendAmount: 0, 
 
     stockWarningDays: 14,
     riskAppetite: 'moderate'
