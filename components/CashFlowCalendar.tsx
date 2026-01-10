@@ -160,7 +160,8 @@ export default function CashFlowCalendar() {
                       event.type === 'income' ? 'text-emerald-600' : 'text-rose-600'
                   }`}>
                   {event.type === 'income' ? <TrendingUp size={12}/> : <TrendingDown size={12}/>}
-                  {symbol}{convert(event.amount).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                  {/* DÜZELTME: Number(...) içine alındı */}
+                  {symbol}{Number(convert(event.amount)).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                   </div>
               </div>
             </div>
