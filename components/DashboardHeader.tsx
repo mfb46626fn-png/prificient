@@ -30,6 +30,7 @@ interface DashboardHeaderProps {
   totalRevenue?: number
   totalExpense?: number
   isDemo?: boolean
+  userEmail?: string
 }
 
 export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, isDemo = false }: DashboardHeaderProps) {
