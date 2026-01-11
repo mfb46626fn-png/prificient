@@ -1,47 +1,107 @@
 import { createClient } from '@/utils/supabase/client'
 
-// Anomali Kontrol Fonksiyonu
-export const runNotificationEngine = async (currentRevenue: number, currentExpense: number, netProfit: number) => {
+// DB ile uyumlu tipler
+type NotificationType = 'info' | 'success' | 'warning' | 'alert' | 'ai_insight'
+
+export const runNotificationEngine = async (totalRevenue: number, totalExpense: number, netProfit: number) => {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
   if (!user) return
 
-  // --- YENİ EKLENEN KISIM: KULLANICI TERCİHİ KONTROLÜ ---
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('notify_anomalies')
-    .eq('id', user.id)
-    .single()
+  // 1. KULLANICI TERCİHİ KONTROLÜ
+  // Eğer 'profiles' tablosunda bu sütun yoksa hata vermemesi için try-catch veya opsiyonel zincirleme
+  try {
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('notify_anomalies')
+        .eq('id', user.id)
+        .single()
 
-  // Eğer kullanıcı anomali bildirimlerini kapattıysa, motoru durdur.
-  if (profile && profile.notify_anomalies === false) {
-    return 
+    if (profile && profile.notify_anomalies === false) {
+        return 
+    }
+  } catch (error) {
+    // Sütun yoksa veya hata varsa varsayılan olarak devam et
   }
 
-  // --- TARİH ARALIKLARINI BELİRLE ---
-  const now = new Date()
+  // --- YARDIMCI: BİLDİRİM OLUŞTURUCU (SPAM KORUMALI) ---
+  const createUniqueNotification = async (title: string, message: string, type: NotificationType) => {
+    // Son 24 saat içinde aynı başlıkla bildirim atılmış mı?
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
+
+    const { data: existing } = await supabase
+      .from('notifications')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('title', title)
+      .gte('created_at', yesterday.toISOString())
+      .maybeSingle() // single() yerine maybeSingle() hata riskini azaltır
+    
+    if (!existing) {
+      await supabase.from('notifications').insert({
+        user_id: user.id,
+        title,
+        message,
+        type, // DB Check Constraint'e uygun tip
+        is_read: false
+      })
+    }
+  }
+
+  // --- BÖLÜM 1: GENEL FİNANSAL SAĞLIK (Props'tan gelen verilerle) ---
   
-  // Bu Ayın Başı ve Sonu
+  // A. ZARAR UYARISI (Kritik)
+  if (netProfit < 0) {
+    await createUniqueNotification(
+      'Zarar Uyarısı 📉',
+      `Dikkat! Giderleriniz gelirlerinizden fazla (Net: ${netProfit.toLocaleString('tr-TR')} TL). Sabit giderleri gözden geçirin.`,
+      'alert' // DB'deki karşılığı 'alert' (danger yok)
+    )
+  }
+
+  // B. DÜŞÜK KÂR MARJI
+  if (totalRevenue > 0) {
+    const margin = (netProfit / totalRevenue) * 100
+    if (margin < 15 && margin > 0) {
+        await createUniqueNotification(
+            'Düşük Kâr Marjı ⚠️',
+            `Kâr marjınız %${margin.toFixed(1)} seviyesine geriledi. Sağlıklı büyüme için fiyatlandırmanızı kontrol edin.`,
+            'warning'
+        )
+    }
+  }
+
+  // C. AI INSIGHT (Yüksek Burn Rate)
+  if (totalRevenue > 0 && totalExpense > (totalRevenue * 0.85)) {
+      await createUniqueNotification(
+          'AI Finansal Tespit 🤖',
+          'Gelirinizin %85\'inden fazlası gidere harcanıyor. Nakit akışını yönetmek zorlaşabilir.',
+          'ai_insight'
+      )
+  }
+
+  // --- BÖLÜM 2: KATEGORİ ANOMALİLERİ (DB Sorgusu ile) ---
+  
+  const now = new Date()
   const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
   const thisMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString()
-  
-  // Geçen Ayın Başı ve Sonu
   const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString()
   const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0).toISOString()
 
-  // --- KATEGORİ BAZLI HARCAMALARI ÇEK ---
-  // Helper: Belirli bir tarih aralığında ve kategorideki toplam gideri çeker
-  const getCategoryTotal = async (category: string, start: string, end: string) => {
+  // Helper: Kategori Toplamı
+  const getCategoryTotal = async (categoryPattern: string, start: string, end: string) => {
+    // Hem 'expenses' (sabit) hem 'transactions' (değişken) tablolarına bakmak daha doğrudur
+    // Şimdilik senin kodundaki gibi expenses üzerinden gidiyoruz
     const { data } = await supabase
       .from('expenses')
       .select('amount')
       .eq('user_id', user.id)
-      .ilike('category', category) // 'Lojistik', 'Kargo' vb.
+      .ilike('category', categoryPattern) 
       .gte('date', start)
       .lte('date', end)
     
-    // Topla
     return data?.reduce((sum, item) => sum + item.amount, 0) || 0
   }
 
@@ -49,68 +109,31 @@ export const runNotificationEngine = async (currentRevenue: number, currentExpen
   const thisMonthLogistic = await getCategoryTotal('%Lojistik%', thisMonthStart, thisMonthEnd)
   const lastMonthLogistic = await getCategoryTotal('%Lojistik%', lastMonthStart, lastMonthEnd)
 
-  // 2. REKLAM / PAZARLAMA ANALİZİ
-  const thisMonthMarketing = await getCategoryTotal('%Pazarlama%', thisMonthStart, thisMonthEnd)
-  const lastMonthMarketing = await getCategoryTotal('%Pazarlama%', lastMonthStart, lastMonthEnd)
-
-
-  // --- ANOMALİ KONTROLLERİ VE BİLDİRİM OLUŞTURMA ---
-  const createAlert = async (title: string, message: string, type: 'warning' | 'danger') => {
-    // Aynı gün içinde aynı başlıkla bildirim atılmış mı kontrol et (Spam önleme)
-    const today = new Date().toISOString().split('T')[0]
-    const { data: existing } = await supabase
-      .from('notifications')
-      .select('*')
-      .eq('title', title)
-      .gte('created_at', today)
-    
-    if (existing && existing.length > 0) return // Zaten uyarılmış
-
-    // Bildirimi Kaydet
-    await supabase.from('notifications').insert({
-      user_id: user.id,
-      title: title,
-      message: message,
-      is_read: false,
-      type: type // DB'de type sütunu yoksa meta data gibi düşünebiliriz, şimdilik title/message yeterli
-    })
-  }
-
-  // KURAL 1: KARGO MALİYETİ SAPMASI (> %20)
-  // Sadece kayda değer tutarlar varsa (örn: 1000 TL üzeri) kontrol et
   if (lastMonthLogistic > 1000) {
     const logisticChange = ((thisMonthLogistic - lastMonthLogistic) / lastMonthLogistic) * 100
+    // %20 artış varsa uyar
     if (logisticChange > 20) {
-       await createAlert(
-         "⚠️ Kargo Maliyetinde Anomali",
-         `Lojistik giderleriniz geçen aya göre %${logisticChange.toFixed(0)} arttı. Beklenmedik bir artış olabilir, kargo faturalarını kontrol edin.`,
-         'danger'
-       )
-    }
-  }
-
-  // KURAL 2: REKLAM GİDERİ SAPMASI (> %30)
-  if (lastMonthMarketing > 1000) {
-    const marketingChange = ((thisMonthMarketing - lastMonthMarketing) / lastMonthMarketing) * 100
-    if (marketingChange > 30) {
-       await createAlert(
-         "📢 Reklam Bütçesi Uyarısı",
-         `Pazarlama harcamalarınız %${marketingChange.toFixed(0)} yükseldi. Bu artışın satışlara yansıyıp yansımadığını kontrol edin.`,
+       await createUniqueNotification(
+         "Kargo Maliyetinde Anomali 📦",
+         `Lojistik giderleriniz geçen aya göre %${logisticChange.toFixed(0)} arttı. Beklenmedik bir artış olabilir.`,
          'warning'
        )
     }
   }
 
-  // KURAL 3: KÂR MARJI DÜŞÜŞÜ (Kritik)
-  // (Bu kısım zaten SmartSummary'de var ama bildirim olarak da düşmesi iyidir)
-  if (currentRevenue > 0) {
-      const margin = (netProfit / currentRevenue) * 100
-      if (margin < 10 && margin > 0) {
-          await createAlert(
-              "📉 Kritik Kâr Marjı",
-              `Net kâr marjınız %${margin.toFixed(1)} seviyesine geriledi. %10'un altı riskli bölgedir.`,
-              'danger'
-          )
-      }
+  // 2. REKLAM / PAZARLAMA ANALİZİ
+  const thisMonthMarketing = await getCategoryTotal('%Pazarlama%', thisMonthStart, thisMonthEnd)
+  const lastMonthMarketing = await getCategoryTotal('%Pazarlama%', lastMonthStart, lastMonthEnd)
+
+  if (lastMonthMarketing > 1000) {
+    const marketingChange = ((thisMonthMarketing - lastMonthMarketing) / lastMonthMarketing) * 100
+    // %30 artış varsa uyar
+    if (marketingChange > 30) {
+       await createUniqueNotification(
+         "Reklam Bütçesi Uyarısı 📢",
+         `Pazarlama harcamalarınız %${marketingChange.toFixed(0)} yükseldi. ROI (Geri Dönüş) analizi yapmanızı öneririz.`,
+         'ai_insight'
+       )
+    }
   }
 }

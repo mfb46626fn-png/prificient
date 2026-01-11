@@ -1,86 +1,52 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
-import OpenAI from 'openai'
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
 
 export async function POST(req: Request) {
   try {
     const supabase = await createClient()
     
-    // 1. KİMLİK DOĞRULAMA
+    // 1. KİMLİK DOĞRULAMA (Güvenlik Duvarı)
+    // Sadece giriş yapmış kullanıcılar n8n'i tetikleyebilir.
     const { data: { user } } = await supabase.auth.getUser()
+    
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { message } = await req.json()
+    // Frontend'den gelen mesajı al
+    const body = await req.json()
+    const { message } = body
 
-    // 2. VERİ TOPLAMA (HAM VERİ)
-    const [profileData, transactionsData, expensesData] = await Promise.all([
-      supabase.from('profiles').select('*').eq('id', user.id).single(),
-      supabase.from('transactions').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(50), // Son 50 işlem yeterli
-      supabase.from('expenses').select('*').eq('user_id', user.id)
-    ])
+    // 2. n8n BAĞLANTISI (Proxy)
+    // Buraya n8n'deki Webhook URL'ini yapıştıracaksın.
+    // Örn: https://webhook.prificient.com/webhook/ai-chat
+    const N8N_WEBHOOK_URL = process.env.N8N_AI_WEBHOOK_URL || 'BURAYA_N8N_WEBHOOK_URL_YAZILACAK'
 
-    const databaseDump = {
-      user_profile: profileData.data,
-      transaction_history: transactionsData.data,
-      fixed_expenses: expensesData.data,
-      meta: {
-        currency: 'TRY',
-        today: new Date().toISOString().split('T')[0]
-      }
-    }
-
-    // 3. SİSTEM İSTEMİ (YENİ CFO PERSONASI)
-    const systemPrompt = `
-      GÖREV:
-      Sen Prificient kullanıcılarının "Finansal Direktörü (CFO)"sün.
-      Eline ham veriler (JSON) gelecek. Sen bu veriyi işleyip, yönetici özeti (Executive Summary) formatında sunacaksın.
-
-      KURALLAR VE ÜSLUP:
-      1. **ASLA** teknik terim kullanma (tablo, row, database, JSON, type değeri vb. YASAK).
-      2. **ASLA** hesaplama yöntemini açıklama ("Şunu şununla topladım" deme). Sadece sonucu söyle.
-      3. **MİNİMALİST OL:** Uzun paragraflar yazma. Maddeler, emojiler ve kalın yazılar (**Bold**) kullan.
-      4. **ŞABLON KULLAN:** Kullanıcı "Durumum ne?" dediğinde aşağıdaki formatı kullan:
-
-      ---
-      📉 **Net Durum:** [Tutar] [Para Birimi]
-      
-      📊 **Özet Tablo:**
-      • Toplam Gelir: [Tutar]
-      • Toplam Gider: [Tutar]
-      • Kâr Marjı: %[Oran]
-
-      💡 **Tespit:** [Tek cümlelik en önemli içgörü. Örn: "Sabit giderleriniz çok yüksek, acil satış lazım."]
-      ---
-
-      5. **HESAPLAMA MANTIĞI:**
-         - Gelir = 'transaction_history' içindeki (income) tipleri.
-         - Gider = 'transaction_history' içindeki (expense) + 'fixed_expenses' içindeki tüm kalemler.
-         - Eğer gelir 0 ise bunu net bir şekilde belirt ("Henüz gelir akışı başlamamış").
-
-      MEVCUT VERİLER:
-      ${JSON.stringify(databaseDump)}
-    `
-
-    // 4. OpenAI ÇAĞRISI
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: message }
-      ],
-      temperature: 0.3, // Biraz daha tutarlı olması için düşük sıcaklık
+    // n8n'e veriyi gönderiyoruz
+    const n8nResponse = await fetch(N8N_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: message,   // Kullanıcının sorusu
+        user_id: user.id    // n8n bu ID ile Supabase'den veriyi çekecek ve hafıza tutacak
+      })
     })
 
-    return NextResponse.json({ response: completion.choices[0].message.content })
+    if (!n8nResponse.ok) {
+      console.error('n8n Hatası:', n8nResponse.statusText)
+      throw new Error('AI servisine bağlanılamadı')
+    }
+
+    // 3. YANITI DÖNDÜR
+    // n8n'den dönen JSON şuna benzer olmalı: { "output": "Merhaba..." }
+    const data = await n8nResponse.json()
+
+    return NextResponse.json(data)
 
   } catch (error) {
-    console.error('AI Error:', error)
-    return NextResponse.json({ error: 'AI servisinde hata oluştu.' }, { status: 500 })
+    console.error('AI Proxy Error:', error)
+    return NextResponse.json({ error: 'İşlem başarısız oldu.' }, { status: 500 })
   }
 }

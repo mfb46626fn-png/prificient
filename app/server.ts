@@ -1,8 +1,8 @@
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 
 export async function createClient() {
-  const cookieStore = await cookies()
+  const cookieStore = await cookies() // Fonksiyon olarak çağırma, doğrudan çağır
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,13 +12,14 @@ export async function createClient() {
         getAll() {
           return cookieStore.getAll()
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             )
           } catch {
-            // Server Component içinde cookie set edilmeye çalışılırsa hata yutulur
+            // Server component'lerde cookie yazarken hata alabiliriz,
+            // bunu yutuyoruz (görmezden geliyoruz).
           }
         },
       },

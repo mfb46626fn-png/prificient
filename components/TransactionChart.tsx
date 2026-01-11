@@ -11,8 +11,8 @@ export default function TransactionChart({ transactions }: { transactions: any[]
   const data = processData(transactions, t)
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-8 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 h-full transition-colors outline-none">
-      <h3 className="text-xl font-black text-gray-900 dark:text-white mb-6 uppercase tracking-wider text-xs">{t.income_expense_analysis}</h3>
+    <div className="bg-white dark:bg-gray-800 p-8 rounded-4xl shadow-sm border border-gray-100 dark:border-gray-700 h-full transition-colors outline-none">
+      <h3 className="text-xl font-black text-gray-900 dark:text-white mb-6 uppercase tracking-wider">{t.income_expense_analysis}</h3>
       
       <div className="h-80 w-full">
         <ResponsiveContainer width="100%" height="100%">

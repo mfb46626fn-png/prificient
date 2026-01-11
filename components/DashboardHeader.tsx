@@ -54,9 +54,9 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
   const notificationRef = useRef<HTMLDivElement>(null)
   const { avatarUrl, loading: profileLoading } = useProfile()
 
-  // 1. BİLDİRİMLERİ ÇEK
+// Bildirimleri Çek
   const fetchNotifications = async () => {
-    if (isDemo) return
+    if (isDemo) return // Demo modunda çekme
 
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
@@ -65,21 +65,20 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
+        .limit(10) // Son 10 bildirim
+      
       if (data) setNotifications(data)
     }
   }
 
-  // 2. OKUNDU İŞARETLE
+  // Okundu İşaretleme
   const markAsRead = async (id: string) => {
-    if (isDemo) return
-
-    const { error } = await supabase
-      .from('notifications')
-      .update({ is_read: true })
-      .eq('id', id)
+    // UI Güncelle
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n))
     
-    if (!error) {
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n))
+    // DB Güncelle
+    if (!isDemo) {
+        await supabase.from('notifications').update({ is_read: true }).eq('id', id)
     }
   }
 
@@ -209,49 +208,55 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
           </div>
 
           <div className="flex items-center gap-3">
-            {/* BİLDİRİM BUTONU */}
-            <div className="relative" ref={notificationRef}>
-              <button 
-                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className={`p-2.5 rounded-xl transition-all relative ${isNotificationsOpen ? 'bg-gray-100 text-black' : 'text-gray-400 hover:text-black hover:bg-gray-50'}`}
-              >
-                <Bell size={20} />
-                {unreadCount > 0 && (
-                  <span className="absolute top-2 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white animate-pulse"></span>
-                )}
-              </button>
+{/* BİLDİRİM BUTONU */}
+<div className="relative" ref={notificationRef}>
+  <button 
+    onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+    className={`p-2.5 rounded-xl transition-all relative ${isNotificationsOpen ? 'bg-gray-100 text-black' : 'text-gray-400 hover:text-black hover:bg-gray-50'}`}
+  >
+    <Bell size={20} />
+    {/* Okunmamış varsa kırmızı nokta koy */}
+    {notifications.some(n => !n.is_read) && (
+      <span className="absolute top-2 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white animate-pulse"></span>
+    )}
+  </button>
 
-              {isNotificationsOpen && (
-                <div className="absolute right-0 top-full mt-3 w-85 bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 py-5 animate-in fade-in zoom-in-95 duration-200 z-50">
-                  <div className="px-6 pb-4 border-b border-gray-50 flex justify-between items-center">
-                    <div>
-                      <h4 className="font-black text-sm uppercase tracking-wider text-gray-900">Bildirimler</h4>
-                      <p className="text-[10px] text-gray-400 font-bold">{unreadCount} Okunmamış</p>
-                    </div>
-                  </div>
-                  <div className="max-h-96 overflow-y-auto divide-y divide-gray-50">
-                    {notifications.length > 0 ? notifications.map((n) => (
-                      <div key={n.id} className={`px-6 py-5 hover:bg-gray-50/80 transition-all group relative ${!n.is_read ? 'bg-indigo-50/30' : ''}`}>
-                        <div className="flex justify-between items-start gap-4">
-                          <div className="flex-1">
-                            <p className={`text-xs font-bold ${!n.is_read ? 'text-indigo-900' : 'text-gray-900'}`}>{n.title}</p>
-                            <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">{n.message}</p>
-                            <span className="text-[9px] font-medium text-gray-400 mt-2 block italic">{new Date(n.created_at).toLocaleDateString('tr-TR')}</span>
-                          </div>
-                          <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {!n.is_read && <button onClick={() => markAsRead(n.id)} className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors"><Check size={14} /></button>}
-                            <button onClick={() => deleteNotification(n.id)} className="p-1.5 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition-colors"><Trash2 size={14} /></button>
-                          </div>
-                        </div>
-                      </div>
-                    )) : <div className="py-12 text-center"><p className="text-xs font-bold text-gray-400">Bildirim bulunmuyor.</p></div>}
-                  </div>
-                  <div className="px-6 pt-4 border-t border-gray-50">
-                    <button onClick={clearAllNotifications} className="w-full py-3 bg-gray-50 rounded-2xl text-[11px] font-black text-gray-500 hover:text-black hover:bg-gray-100 uppercase tracking-[0.2em] transition-all">Tümünü Temizle</button>
-                  </div>
-                </div>
-              )}
+  {/* DROPDOWN */}
+  {isNotificationsOpen && (
+    <div className="absolute right-0 top-full mt-3 w-80 bg-white rounded-[2rem] shadow-2xl border border-gray-100 py-4 animate-in fade-in zoom-in-95 duration-200 z-50">
+      
+      <div className="px-6 pb-2 border-b border-gray-50 flex justify-between items-center">
+        <h4 className="font-bold text-sm text-gray-900">Bildirimler</h4>
+        <span className="text-[10px] bg-gray-100 px-2 py-0.5 rounded-full text-gray-500 font-bold">
+            {notifications.filter(n => !n.is_read).length} Yeni
+        </span>
+      </div>
+
+      <div className="max-h-80 overflow-y-auto custom-scrollbar">
+        {notifications.length > 0 ? (
+          notifications.map((n) => (
+            <div 
+                key={n.id} 
+                onClick={() => markAsRead(n.id)}
+                className={`px-6 py-4 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors ${!n.is_read ? 'bg-blue-50/30' : ''}`}
+            >
+              <div className="flex justify-between items-start mb-1">
+                  <p className={`text-xs font-bold ${!n.is_read ? 'text-blue-600' : 'text-gray-900'}`}>{n.title}</p>
+                  <span className="text-[9px] text-gray-400">{new Date(n.created_at).toLocaleDateString('tr-TR')}</span>
+              </div>
+              <p className="text-[11px] text-gray-500 leading-relaxed">{n.message}</p>
             </div>
+          ))
+        ) : (
+          <div className="py-8 text-center text-gray-400 text-xs font-medium">
+            Henüz bildiriminiz yok.
+          </div>
+        )}
+      </div>
+      
+    </div>
+  )}
+</div>
 
             {/* PROFİL / ÇIKIŞ */}
             {!isDemo ? (

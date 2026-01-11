@@ -50,8 +50,10 @@ export default function LandingHeader() {
           {/* --- MASAÜSTÜ MENÜ --- */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
             <Link href="#ozellikler" className="hover:text-black transition-colors">Özellikler</Link>
-            <Link href="#vision" className="hover:text-black transition-colors">Vizyonumuz</Link>
             <Link href="#nasil" className="hover:text-black transition-colors">Nasıl Çalışır?</Link>
+            {/* YENİ EKLENEN FİYATLAR LİNKİ */}
+            <Link href="#pricing" className="hover:text-black transition-colors">Fiyatlar</Link>
+            <Link href="#vision" className="hover:text-black transition-colors">Vizyonumuz</Link>
           </nav>
 
           {/* --- MASAÜSTÜ BUTONLAR --- */}
@@ -95,18 +97,26 @@ export default function LandingHeader() {
                   Özellikler
                 </Link>
                 <Link 
-                  href="#vision" 
-                  onClick={() => setIsMobileMenuOpen(false)} 
-                  className="text-2xl font-bold text-gray-900 py-4 border-b border-gray-100"
-                >
-                  Vizyonumuz
-                </Link>
-                <Link 
                   href="#nasil" 
                   onClick={() => setIsMobileMenuOpen(false)} 
                   className="text-2xl font-bold text-gray-900 py-4 border-b border-gray-100"
                 >
                   Nasıl Çalışır?
+                </Link>
+                {/* YENİ EKLENEN MOBİL FİYATLAR LİNKİ */}
+                <Link 
+                  href="#pricing" 
+                  onClick={() => setIsMobileMenuOpen(false)} 
+                  className="text-2xl font-bold text-gray-900 py-4 border-b border-gray-100"
+                >
+                  Fiyatlar
+                </Link>
+                <Link 
+                  href="#vision" 
+                  onClick={() => setIsMobileMenuOpen(false)} 
+                  className="text-2xl font-bold text-gray-900 py-4 border-b border-gray-100"
+                >
+                  Vizyonumuz
                 </Link>
               </div>
 

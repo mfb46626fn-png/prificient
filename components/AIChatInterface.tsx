@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Sparkles, X, Send, Bot, User } from 'lucide-react'
+import { createClient } from '@/utils/supabase/client' // Supabase eklendi
 
 type Message = {
   role: 'user' | 'ai'
@@ -11,11 +12,14 @@ type Message = {
 export default function AIChatInterface() {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'ai', content: 'Merhaba! Ben Prificient Asistan. Finansal durumunla ilgili ne bilmek istersin?' }
+    { role: 'ai', content: 'Merhaba! Ben Prificient Asistan. Finansal verilerini analiz edebilirim. Ne sormak istersin?' }
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  
+  // Supabase istemcisi
+  const supabase = createClient()
 
   // Otomatik kaydırma
   useEffect(() => {
@@ -32,21 +36,35 @@ export default function AIChatInterface() {
     setLoading(true)
 
     try {
+      // 1. Önce aktif kullanıcıyı al (n8n hafızası için ID lazım)
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        throw new Error('Kullanıcı oturumu bulunamadı')
+      }
+
+      // 2. Next.js API Route'a gönder (Proxy)
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage })
+        body: JSON.stringify({ 
+          message: userMessage,
+          user_id: user.id // KRİTİK: n8n bu ID ile Supabase'den veriyi çekecek
+        })
       })
       
       const data = await res.json()
       
-      if (data.response) {
-        setMessages(prev => [...prev, { role: 'ai', content: data.response }])
+      // n8n'den gelen "output" alanını yakala
+      if (data.output) {
+        setMessages(prev => [...prev, { role: 'ai', content: data.output }])
       } else {
-        throw new Error('Yanıt alınamadı')
+        throw new Error('Yanıt formatı hatalı')
       }
+
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'ai', content: 'Üzgünüm, şu an bağlantı kuramıyorum. Lütfen sonra tekrar dene.' }])
+      console.error(error)
+      setMessages(prev => [...prev, { role: 'ai', content: 'Şu an finansal verilerine erişemiyorum. Lütfen biraz sonra tekrar dene.' }])
     } finally {
       setLoading(false)
     }
@@ -67,7 +85,7 @@ export default function AIChatInterface() {
               </div>
               <div>
                 <h3 className="font-bold text-sm">Finansal Asistan</h3>
-                <p className="text-[10px] text-indigo-100 opacity-80">GPT-4o tarafından desteklenmektedir</p>
+                <p className="text-[10px] text-indigo-100 opacity-80">AI Agent (Live Data)</p>
               </div>
             </div>
             <button onClick={() => setIsOpen(false)} className="hover:bg-white/20 p-1.5 rounded-lg transition-colors">
@@ -110,7 +128,7 @@ export default function AIChatInterface() {
             <div className="relative flex items-center">
               <input
                 type="text"
-                placeholder="Bir soru sor..."
+                placeholder="Örn: Bu ay ne kadar kargo ödedim?"
                 className="w-full bg-gray-100 text-gray-900 placeholder:text-gray-400 px-4 py-3.5 pr-12 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -128,7 +146,7 @@ export default function AIChatInterface() {
         </div>
       )}
 
-      {/* TETİKLEYİCİ BUTON (Feedback'in üzerinde duracak) */}
+      {/* TETİKLEYİCİ BUTON */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="pointer-events-auto group relative flex items-center justify-center"
