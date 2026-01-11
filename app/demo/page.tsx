@@ -5,7 +5,6 @@ import ExpensePieChart from '@/components/ExpensePieChart'
 import DashboardHeader from '@/components/DashboardHeader'
 import KPISection from '@/components/KPISection'
 import SmartSummary from '@/components/SmartSummary'
-import TransactionList from '@/components/TransactionList'
 import { DEMO_DATA } from '@/utils/demoData'
 
 export default function DemoPage() {
