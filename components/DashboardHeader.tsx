@@ -372,7 +372,7 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
           </div>
       </div>
 
-      <BetaInfoModal isOpen={isBetaModalOpen} onClose={() => setIsBetaModalOpen(false)} />
+      <BetaInfoModal isOpen={isBetaModalOpen} onClose={() => setIsBetaModalOpen(false)} actionLabel="Kullanmaya Başla" onAction={() => router.push('/dashboard')} />
     </>
   )
 }

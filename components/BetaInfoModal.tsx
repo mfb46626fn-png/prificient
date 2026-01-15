@@ -3,8 +3,10 @@
 import { X, Zap, CheckCircle2, Calendar, PartyPopper, ArrowRight } from 'lucide-react'
 
 interface BetaInfoModalProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean,
+  onClose: () => void,
+  actionLabel: string,
+  onAction: () => void,
 }
 
 // BURASI SİZİN KONTROL PANELİNİZ

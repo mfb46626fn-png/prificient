@@ -16,7 +16,7 @@ export default async function AIAssistantPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* 2. Profesyonel Header'ı Buraya Koy */}
-      <DashboardHeader userEmail={user.email || ''} />
+      <DashboardHeader/>
 
       {/* 3. Chat Arayüzünü Yükle */}
       <AIChatInterface />

@@ -31,7 +31,7 @@ export default function BlogPage() {
                     <Link key={post.id} href={`/blog/${post.slug}`} className="group flex flex-col bg-white rounded-[2rem] border border-gray-100 overflow-hidden hover:shadow-2xl hover:shadow-blue-900/5 hover:-translate-y-1 transition-all duration-300 h-full">
                         
                         {/* Görsel Alanı (Gradient) */}
-                        <div className={`h-56 bg-gradient-to-br ${post.imageGradient} relative overflow-hidden p-6 flex flex-col justify-end`}>
+                        <div className={`h-56 bg-gradient-to-br relative overflow-hidden p-6 flex flex-col justify-end`}>
                             <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors"></div>
                             <div className="relative z-10">
                                 <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider rounded-lg mb-2 border border-white/20">
