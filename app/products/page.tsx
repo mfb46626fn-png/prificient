@@ -1,192 +1,213 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { Plus, Search, Edit2, Trash2, Package, Tag, ArrowUpDown, Upload } from 'lucide-react'
 import DashboardHeader from '@/components/DashboardHeader'
-import { useCurrency } from '@/app/contexts/CurrencyContext'
-import Image from 'next/image'
-import ProductImportModal from '@/components/ProductImportModal'
-import ProductModal from '@/components/ProductModal' // YENİ IMPORT
+import { 
+  Package, TrendingUp, AlertCircle, Search, 
+  ArrowRight, ShieldCheck, ShieldAlert, Shield
+} from 'lucide-react'
+import Link from 'next/link'
+
+// TİP TANIMLARI
+type ProductSummary = {
+  id: string
+  name: string
+  total_revenue: number
+  total_profit: number
+  total_orders: number
+  last_sale_date: string
+  average_margin: number
+  confidence_level: 'low' | 'medium' | 'high'
+}
 
 export default function ProductsPage() {
   const supabase = createClient()
-  const { symbol, convert } = useCurrency()
-
-  const [products, setProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [products, setProducts] = useState<ProductSummary[]>([])
   const [searchTerm, setSearchTerm] = useState('')
-  
-  // Sıralama State'i
-  const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' }>({ key: 'created_at', direction: 'desc' })
 
-  // Modal State'leri
-  const [isProductModalOpen, setIsProductModalOpen] = useState(false)
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false)
-  const [editingProduct, setEditingProduct] = useState<any | null>(null)
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
-  // VERİLERİ ÇEK
-  const fetchProducts = async () => {
-    setLoading(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+      // 1. ÜRÜNLERİ VE SİPARİŞLERİNİ ÇEK
+      const { data: rawData, error } = await supabase
+        .from('products')
+        .select(`
+          id,
+          name,
+          orders (
+            total_revenue,
+            net_profit,
+            order_date
+          )
+        `)
+        .eq('user_id', user.id)
 
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-    
-    if (error) console.error(error)
-    if (data) setProducts(data)
-    setLoading(false)
-  }
-
-  useEffect(() => { fetchProducts() }, [])
-
-  // Silme
-  const handleDelete = async (id: string) => {
-    if (!confirm("Bu ürünü silmek istediğinize emin misiniz?")) return
-    await supabase.from('products').delete().eq('id', id)
-    fetchProducts()
-  }
-
-  // --- SORTING (SIRALAMA) ---
-  const handleSort = (key: string) => {
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') direction = 'desc';
-    setSortConfig({ key, direction });
-  }
-
-  const sortedProducts = useMemo(() => {
-    let data = [...products];
-    if (searchTerm) {
-        data = data.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.sku?.toLowerCase().includes(searchTerm.toLowerCase()))
-    }
-    data.sort((a, b) => {
-      let aValue = a[sortConfig.key];
-      let bValue = b[sortConfig.key];
-      if (sortConfig.key === 'selling_price' || sortConfig.key === 'cost_price') {
-         aValue = Number(aValue); bValue = Number(bValue);
+      if (error) {
+        console.error("Veri çekme hatası:", error)
+        setLoading(false)
+        return
       }
-      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-    return data;
-  }, [products, searchTerm, sortConfig]);
 
-  // Modal İşlemleri
-  const openAddModal = () => {
-    setEditingProduct(null)
-    setIsProductModalOpen(true)
+      // 2. CANLI KARNE HESAPLAMA (Aggregation)
+      const summaries: ProductSummary[] = rawData.map((prod: any) => {
+        let rev = 0
+        let profit = 0
+        let count = prod.orders?.length || 0
+        let lastDate = ''
+
+        // Siparişleri döngüye al ve topla
+        if (prod.orders && prod.orders.length > 0) {
+            prod.orders.forEach((o: any) => {
+                rev += Number(o.total_revenue)
+                profit += Number(o.net_profit)
+                if (!lastDate || new Date(o.order_date) > new Date(lastDate)) {
+                    lastDate = o.order_date
+                }
+            })
+        }
+
+        // Güven Seviyesi (Manifesto Madde 8)
+        let conf: 'low' | 'medium' | 'high' = 'low'
+        if (count > 20) conf = 'high'
+        else if (count >= 5) conf = 'medium'
+
+        return {
+            id: prod.id,
+            name: prod.name,
+            total_revenue: rev,
+            total_profit: profit,
+            total_orders: count,
+            last_sale_date: lastDate,
+            average_margin: rev > 0 ? (profit / rev) * 100 : 0,
+            confidence_level: conf
+        }
+      })
+
+      // 3. SADECE SATIŞI OLANLARI GÖSTER VE KÂRA GÖRE SIRALA
+      // Manifesto: "Satılmamış ürün = yok"
+      const activeProducts = summaries
+        .filter(p => p.total_orders > 0)
+        .sort((a, b) => b.total_profit - a.total_profit)
+
+      setProducts(activeProducts)
+      setLoading(false)
+    }
+
+    fetchData()
+  }, [])
+
+  // FORMAT
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount)
   }
 
-  const openEditModal = (p: any) => {
-    setEditingProduct(p)
-    setIsProductModalOpen(true)
-  }
-
-  const handleModalSuccess = () => {
-    setIsProductModalOpen(false)
-    setEditingProduct(null)
-    fetchProducts() // Listeyi yenile
+  const getConfidenceBadge = (level: string) => {
+      if (level === 'high') return <span className="flex items-center gap-1 text-[10px] uppercase font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-100"><ShieldCheck size={12}/> Yüksek Güven</span>
+      if (level === 'medium') return <span className="flex items-center gap-1 text-[10px] uppercase font-black text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-100"><Shield size={12}/> Orta Güven</span>
+      return <span className="flex items-center gap-1 text-[10px] uppercase font-black text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-200"><ShieldAlert size={12}/> Düşük Veri</span>
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/30 pb-20 font-sans">
+    <div className="min-h-screen bg-gray-50 font-sans pb-20">
       <DashboardHeader />
 
-      <main className="max-w-7xl mx-auto p-4 sm:p-8 space-y-8 animate-in fade-in duration-500">
+      <main className="max-w-6xl mx-auto p-4 sm:p-8 space-y-8 animate-in fade-in duration-500">
         
-        {/* BAŞLIK */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 pb-5">
           <div>
-            <h1 className="text-3xl font-black text-gray-900 tracking-tight">Ürün Kataloğu</h1>
-            <p className="text-gray-500 font-medium">Ürünlerinizi ve maliyet detaylarını buradan yönetin.</p>
+            <h1 className="text-3xl font-black text-black tracking-tight">Ürün Karneleri</h1>
+            <p className="text-gray-600 font-bold mt-1 text-sm">Sadece satışı gerçekleşmiş ürünlerin performans özeti.</p>
           </div>
-          <div className="flex gap-3">
-             <button onClick={() => setIsImportModalOpen(true)} className="px-5 py-3 bg-white border border-gray-200 text-gray-700 rounded-2xl font-bold flex items-center gap-2 hover:bg-gray-50 transition-all">
-                <Upload size={18} /> Excel Yükle
-             </button>
-             <button onClick={openAddModal} className="px-6 py-3 bg-black text-white rounded-2xl font-bold flex items-center gap-2 hover:bg-gray-800 transition-all shadow-lg shadow-black/10 active:scale-95">
-                <Plus size={20} /> Yeni Ürün
-             </button>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden min-h-[600px]">
           
-          {/* SEARCH */}
-          <div className="p-6 border-b border-gray-50 flex flex-col sm:flex-row gap-4 justify-between items-center">
-             <div className="relative w-full sm:max-w-md">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input type="text" placeholder="Ürün adı, SKU veya pazaryeri ara..." className="w-full pl-12 pr-4 py-3 bg-gray-50 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-gray-100 transition-all" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}/>
-             </div>
-             <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Toplam {sortedProducts.length} Ürün</div>
-          </div>
-
-          {/* BAŞLIKLAR */}
-          <div className="grid grid-cols-12 gap-4 px-8 py-4 bg-gray-50/50 text-[10px] sm:text-xs font-black text-gray-400 uppercase tracking-wider border-b border-gray-50 select-none">
-            <div onClick={() => handleSort('name')} className="col-span-4 cursor-pointer hover:text-black flex items-center gap-1 group">Ürün Bilgisi <ArrowUpDown size={12} className="opacity-50 group-hover:opacity-100"/></div>
-            <div onClick={() => handleSort('marketplace')} className="col-span-2 cursor-pointer hover:text-black flex items-center gap-1 group">Pazaryeri <ArrowUpDown size={12} className="opacity-50 group-hover:opacity-100"/></div>
-            <div onClick={() => handleSort('cost_price')} className="col-span-2 text-right cursor-pointer hover:text-black flex items-center justify-end gap-1 group">Maliyet <ArrowUpDown size={12} className="opacity-50 group-hover:opacity-100"/></div>
-            <div onClick={() => handleSort('selling_price')} className="col-span-2 text-right cursor-pointer hover:text-black flex items-center justify-end gap-1 group">Satış Fiyatı <ArrowUpDown size={12} className="opacity-50 group-hover:opacity-100"/></div>
-            <div className="col-span-2 text-center">İşlem</div>
-          </div>
-
-          {/* LİSTE */}
-          <div className="divide-y divide-gray-50">
-            {loading ? <div className="p-12 text-center text-gray-400">Yükleniyor...</div> : sortedProducts.length === 0 ? <div className="p-12 text-center text-gray-400">Ürün bulunamadı.</div> : (
-               sortedProducts.map((p) => {
-                 const isMissingInfo = p.cost_price === 0;
-                 return (
-                 <div key={p.id} className={`grid grid-cols-12 gap-4 px-8 py-5 items-center hover:bg-gray-50 transition-colors group ${isMissingInfo ? 'bg-orange-50/30' : ''}`}>
-                    <div className="col-span-4 flex items-center gap-4">
-                       <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-xs shrink-0 overflow-hidden">
-                          {p.image_url ? <Image src={p.image_url} alt={p.name} width={40} height={40} className="w-full h-full object-cover" /> : <Package size={18}/>}
-                       </div>
-                       <div className="min-w-0">
-                          <p className="font-bold text-gray-900 text-sm truncate flex items-center gap-2">
-                            {p.name}
-                            {isMissingInfo && <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" title="Maliyet bilgisi eksik"></span>}
-                          </p>
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider truncate flex items-center gap-1"><Tag size={10} /> {p.sku}</p>
-                       </div>
-                    </div>
-                    <div className="col-span-2"><span className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-wide border border-blue-100">{p.marketplace}</span></div>
-                    <div className="col-span-2 text-right">
-                       <p className="text-sm font-medium text-gray-500">{symbol}{convert(p.cost_price)}</p>
-                       {p.shipping_cost > 0 && <p className="text-[9px] text-gray-400">+ {symbol}{convert(p.shipping_cost)} Kargo</p>}
-                    </div>
-                    <div className="col-span-2 text-right">
-                       <p className="text-sm font-black text-gray-900">{symbol}{convert(p.selling_price)}</p>
-                    </div>
-                    <div className="col-span-2 flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                       <button onClick={() => openEditModal(p)} className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-xl"><Edit2 size={16} /></button>
-                       <button onClick={() => handleDelete(p.id)} className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl"><Trash2 size={16} /></button>
-                    </div>
-                 </div>
-                 )})
-            )}
+          <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input 
+                type="text" 
+                placeholder="Ürün ara..." 
+                className="pl-10 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl font-bold text-black text-sm outline-none focus:border-black transition-all w-full md:w-64"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
           </div>
         </div>
+
+        {/* LİSTE */}
+        {loading ? (
+            <div className="text-center py-20 text-gray-500 font-bold">Analiz yapılıyor...</div>
+        ) : products.length === 0 ? (
+            <div className="bg-white p-16 rounded-[2.5rem] text-center border-2 border-dashed border-gray-200">
+                <Package size={48} className="mx-auto text-gray-300 mb-4"/>
+                <h3 className="text-xl font-black text-black">Henüz Aktif Ürün Yok</h3>
+                <p className="text-gray-500 font-medium mt-2">
+                    Sistem sadece "gerçekleşmiş satışları" ürün olarak kabul eder.<br/>
+                    Veri sayfasından bir satış dosyası yükleyin.
+                </p>
+            </div>
+        ) : (
+            <div className="grid grid-cols-1 gap-4">
+                {products
+                    .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map((product) => (
+                    <Link key={product.id} href={`/products/${product.id}`} className="group block">
+                        <div className="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-sm hover:shadow-xl hover:border-black/5 transition-all duration-300 relative overflow-hidden">
+                            
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                                
+                                {/* SOL: İSİM VE GÜVEN */}
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        {getConfidenceBadge(product.confidence_level)}
+                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Son Satış: {new Date(product.last_sale_date).toLocaleDateString('tr-TR')}</span>
+                                    </div>
+                                    <h3 className="text-xl font-black text-gray-900 group-hover:text-indigo-600 transition-colors">
+                                        {product.name}
+                                    </h3>
+                                </div>
+
+                                {/* ORTA: METRİKLER */}
+                                <div className="flex items-center gap-8 md:border-l md:border-gray-100 md:pl-8">
+                                    
+                                    <div className="text-center md:text-left">
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Toplam Sipariş</p>
+                                        <p className="text-xl font-black text-gray-900">{product.total_orders}</p>
+                                    </div>
+
+                                    <div className="text-center md:text-left">
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Ort. Marj</p>
+                                        <p className={`text-xl font-black ${product.average_margin > 30 ? 'text-emerald-500' : product.average_margin > 15 ? 'text-blue-500' : 'text-orange-500'}`}>
+                                            %{product.average_margin.toFixed(0)}
+                                        </p>
+                                    </div>
+
+                                    <div className="text-center md:text-right min-w-[120px]">
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Net Kâr</p>
+                                        <p className="text-2xl font-black text-gray-900">{formatCurrency(product.total_profit)}</p>
+                                    </div>
+
+                                </div>
+
+                                {/* SAĞ: OK */}
+                                <div className="hidden md:flex items-center justify-center w-12 h-12 bg-gray-50 rounded-full group-hover:bg-black group-hover:text-white transition-all">
+                                    <ArrowRight size={20} />
+                                </div>
+
+                            </div>
+                            
+                            {/* Hover Efekti için Arkaplan */}
+                            <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-gray-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+        )}
+
       </main>
-
-      {/* YENİ AKILLI MODAL */}
-      <ProductModal 
-        isOpen={isProductModalOpen}
-        onClose={() => setIsProductModalOpen(false)}
-        onSuccess={handleModalSuccess}
-        productToEdit={editingProduct}
-      />
-
-      {/* EXCEL IMPORT MODAL */}
-      <ProductImportModal 
-        isOpen={isImportModalOpen}
-        onClose={() => setIsImportModalOpen(false)}
-        onSuccess={() => { fetchProducts(); alert("Ürünler başarıyla yüklendi. Lütfen maliyet bilgilerini kontrol edin."); }}
-      />
     </div>
   )
 }

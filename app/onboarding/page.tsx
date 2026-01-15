@@ -1,325 +1,328 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, CheckCircle2, ShoppingBag, Store, Wallet, Loader2, Plus, Trash2 } from 'lucide-react'
-import { useFinancialConfig } from '@/app/contexts/FinancialConfigContext' // Context'i bağladık
+import { 
+  Building2, Globe, CreditCard, Truck, CheckCircle2, 
+  ArrowRight, ArrowLeft, Store, Wallet 
+} from 'lucide-react'
 
-// --- PLATFORMA ÖZEL VARSAYILAN GİDERLER ---
-const PLATFORM_DEFAULTS: Record<string, { label: string, amount: string }[]> = {
-  'Shopify': [
-    { label: 'Shopify Aboneliği', amount: '1000' },
-    { label: 'Uygulama/Eklenti Giderleri', amount: '500' },
-    { label: 'Dijital Pazarlama (Ads)', amount: '5000' },
-  ],
-  'Trendyol': [
-    { label: 'Entegrasyon Yazılımı', amount: '300' },
-    { label: 'Reklam Bakiyesi', amount: '2000' },
-    { label: 'Muhasebe/Müşavirlik', amount: '1500' },
-  ],
-  'Amazon': [
-    { label: 'Professional Seller Hesabı', amount: '1400' },
-    { label: 'Helium10 / Yazılımlar', amount: '3000' },
-    { label: 'PPC Reklamları', amount: '5000' },
-  ],
-  'Etsy': [
-    { label: 'Listing Ücretleri (Tahmini)', amount: '500' },
-    { label: 'Etsy Ads', amount: '1000' },
-    { label: 'Araçlar (Marmalead vb.)', amount: '300' },
-  ],
-  'Genel': [
-    { label: 'Muhasebe', amount: '1500' },
-    { label: 'Yazılım Abonelikleri', amount: '500' },
-    { label: 'Reklam Bütçesi', amount: '2000' },
-  ]
+// TİP TANIMLARI
+type OnboardingData = {
+  company_type: string
+  active_channels: Record<string, boolean>
+  payment_gateways: Record<string, { rate: number, fixed: number, active: boolean }>
+  avg_shipping_cost: number
+  avg_packaging_cost: number
+}
+
+// BAŞLANGIÇ VERİSİ
+const INITIAL_DATA: OnboardingData = {
+  company_type: 'sahis',
+  active_channels: {
+    shopify: false,
+    trendyol: false,
+    hepsiburada: false,
+    amazon: false,
+    etsy: false,
+    woocommerce: false
+  },
+  payment_gateways: {
+    iyzico: { rate: 2.99, fixed: 3.00, active: false },
+    paytr: { rate: 1.89, fixed: 0.00, active: false },
+    stripe: { rate: 2.90, fixed: 0.30, active: false }, // USD cents
+    shopify_payments: { rate: 2.50, fixed: 0.00, active: false },
+    havale: { rate: 0, fixed: 0, active: false }
+  },
+  avg_shipping_cost: 50,
+  avg_packaging_cost: 5
 }
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1)
+  const [data, setData] = useState<OnboardingData>(INITIAL_DATA)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
-  const { refreshConfig } = useFinancialConfig() // İşlem bitince ayarları tazelemek için
 
-  const [userId, setUserId] = useState<string | null>(null)
+  // --- ADIM 1: ŞİRKET TÜRÜ ---
+  const renderStep1 = () => (
+    <div className="space-y-6 animate-in fade-in slide-in-from-right-8">
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Building2 size={32}/>
+        </div>
+        <h2 className="text-2xl font-black text-gray-900">Şirket Yapınız</h2>
+        <p className="text-gray-500 text-sm font-medium mt-2">
+          Vergi hesaplamaları ve net kâr analizi için şirket türünüzü bilmemiz gerekiyor.
+        </p>
+      </div>
 
-  // Form Verileri
-  const [platform, setPlatform] = useState('')
-  const [category, setCategory] = useState('')
-  
-  // Gider Listesi
-  const [costList, setCostList] = useState<{ id: string, label: string, amount: string }[]>([])
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[
+          { id: 'sahis', title: 'Şahıs Şirketi', desc: 'Gelir Vergisi Mükellefi' },
+          { id: 'ltd', title: 'Limited Şirket', desc: 'Kurumlar Vergisi (%25)' },
+          { id: 'as', title: 'Anonim Şirket', desc: 'Kurumlar Vergisi (%25)' },
+          { id: 'micro', title: 'Mikro İhracatçı', desc: 'KDV İadesi / Muafiyeti' }
+        ].map((type) => (
+          <button
+            key={type.id}
+            onClick={() => setData({ ...data, company_type: type.id })}
+            className={`p-6 rounded-2xl border-2 text-left transition-all ${
+              data.company_type === type.id 
+                ? 'border-blue-600 bg-blue-50/50 ring-2 ring-blue-100' 
+                : 'border-gray-100 bg-white hover:border-gray-200'
+            }`}
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className={`font-bold ${data.company_type === type.id ? 'text-blue-700' : 'text-gray-900'}`}>
+                  {type.title}
+                </h3>
+                <p className="text-xs text-gray-500 mt-1 font-medium">{type.desc}</p>
+              </div>
+              {data.company_type === type.id && <CheckCircle2 className="text-blue-600" size={20}/>}
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
 
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) setUserId(user.id)
-      else router.push('/login')
-    }
-    getUser()
-  }, [router, supabase])
+  // --- ADIM 2: SATIŞ KANALLARI ---
+  const renderStep2 = () => (
+    <div className="space-y-6 animate-in fade-in slide-in-from-right-8">
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Store size={32}/>
+        </div>
+        <h2 className="text-2xl font-black text-gray-900">Satış Kanalları</h2>
+        <p className="text-gray-500 text-sm font-medium mt-2">
+          Hangi platformlarda aktif satış yapıyorsunuz?
+        </p>
+      </div>
 
-  // Platform değiştiğinde varsayılan giderleri yükle
-  useEffect(() => {
-    if (step === 3 && platform && costList.length === 0) {
-      const defaults = PLATFORM_DEFAULTS[platform] || PLATFORM_DEFAULTS['Genel']
-      setCostList(defaults.map((item, index) => ({ 
-          id: index.toString(), 
-          label: item.label, 
-          amount: item.amount 
-      })))
-    }
-  }, [step, platform, costList.length])
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {Object.keys(data.active_channels).map((channel) => (
+          <button
+            key={channel}
+            onClick={() => setData({
+              ...data,
+              active_channels: { ...data.active_channels, [channel]: !data.active_channels[channel] }
+            })}
+            className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-3 ${
+              data.active_channels[channel]
+                ? 'border-purple-600 bg-purple-50 text-purple-700'
+                : 'border-gray-100 bg-white text-gray-500 hover:border-gray-200'
+            }`}
+          >
+            <Globe size={24} className={data.active_channels[channel] ? 'text-purple-600' : 'text-gray-400'}/>
+            <span className="font-bold capitalize">{channel}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
 
-  // --- GİDER LİSTESİ YÖNETİMİ ---
-  const updateCost = (id: string, field: 'label' | 'amount', value: string) => {
-    setCostList(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item))
-  }
+  // --- ADIM 3: ÖDEME ALTYAPISI (KRİTİK) ---
+  const renderStep3 = () => (
+    <div className="space-y-6 animate-in fade-in slide-in-from-right-8">
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Wallet size={32}/>
+        </div>
+        <h2 className="text-2xl font-black text-gray-900">Komisyon Ayarları</h2>
+        <p className="text-gray-500 text-sm font-medium mt-2">
+          "Paranın %3'ü Iyzico'ya gidiyor" diyebilmemiz için bu oranlar şart.
+        </p>
+      </div>
 
-  const addCostRow = () => {
-    setCostList(prev => [...prev, { id: Math.random().toString(36).substr(2, 9), label: '', amount: '' }])
-  }
+      <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+        {Object.keys(data.payment_gateways).map((gateway) => {
+          const info = data.payment_gateways[gateway]
+          return (
+            <div key={gateway} className={`p-5 rounded-2xl border transition-all ${info.active ? 'border-emerald-500 bg-emerald-50/30' : 'border-gray-200 bg-white opacity-60 hover:opacity-100'}`}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <input 
+                    type="checkbox" 
+                    checked={info.active}
+                    onChange={(e) => {
+                      const newData = { ...data }
+                      newData.payment_gateways[gateway].active = e.target.checked
+                      setData(newData)
+                    }}
+                    className="w-5 h-5 rounded text-emerald-600 focus:ring-emerald-500"
+                  />
+                  <span className="font-black text-gray-900 capitalize">{gateway.replace('_', ' ')}</span>
+                </div>
+              </div>
 
-  const removeCostRow = (id: string) => {
-    setCostList(prev => prev.filter(item => item.id !== id))
-  }
+              {info.active && (
+                <div className="grid grid-cols-2 gap-4 pl-8 animate-in slide-in-from-top-2">
+                  <div>
+                    <label className="text-[10px] font-bold text-gray-500 uppercase">Komisyon (%)</label>
+                    <input 
+                      type="number" 
+                      value={info.rate}
+                      onChange={(e) => {
+                        const newData = { ...data }
+                        newData.payment_gateways[gateway].rate = parseFloat(e.target.value)
+                        setData(newData)
+                      }}
+                      className="w-full mt-1 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold focus:border-emerald-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-gray-500 uppercase">Sabit Ücret (TL)</label>
+                    <input 
+                      type="number" 
+                      value={info.fixed}
+                      onChange={(e) => {
+                        const newData = { ...data }
+                        newData.payment_gateways[gateway].fixed = parseFloat(e.target.value)
+                        setData(newData)
+                      }}
+                      className="w-full mt-1 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold focus:border-emerald-500 outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
 
-  // Toplam Sabit Gider Hesabı
-  const totalFixedCost = costList.reduce((acc, item) => acc + (parseFloat(item.amount) || 0), 0)
+  // --- ADIM 4: OPERASYONEL GİDERLER ---
+  const renderStep4 = () => (
+    <div className="space-y-6 animate-in fade-in slide-in-from-right-8">
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Truck size={32}/>
+        </div>
+        <h2 className="text-2xl font-black text-gray-900">Operasyonel Giderler</h2>
+        <p className="text-gray-500 text-sm font-medium mt-2">
+          Her bir sipariş için ortalama ne kadar harcıyorsunuz?
+        </p>
+      </div>
 
-  // --- KAYDET VE BİTİR (YENİ SİSTEME GÖRE) ---
-  const handleFinish = async () => {
-    if (!userId) return
+      <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm space-y-6">
+        <div>
+          <label className="flex items-center justify-between text-sm font-bold text-gray-700 mb-2">
+            <span>Ortalama Kargo Maliyeti</span>
+            <span className="text-orange-600">{data.avg_shipping_cost} TL</span>
+          </label>
+          <input 
+            type="range" 
+            min="0" max="200" step="1"
+            value={data.avg_shipping_cost}
+            onChange={(e) => setData({ ...data, avg_shipping_cost: parseFloat(e.target.value) })}
+            className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-orange-600"
+          />
+          <div className="flex justify-between text-xs text-gray-400 font-bold mt-2">
+            <span>0 TL</span>
+            <span>200 TL+</span>
+          </div>
+        </div>
+
+        <div className="pt-4 border-t border-gray-100">
+          <label className="flex items-center justify-between text-sm font-bold text-gray-700 mb-2">
+            <span>Paketleme / Kutu Maliyeti</span>
+            <span className="text-orange-600">{data.avg_packaging_cost} TL</span>
+          </label>
+          <input 
+            type="range" 
+            min="0" max="50" step="0.5"
+            value={data.avg_packaging_cost}
+            onChange={(e) => setData({ ...data, avg_packaging_cost: parseFloat(e.target.value) })}
+            className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-orange-600"
+          />
+          <p className="text-xs text-gray-400 mt-2 font-medium">
+            * Koli bandı, kutu, patpat, teşekkür kartı vb. toplamı.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+
+  // --- KAYDETME FONKSİYONU ---
+  const handleComplete = async () => {
     setLoading(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (user) {
+      const { error } = await supabase.from('store_settings').upsert({
+        user_id: user.id,
+        ...data,
+        updated_at: new Date().toISOString()
+      })
 
-    try {
-        // 1. Giderleri yeni sistemin formatına (FixedExpense) çevir
-        const formattedFixedExpenses = costList
-            .filter(c => c.label && c.amount) // Boşları ele
-            .map(c => ({
-                id: c.id,
-                title: c.label,
-                amount: parseFloat(c.amount),
-                paymentDay: 1 // Varsayılan olarak ayın 1'i (Kullanıcı sonra ayarlardan değiştirebilir)
-            }))
-
-        // 2. Yeni Financial Config Objesini Oluştur
-        const newFinancialConfig = {
-            // Varsayılan değerler (Önceki context yapımızdan)
-            profitTargetPercent: 25,
-            minMargin: 10,
-            stockWarningDays: 14,
-            riskAppetite: 'moderate',
-            platformCommission: platform === 'Trendyol' ? 20 : (platform === 'Shopify' ? 2.9 : 15), // Basit varsayımlar
-            paymentProcessorFee: 0,
-            fixedPerOrderFee: 0,
-            logisticsCost: 0,
-            
-            // Kullanıcıdan gelenler
-            selectedPlatform: platform,
-            monthlyFixedCost: totalFixedCost, // Dashboard'daki Burn Rate buna bakıyor
-            fixedExpenses: formattedFixedExpenses // Ayarlar sayfasındaki liste buna bakıyor
-        }
-
-        // app/onboarding/page.tsx içinde handleFinish fonksiyonu
-        const { error } = await supabase
-            .from('profiles')
-            .update({
-                onboarding_completed: true, // Veritabanındaki sütun ismiyle birebir aynı olmalı
-                financial_config: newFinancialConfig,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', userId)
-
-        if (error) throw error
-
-        // 4. Context'i tazele (Dashboard güncel veriyi görsün)
-        await refreshConfig()
-
-        // 5. Yönlendir
-        router.push('/dashboard')
-
-    } catch (error: any) {
-        alert('Kurulum sırasında bir hata oluştu: ' + error.message)
-    } finally {
+      if (error) {
+        alert('Hata oluştu: ' + error.message)
         setLoading(false)
+      } else {
+        // Dashboard'a yönlendir
+        router.push('/dashboard')
+      }
     }
   }
-
-  // UI Helper Class
-  const inputClass = "w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-black rounded-2xl outline-none transition-all font-bold text-gray-900 placeholder:text-gray-400 text-lg"
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 font-sans selection:bg-black selection:text-white">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 font-sans">
       
-      {/* Progress Bar */}
-      <div className="w-full max-w-lg mb-10">
-        <div className="flex justify-between text-[10px] font-black text-gray-300 uppercase tracking-widest mb-3">
-          <span className={step >= 1 ? 'text-black' : ''}>Platform</span>
-          <span className={step >= 2 ? 'text-black' : ''}>Kategori</span>
-          <span className={step >= 3 ? 'text-black' : ''}>Maliyetler</span>
-        </div>
-        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-black transition-all duration-500 ease-out"
-            style={{ width: step === 1 ? '33%' : step === 2 ? '66%' : '100%' }}
-          ></div>
-        </div>
+      {/* PROGRESS BAR */}
+      <div className="w-full max-w-lg mb-8 flex items-center justify-between px-2">
+        {[1, 2, 3, 4].map((s) => (
+          <div key={s} className="flex flex-col items-center gap-2">
+            <div className={`w-3 h-3 rounded-full transition-all duration-500 ${step >= s ? 'bg-black scale-125' : 'bg-gray-300'}`}></div>
+          </div>
+        ))}
       </div>
 
-      <div className="w-full max-w-lg animate-in fade-in slide-in-from-bottom-4 duration-500">
-        
-        {/* ADIM 1: PLATFORM SEÇİMİ */}
-        {step === 1 && (
-          <div className="space-y-8">
-            <div className="text-center">
-                <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-sm">
-                    <Store size={36} />
-                </div>
-                <h1 className="text-4xl font-black text-gray-900 tracking-tight">Nerede Satıyorsun?</h1>
-                <p className="text-gray-500 font-medium mt-2 text-lg">Sistemi senin için özelleştireceğiz.</p>
-            </div>
+      <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-xl p-8 relative overflow-hidden">
+        {step === 1 && renderStep1()}
+        {step === 2 && renderStep2()}
+        {step === 3 && renderStep3()}
+        {step === 4 && renderStep4()}
 
-            <div className="grid grid-cols-2 gap-4">
-                {['Trendyol', 'Hepsiburada', 'Amazon', 'Shopify', 'Etsy', 'Kendi Sitem'].map((p) => (
-                    <button
-                        key={p}
-                        onClick={() => setPlatform(p)}
-                        className={`p-5 rounded-2xl font-bold text-sm transition-all border-2 active:scale-95 ${platform === p ? 'border-black bg-black text-white shadow-xl shadow-black/20' : 'border-gray-100 bg-white text-gray-600 hover:border-gray-300'}`}
-                    >
-                        {p}
-                    </button>
-                ))}
-            </div>
-
+        {/* NAVIGATION BUTTONS */}
+        <div className="flex items-center justify-between mt-10 pt-6 border-t border-gray-100">
+          {step > 1 ? (
             <button 
-                onClick={() => setStep(2)} 
-                disabled={!platform}
-                className="w-full py-5 bg-black text-white rounded-[1.5rem] font-black text-lg hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center gap-3 shadow-2xl shadow-black/20"
+              onClick={() => setStep(s => s - 1)}
+              className="flex items-center gap-2 text-gray-500 font-bold hover:text-black transition-colors"
             >
-                Devam Et <ArrowRight size={20} strokeWidth={3} />
+              <ArrowLeft size={18}/> Geri
             </button>
-          </div>
-        )}
+          ) : (
+            <div></div> // Boşluk tutucu
+          )}
 
-        {/* ADIM 2: KATEGORİ */}
-        {step === 2 && (
-          <div className="space-y-8">
-            <div className="text-center">
-                <div className="w-20 h-20 bg-purple-50 text-purple-600 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-sm">
-                    <ShoppingBag size={36} />
-                </div>
-                <h1 className="text-4xl font-black text-gray-900 tracking-tight">Ne Satıyorsun?</h1>
-                <p className="text-gray-500 font-medium mt-2 text-lg">İş modelini anlamamız için gerekli.</p>
-            </div>
-
-            <div>
-                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Kategori / Ürün Tipi</label>
-                <input 
-                    type="text" 
-                    placeholder="Örn: Kadın Giyim, Petshop, Elektronik..." 
-                    className={inputClass}
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    autoFocus
-                />
-            </div>
-
-            <div className="flex gap-4">
-                <button onClick={() => setStep(1)} className="px-8 py-5 bg-gray-100 text-gray-600 rounded-[1.5rem] font-bold hover:bg-gray-200 transition-colors">Geri</button>
-                <button 
-                    onClick={() => setStep(3)} 
-                    disabled={!category}
-                    className="flex-1 py-5 bg-black text-white rounded-[1.5rem] font-black text-lg hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center gap-3 shadow-2xl shadow-black/20"
-                >
-                    Devam Et <ArrowRight size={20} strokeWidth={3} />
-                </button>
-            </div>
-          </div>
-        )}
-
-        {/* ADIM 3: MALİYETLER (EN ÖNEMLİ KISIM) */}
-        {step === 3 && (
-          <div className="space-y-6">
-            <div className="text-center mb-2">
-                <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-[2rem] flex items-center justify-center mx-auto mb-4 shadow-sm">
-                    <Wallet size={32} />
-                </div>
-                <h1 className="text-3xl font-black text-gray-900 tracking-tight">Sabit Giderlerin?</h1>
-                <p className="text-gray-500 font-medium mt-2">
-                   <span className="text-black font-bold">{platform}</span> için tahminlerimiz bunlar. Düzenleyebilirsin.
-                </p>
-            </div>
-
-            {/* Gider Listesi */}
-            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                {costList.map((item) => (
-                    <div key={item.id} className="flex items-center gap-3 group animate-in slide-in-from-bottom-2 duration-300">
-                        <input 
-                           type="text" 
-                           placeholder="Gider Adı"
-                           className="flex-1 px-4 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:bg-white focus:border-black outline-none font-bold text-gray-900 text-sm transition-all"
-                           value={item.label}
-                           onChange={(e) => updateCost(item.id, 'label', e.target.value)}
-                        />
-                        
-                        <div className="relative w-32 shrink-0">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xs">₺</span>
-                            <input 
-                               type="number" 
-                               placeholder="0"
-                               className="w-full pl-7 pr-3 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:bg-white focus:border-black outline-none font-black text-gray-900 text-sm transition-all"
-                               value={item.amount}
-                               onChange={(e) => updateCost(item.id, 'amount', e.target.value)}
-                            />
-                        </div>
-
-                        <button 
-                           onClick={() => removeCostRow(item.id)}
-                           className="p-3 text-gray-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"
-                        >
-                            <Trash2 size={18} />
-                        </button>
-                    </div>
-                ))}
-
-                <button 
-                   onClick={addCostRow}
-                   className="w-full py-3 border-2 border-dashed border-gray-200 text-gray-400 rounded-xl font-bold text-sm hover:border-black hover:text-black hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
-                >
-                    <Plus size={16} /> Başka Gider Ekle
-                </button>
-            </div>
-
-            {/* Özet ve Bitir */}
-            <div className="bg-gray-900 text-white p-6 rounded-[2rem] shadow-2xl shadow-gray-900/30">
-                <div className="flex justify-between items-end mb-6">
-                    <div>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">AYLIK TOPLAM (BURN RATE)</p>
-                        <p className="text-3xl font-black tracking-tight">₺{totalFixedCost.toLocaleString('tr-TR')}</p>
-                    </div>
-                    <div className="text-right">
-                        <p className="text-[10px] text-gray-500 font-bold">YILLIK TAHMİNİ</p>
-                        <p className="text-sm font-bold text-gray-300">₺{(totalFixedCost * 12).toLocaleString('tr-TR')}</p>
-                    </div>
-                </div>
-                
-                <button 
-                    onClick={handleFinish} 
-                    disabled={loading}
-                    className="w-full py-4 bg-white text-black rounded-xl font-black text-lg hover:bg-gray-100 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
-                >
-                    {loading ? <Loader2 className="animate-spin" /> : <><CheckCircle2 size={20} strokeWidth={3} /> Kurulumu Tamamla</>}
-                </button>
-            </div>
-
-            <button onClick={() => setStep(2)} className="w-full text-xs text-gray-400 hover:text-black font-bold py-2 transition-colors">Geri Dön</button>
-
-          </div>
-        )}
-
+          {step < 4 ? (
+            <button 
+              onClick={() => setStep(s => s + 1)}
+              className="flex items-center gap-2 bg-black text-white px-8 py-3 rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg shadow-black/10 active:scale-95"
+            >
+              Devam Et <ArrowRight size={18}/>
+            </button>
+          ) : (
+            <button 
+              onClick={handleComplete}
+              disabled={loading}
+              className="flex items-center gap-2 bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Kuruluyor...' : 'Sistemi Başlat'} <CheckCircle2 size={18}/>
+            </button>
+          )}
+        </div>
       </div>
+      
+      <p className="mt-6 text-xs text-gray-400 font-bold uppercase tracking-widest">
+        Prificient Onboarding • Adım {step} / 4
+      </p>
     </div>
   )
 }

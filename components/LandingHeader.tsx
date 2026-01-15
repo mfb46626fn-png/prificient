@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Menu, X } from 'lucide-react'
 import BetaInfoModal from '@/components/BetaInfoModal'
+import Image from 'next/image'
 
 export default function LandingHeader() {
   const router = useRouter()
@@ -37,15 +38,17 @@ export default function LandingHeader() {
       <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           
-          {/* LOGO */}
-          <Link 
-              href="/" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center gap-2 font-black text-xl tracking-tight text-gray-900 z-50 relative"
-          >
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-black text-sm font-bold text-white">P</span>
-            Prificient
-          </Link>
+{/* LOGO KISMI */}
+    <Link href="/" className="flex items-center gap-2">
+        <Image 
+          src="/logo.png" 
+          alt="Prificient" 
+          width={150} 
+          height={50} 
+          className="object-contain h-12 w-auto" // Landing logoları tık daha büyük olabilir (h-12)
+          priority
+        />
+    </Link>
 
           {/* --- MASAÜSTÜ MENÜ --- */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">

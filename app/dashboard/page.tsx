@@ -1,160 +1,267 @@
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+'use client'
 
-import { createClient } from '@/utils/supabase/server'
-import { redirect } from 'next/navigation'
-import TransactionChart from '@/components/TransactionChart'
-import ExpensePieChart from '@/components/ExpensePieChart'
-import DateFilter from '@/components/DateFilter'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/utils/supabase/client'
 import DashboardHeader from '@/components/DashboardHeader'
-import KPISection from '@/components/KPISection'
-import SmartSummary from '@/components/SmartSummary'
-import MonthStatusSummary from '@/components/MonthStatusSummary'
-import AnomalyAlert from '@/components/AnomalyAlert'
-// YENİ: Başa Baş Kartı
-import BreakevenCard from '@/components/BreakevenCard'
-import CashFlowCalendar from '@/components/CashFlowCalendar'
+import { 
+  Activity, TrendingUp, Package, 
+  AlertCircle, Banknote, Clock 
+} from 'lucide-react'
+import DashboardAIBox from '@/components/DashboardAIBox'
 
-export default async function Dashboard(props: {
-  searchParams: Promise<{ period?: string }>
-}) {
-  const searchParams = await props.searchParams
-  const period = searchParams?.period || 'all'
+// TİP TANIMLARI
+type DashboardStats = {
+  totalRevenue: number
+  totalProfit: number
+  totalOrders: number
+  margin: number
+}
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  if (!user) redirect('/login')
+type EventItem = {
+  event_id: string
+  event_type: string
+  event_date: string
+  description: string
+  products: { name: string } | null
+  orders: { net_profit: number, quantity: number, sale_price: number } | null
+}
 
-  const now = new Date()
-  
-  // 1. ANA FİLTRE İÇİN TARİH ARALIĞI (Grafikler ve KPI'lar için)
-  let startDate: string | null = null
-  let endDate: string | null = null
+export default function DashboardPage() {
+  const supabase = createClient()
+  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState<DashboardStats>({ totalRevenue: 0, totalProfit: 0, totalOrders: 0, margin: 0 })
+  const [feed, setFeed] = useState<EventItem[]>([])
 
-  if (period === 'this-month') {
-    startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
-    endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
-  } else if (period === 'last-month') {
-    startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0]
-    endDate = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().split('T')[0]
+  // VERİ ÇEKME MOTORU
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      setLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      // 1. İSTATİSTİKLER (Orders Tablosundan)
+      const { data: orders } = await supabase
+        .from('orders')
+        .select('total_revenue, net_profit')
+        .eq('user_id', user.id)
+      
+      let rev = 0, prof = 0, count = 0
+      if (orders) {
+        orders.forEach(o => {
+          rev += Number(o.total_revenue)
+          prof += Number(o.net_profit)
+        })
+        count = orders.length
+      }
+
+      setStats({
+        totalRevenue: rev,
+        totalProfit: prof,
+        totalOrders: count,
+        margin: rev > 0 ? (prof / rev) * 100 : 0
+      })
+
+      // 2. OLAY AKIŞI (Events Tablosundan)
+      const { data: events } = await supabase
+        .from('events')
+        .select(`
+          event_id,
+          event_type,
+          event_date,
+          description,
+          products ( name ),
+          orders ( net_profit, quantity, sale_price )
+        `)
+        .eq('user_id', user.id)
+        .order('event_date', { ascending: false })
+        .limit(20) 
+
+      if (events) setFeed(events as any)
+      
+      setLoading(false)
+    }
+
+    fetchDashboardData()
+  }, [])
+
+  // FORMAT YARDIMCISI
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount)
   }
 
-  // 2. BAŞA BAŞ KARTI İÇİN TARİH ARALIĞI (Her zaman 'Bu Ay' olmalı)
-  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
-  const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
-
-  // --- SORGULAR ---
-
-  // A. Ana Veriler (Seçilen periyoda göre)
-  let revQuery = supabase.from('revenues').select('*').eq('user_id', user.id)
-  let expQuery = supabase.from('expenses').select('*').eq('user_id', user.id)
-
-  if (startDate && endDate) {
-    revQuery = revQuery.gte('date', startDate).lte('date', endDate)
-    expQuery = expQuery.gte('date', startDate).lte('date', endDate)
+  const formatDate = (dateString: string) => {
+    const d = new Date(dateString)
+    return d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) + ' · ' + d.toLocaleDateString('tr-TR', { day:'numeric', month:'short' })
   }
-
-  // B. Başa Baş Verileri (Sadece bu ay için)
-  // Not: Eğer ana filtre zaten 'this-month' ise tekrar sorgu atmayabiliriz ama
-  // kod karmaşasını önlemek ve 'all'/'last-month' durumlarında da kartın çalışması için ayrı çekiyoruz.
-  const cmRevQuery = supabase.from('revenues').select('amount').eq('user_id', user.id).gte('date', currentMonthStart).lte('date', currentMonthEnd)
-  const cmExpQuery = supabase.from('expenses').select('amount').eq('user_id', user.id).gte('date', currentMonthStart).lte('date', currentMonthEnd)
-
-  // --- TÜM VERİLERİ PARALEL ÇEK ---
-  const [revRes, expRes, cmRevRes, cmExpRes] = await Promise.all([
-    revQuery.order('date', { ascending: false }),
-    expQuery.order('date', { ascending: false }),
-    cmRevQuery,
-    cmExpQuery
-  ])
-
-  // --- İŞLEME: ANA DASHBOARD ---
-  const formattedRevenues = (revRes.data || []).map(r => ({ ...r, type: 'revenue', category: 'Gelir' }))
-  const formattedExpenses = (expRes.data || []).map(e => ({ ...e, type: 'expense' }))
-
-  const allTransactions = [...formattedRevenues, ...formattedExpenses].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  )
-
-  const totalRevenue = formattedRevenues.reduce((acc, curr) => acc + Number(curr.amount), 0)
-  const totalExpense = formattedExpenses.reduce((acc, curr) => acc + Number(curr.amount), 0)
-  const netProfit = totalRevenue - totalExpense
-  const margin = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) : "0"
-
-  // --- İŞLEME: BAŞA BAŞ KARTI ---
-  const cmTotalRevenue = (cmRevRes.data || []).reduce((acc, curr) => acc + Number(curr.amount), 0)
-  const cmTotalExpense = (cmExpRes.data || []).reduce((acc, curr) => acc + Number(curr.amount), 0)
-  const currentMonthNetProfit = cmTotalRevenue - cmTotalExpense
 
   return (
-    <div className="min-h-screen bg-white pb-10 font-sans">
-      <DashboardHeader 
-        totalRevenue={totalRevenue} 
-        totalExpense={totalExpense} 
-      />
+    <div className="min-h-screen bg-gray-50 font-sans pb-20">
+      <DashboardHeader />
 
-      <main className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
+      <main className="max-w-6xl mx-auto p-4 sm:p-8 space-y-8 animate-in fade-in duration-500">
         
-        {/* ANOMALİ ALARMI */}
-        <AnomalyAlert />
-
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        {/* BAŞLIK */}
+        <div className="flex items-center justify-between border-b border-gray-200 pb-5">
           <div>
-            <h2 className="text-3xl font-black text-gray-900 tracking-tight">Genel Bakış</h2>
-            <p className="text-gray-500 font-medium">Finansal rotanızın anlık özeti.</p>
+            <h1 className="text-3xl font-black text-black tracking-tight">Komuta Merkezi</h1>
+            <p className="text-gray-600 font-bold mt-1 text-sm">Gerçekleşmiş olayların canlı akışı.</p>
           </div>
-          <div className="flex items-center gap-3">
-            <DateFilter />
+          <div className="flex items-center gap-2 px-4 py-1.5 bg-emerald-100 text-emerald-800 rounded-full text-xs font-black animate-pulse border border-emerald-200 shadow-sm">
+            <Activity size={14} /> CANLI
           </div>
         </div>
 
-        <div className="mb-8 animate-in slide-in-from-bottom-4 duration-700 delay-200">
-          <MonthStatusSummary 
-            currentRevenue={totalRevenue} 
-            currentExpense={totalExpense} 
-            lastMonthRevenue={totalRevenue * 0.9} // Simülasyon
-          />
-        </div>
-
-        <div className="space-y-6">
-          <KPISection totalRevenue={totalRevenue} totalExpense={totalExpense} netProfit={netProfit} margin={margin} />
-          
-        {/* YENİ: BAŞA BAŞ VE TAKVİM GRID */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in slide-in-from-bottom-4 delay-300">
-              {/* SOL: Başa Baş Göstergesi (%33 Genişlik) */}
-              <div className="lg:col-span-1">
-                  <BreakevenCard currentMonthNetProfit={currentMonthNetProfit} />
-              </div>
-
-              {/* SAĞ: Nakit Akışı Takvimi (%66 Genişlik) */}
-              <div className="lg:col-span-2">
-                  <CashFlowCalendar />
-              </div>
-          </div>
-
-          <SmartSummary revenue={totalRevenue} expense={totalExpense} netProfit={netProfit} margin={margin} />
-        </div>
-
-        {allTransactions.length > 0 ? (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
-                <TransactionChart transactions={allTransactions} />
-              </div>
-              <div className="lg:col-span-1">
-                <ExpensePieChart transactions={formattedExpenses} />
-              </div>
+        {/* 1. KPI KARTLARI (BÜYÜK RESİM) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* NET KÂR (EN ÖNEMLİSİ) */}
+            <div className="bg-black text-white p-8 rounded-[2rem] shadow-2xl shadow-gray-400 relative overflow-hidden group">
+                {/* Arkaplan Efekti */}
+                <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-12 -mt-12 blur-3xl"></div>
+                
+                <div className="relative z-10">
+                    <div className="flex items-center gap-2 text-gray-300 text-xs font-black uppercase tracking-widest mb-2">
+                        <TrendingUp size={16} className="text-emerald-400"/> Toplam Net Kâr
+                    </div>
+                    <div className="text-5xl font-black tracking-tighter mt-1 text-white">
+                        {formatCurrency(stats.totalProfit)}
+                    </div>
+                    <div className="mt-6 flex items-center gap-2 text-sm font-medium text-gray-300">
+                        <span className="text-black bg-white px-3 py-1 rounded-lg text-xs font-bold">%{stats.margin.toFixed(1)} Marj</span>
+                        <span className="opacity-80">ile çalışıyorsun</span>
+                    </div>
+                </div>
             </div>
-          </div>
-        ) : (
-          <div className="py-24 flex flex-col items-center justify-center bg-gray-50 rounded-4xl border-2 border-dashed border-gray-200 text-center px-4">
-            <h3 className="text-xl font-bold text-gray-900 mb-2 text-balance">Henüz finansal veri bulunamadı</h3>
-            <p className="text-gray-500">Analizleri görmek için menüden "İşlemler & Veri" sayfasına giderek veri ekleyin.</p>
-          </div>
-        )}
+
+            {/* CİRO */}
+            <div className="bg-white p-8 rounded-[2rem] border-2 border-gray-100 shadow-sm hover:border-emerald-200 hover:shadow-md transition-all group">
+                <div className="flex items-center gap-2 text-gray-500 text-xs font-black uppercase tracking-widest mb-2">
+                    <Banknote size={16}/> Toplam Ciro
+                </div>
+                <div className="text-4xl font-black text-black tracking-tighter mt-1 group-hover:text-emerald-700 transition-colors">
+                    {formatCurrency(stats.totalRevenue)}
+                </div>
+                <div className="mt-6 text-xs font-bold text-gray-400 uppercase tracking-wide">
+                    Kasaya Giren Brüt Para
+                </div>
+            </div>
+
+            {/* SİPARİŞ ADEDİ */}
+            <div className="bg-white p-8 rounded-[2rem] border-2 border-gray-100 shadow-sm hover:border-blue-200 hover:shadow-md transition-all group">
+                <div className="flex items-center gap-2 text-gray-500 text-xs font-black uppercase tracking-widest mb-2">
+                    <Package size={16}/> Toplam Sipariş
+                </div>
+                <div className="text-4xl font-black text-black tracking-tighter mt-1 group-hover:text-blue-700 transition-colors">
+                    {stats.totalOrders}
+                </div>
+                <div className="mt-6 text-xs font-bold text-gray-400 uppercase tracking-wide">
+                    Adet Gerçekleşmiş Satış
+                </div>
+            </div>
+        </div>
+
+        {/* 2. ZAMAN TÜNELİ (EVENT STREAM) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {/* SOL: AKIŞ */}
+            <div className="lg:col-span-2 space-y-6">
+                <div className="flex items-center gap-2 mb-4">
+                    <Clock size={20} className="text-black"/>
+                    <h3 className="text-xl font-black text-black">Olay Akışı</h3>
+                </div>
+
+                <div className="space-y-4">
+                    {loading ? (
+                        <p className="text-center text-gray-500 font-bold py-10">Akış yükleniyor...</p>
+                    ) : feed.length === 0 ? (
+                        <div className="bg-white p-10 rounded-[2rem] text-center border-2 border-dashed border-gray-200">
+                            <p className="text-gray-500 font-bold text-lg">Henüz bir olay gerçekleşmedi.</p>
+                            <p className="text-gray-400 text-sm mt-2">Excel yükleyerek ilk veriyi gir.</p>
+                        </div>
+                    ) : (
+                        feed.map((event) => (
+                            <div key={event.event_id} className="bg-white p-6 rounded-[1.5rem] border border-gray-200 shadow-sm hover:shadow-lg hover:border-gray-300 transition-all flex items-start gap-5 group">
+                                
+                                {/* İKON ALANI */}
+                                <div className={`mt-1 min-w-[3.5rem] h-14 rounded-2xl flex items-center justify-center border ${
+                                    event.event_type === 'order_created' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                    event.event_type === 'price_change' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                                    'bg-gray-50 text-gray-600 border-gray-200'
+                                }`}>
+                                    {event.event_type === 'order_created' ? <Package size={24} /> : 
+                                     event.event_type === 'price_change' ? <TrendingUp size={24} /> : 
+                                     <Activity size={24} />}
+                                </div>
+
+                                {/* İÇERİK ALANI */}
+                                <div className="flex-1">
+                                    <div className="flex justify-between items-start">
+                                        <h4 className="font-black text-black text-base">
+                                            {event.event_type === 'order_created' ? 'Yeni Sipariş' : 
+                                             event.event_type === 'price_change' ? 'Fiyat Değişimi' : 'Sistem Olayı'}
+                                        </h4>
+                                        <span className="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200">
+                                            {formatDate(event.event_date)}
+                                        </span>
+                                    </div>
+                                    
+                                    <p className="text-gray-800 mt-2 font-semibold leading-relaxed text-sm">
+                                        {event.description || (event.products ? `${event.products.name} ile ilgili işlem.` : 'Detay yok.')}
+                                    </p>
+
+                                    {/* SİPARİŞ DETAYI (VARSA) */}
+                                    {event.event_type === 'order_created' && event.orders && (
+                                        <div className="mt-4 flex gap-3">
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] uppercase font-bold text-gray-400 mb-0.5">NET KÂR</span>
+                                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 text-emerald-800 rounded-lg text-sm font-black border border-emerald-200">
+                                                    {formatCurrency(event.orders.net_profit)}
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] uppercase font-bold text-gray-400 mb-0.5">ADET</span>
+                                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-black border border-gray-200">
+                                                    {event.orders.quantity}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+
+            {/* SAĞ: ANALİZ PANELİ */}
+            <div className="space-y-6">
+                <div className="flex items-center gap-2 mb-4">
+                    <AlertCircle size={20} className="text-black"/>
+                    <h3 className="text-xl font-black text-black">Analiz Paneli</h3>
+                </div>
+
+                {/* YENİ: DİNAMİK AI KUTUSU (ESKİ STATİK KUTU GİTTİ) */}
+                <DashboardAIBox />
+
+                {/* BASİT İPUÇLARI */}
+                <div className="bg-white p-6 rounded-[2rem] border-2 border-gray-100 shadow-sm">
+                    <h5 className="font-black text-black text-sm mb-4">Sistem Durumu</h5>
+                    <ul className="space-y-4">
+                        <li className="text-xs font-bold text-gray-600 flex gap-3 items-start">
+                            <span className="w-2 h-2 bg-rose-500 rounded-full mt-1.5 shrink-0"></span>
+                            <span>Sadece gerçekleşmiş satışlar sisteme dahil edilir. Tahmin yok.</span>
+                        </li>
+                        <li className="text-xs font-bold text-gray-600 flex gap-3 items-start">
+                            <span className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 shrink-0"></span>
+                            <span>Fiyat değişiklikleri otomatik tespit edilir ve "Karar" olarak kaydedilir.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
       </main>
-      
     </div>
   )
 }

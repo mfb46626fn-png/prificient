@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import LandingHeader from '@/components/LandingHeader'
+// Header ve Footer bileşenlerinin var olduğunu varsayıyorum. Yoksa söylemen yeterli.
+import LandingHeader from '@/components/LandingHeader' 
 import LandingFooter from '@/components/LandingFooter'
 import { 
   ArrowRight, 
@@ -33,7 +34,7 @@ export default function Home() {
            ========================================= */}
         <section className="relative pt-28 pb-20 lg:pt-36 lg:pb-32 w-full overflow-hidden">
           
-          {/* Arkaplan Efektleri (Tüm ekranı kaplayacak şekilde revize edildi) */}
+          {/* Arkaplan Efektleri */}
           <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-50"></div>
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-gradient-to-b from-blue-50/60 via-indigo-50/20 to-transparent blur-[120px] -z-10 pointer-events-none"></div>
 
@@ -86,13 +87,12 @@ export default function Home() {
                 <span>Beta süresince kredi kartı gerekmez</span>
             </div>
 
-            {/* Dashboard Görseli (BEYAZ KUTU KALDIRILDI) */}
+            {/* Dashboard Görseli */}
             <div className="mt-20 relative max-w-6xl mx-auto group perspective-1000">
-              {/* Arkaplan Glow (Daha yayvan ve doğal) */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] bg-blue-600/20 rounded-[100%] blur-[80px] opacity-40 group-hover:opacity-60 transition-opacity duration-700 -z-10"></div>
               
-              {/* Görsel Wrapper: Artık bg-white ve padding YOK. Sadece gölge ve radius var. */}
               <div className="relative rounded-2xl shadow-2xl transition-transform duration-700 group-hover:scale-[1.01] bg-transparent">
+                 {/* Görseli public klasörüne 'dashboard-preview.png' olarak koyman gerekiyor */}
                  <Image 
                     src="/dashboard-preview.png"
                     alt="Prificient Dashboard Arayüzü"
@@ -103,7 +103,7 @@ export default function Home() {
                     priority
                  />
                  
-                 {/* Floating Badge: Net Kâr Artışı */}
+                 {/* Floating Badge */}
                  <div className="absolute -top-6 -right-6 hidden md:flex flex-col gap-1 bg-white p-5 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 animate-bounce duration-[4000ms] z-20">
                     <div className="flex items-center gap-3">
                         <div className="bg-emerald-100 p-2 rounded-lg">
@@ -120,9 +120,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* =========================================
-            LOGO BANTI
-           ========================================= */}
+        {/* LOGO BANTI */}
         <div className="py-10 border-y border-gray-100 bg-gray-50/30">
            <div className="container mx-auto px-6 text-center">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">
@@ -139,9 +137,7 @@ export default function Home() {
            </div>
         </div>
 
-        {/* =========================================
-            2. ÖZELLİKLER (ZIG-ZAG)
-           ========================================= */}
+        {/* 2. ÖZELLİKLER */}
         <section id="features" className="py-24 bg-white overflow-hidden">
           <div className="container mx-auto px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -236,9 +232,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* =========================================
-            3. NASIL ÇALIŞIR (3 ADIM)
-           ========================================= */}
+        {/* 3. NASIL ÇALIŞIR */}
         <section id="nasil" className="py-24 bg-gray-50 relative overflow-hidden">
            <div className="container mx-auto px-6 lg:px-8 relative z-10 text-center">
               <h2 className="text-sm font-bold leading-7 text-blue-600 uppercase tracking-widest bg-blue-50 inline-block px-3 py-1 rounded-full border border-blue-100">Süreç</h2>
@@ -283,9 +277,7 @@ export default function Home() {
            </div>
         </section>
 
-        {/* =========================================
-            4. FİYATLANDIRMA
-           ========================================= */}
+        {/* 4. FİYATLANDIRMA */}
         <section id="pricing" className="py-24 bg-white">
           <div className="container mx-auto px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -377,9 +369,7 @@ export default function Home() {
           </div>
         </section>
 
-{/* =========================================
-            5. SSS (FAQ - AÇILIP KAPANIR)
-           ========================================= */}
+        {/* 5. SSS (FAQ) */}
         <section className="py-24 bg-gray-50">
           <div className="container mx-auto px-6 lg:px-8 max-w-4xl">
              <div className="text-center mb-16">
@@ -400,7 +390,7 @@ export default function Home() {
                           <HelpCircle size={20} className="text-blue-500 shrink-0" />
                           <span>{item.q}</span>
                        </div>
-                       {/* Chevron İkonu - Açılınca döner */}
+                       {/* Chevron İkonu */}
                        <svg 
                          className="h-5 w-5 text-gray-400 transition-transform duration-300 group-open:rotate-180 shrink-0" 
                          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
@@ -417,15 +407,11 @@ export default function Home() {
           </div>
         </section>
 
-{/* =========================================
-            6. CTA (GARANTİ CONTRAST - SOLID DARK)
-           ========================================= */}
+        {/* 6. CTA */}
         <section className="py-24 bg-white">
             <div className="container mx-auto px-6 lg:px-8">
-                {/* DÜZELTME: bg-gray-900 (Koyu Gri/Siyah) arka plan zorunlu tutuldu */}
                 <div className="relative isolate overflow-hidden bg-white px-6 py-24 shadow-2xl rounded-[3rem] sm:px-24 text-center">
                     
-                    {/* İçerik */}
                     <div className="mx-auto max-w-2xl relative z-10">
                         <h2 className="text-3xl font-black tracking-tight text-black sm:text-5xl mb-6">
                             Finansal Özgürlüğünüze <br />
@@ -446,7 +432,6 @@ export default function Home() {
                             </Link>
                         </div>
 
-                        {/* Alt Metin */}
                         <div className="mt-8 pt-8 border-t border-gray-800 flex flex-wrap justify-center gap-6 text-xs font-bold text-gray-400 uppercase tracking-widest">
                              <span className="hidden sm:inline">•</span>
                              <span>Kredi Kartı Gerekmez</span>

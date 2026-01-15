@@ -1,94 +1,112 @@
 'use client'
 
-import { TrendingUp, TrendingDown, AlertCircle, CheckCircle2, Minus } from 'lucide-react'
-import { useCurrency } from '@/app/contexts/CurrencyContext'
+import { useEffect, useState } from 'react'
+import { TrendingUp, AlertTriangle, AlertOctagon, Loader2 } from 'lucide-react'
 
-interface MonthStatusProps {
-  currentRevenue: number
-  currentExpense: number
-  lastMonthRevenue: number // Geçen ayın verisi (Kıyaslama için)
+type InsightData = {
+  title: string
+  message: string
+  sentiment: 'positive' | 'warning' | 'critical' | 'neutral'
 }
 
-export default function MonthStatusSummary({ currentRevenue, currentExpense, lastMonthRevenue }: MonthStatusProps) {
-  const { symbol, convert } = useCurrency()
+export default function DashboardInsight() {
+  const [data, setData] = useState<InsightData | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const netProfit = currentRevenue - currentExpense
-  const margin = currentRevenue > 0 ? (netProfit / currentRevenue) * 100 : 0
-  const expenseRatio = currentRevenue > 0 ? (currentExpense / currentRevenue) * 100 : 0
-
-  // --- DETERMINISTIC LOGIC (KARAR MEKANİZMASI) ---
-  
-  let statusTitle = ""
-  let statusMessage = ""
-  let statusColor = ""
-  let Icon = Minus
-
-  // Senaryo 1: ZARAR DURUMU
-  if (netProfit < 0) {
-    statusTitle = "Dikkat: Zarar Ediyorsunuz"
-    statusColor = "bg-rose-50 border-rose-100 text-rose-900"
-    Icon = TrendingDown
-    
-    // Alt detay: Neden?
-    if (expenseRatio > 100) {
-        statusMessage = `Giderleriniz gelirlerinizin tamamını aştı. Her satışta ortalama %${Math.abs(margin).toFixed(0)} kaybediyorsunuz. Acil müdahale (fiyat artışı veya gider kısıntısı) gerekiyor.`
-    } else {
-        statusMessage = "Operasyonel maliyetler kârlılığınızı negatif bölgeye çekiyor."
+  useEffect(() => {
+    // Sayfa açılınca API'den veriyi çek
+    const fetchInsight = async () => {
+      try {
+        const res = await fetch('/api/insight')
+        const json = await res.json()
+        setData(json)
+      } catch (e) {
+        console.error(e)
+      } finally {
+        setLoading(false)
+      }
     }
-  } 
-  // Senaryo 2: DÜŞÜK KÂRLILIK (Riskli Bölge: %0 - %15 arası)
-  else if (margin > 0 && margin < 15) {
-    statusTitle = "Kârlısınız Ancak Risk Var"
-    statusColor = "bg-yellow-50 border-yellow-100 text-yellow-900"
-    Icon = AlertCircle
 
-    statusMessage = `Net kâr marjınız %${margin.toFixed(1)}. Bu oran e-ticaret için sınırda kabul edilir. Beklenmedik bir iade veya reklam maliyeti ayı zararla kapatmanıza neden olabilir.`
-  }
-  // Senaryo 3: SAĞLIKLI BÜYÜME (İdeal Bölge: %15+)
-  else {
-    statusTitle = "İşler Yolunda Gidiyor"
-    statusColor = "bg-emerald-50 border-emerald-100 text-emerald-900"
-    Icon = TrendingUp
+    fetchInsight()
+  }, [])
 
-    // Büyüme detayı
-    if (currentRevenue > lastMonthRevenue) {
-        const growth = ((currentRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
-        statusMessage = `Geçen aya göre cironuzu %${growth.toFixed(0)} artırdınız ve %${margin.toFixed(1)} gibi sağlıklı bir marj ile çalışıyorsunuz. Bu tempoyu koruyun.`
-    } else {
-        statusMessage = `Cironuz geçen aydan düşük olsa da, %${margin.toFixed(1)} kâr marjı ile verimli bir ay geçiriyorsunuz. Nakit akışınız pozitif.`
+  // RENK VE İKON AYARLARI
+  const styles = {
+    positive: {
+      bg: 'bg-emerald-50',
+      border: 'border-emerald-100',
+      iconBg: 'bg-emerald-100',
+      iconColor: 'text-emerald-600',
+      titleColor: 'text-emerald-900',
+      Icon: TrendingUp
+    },
+    warning: {
+      bg: 'bg-amber-50',
+      border: 'border-amber-100',
+      iconBg: 'bg-amber-100',
+      iconColor: 'text-amber-600',
+      titleColor: 'text-amber-900',
+      Icon: AlertTriangle
+    },
+    critical: {
+      bg: 'bg-rose-50',
+      border: 'border-rose-100',
+      iconBg: 'bg-rose-100',
+      iconColor: 'text-rose-600',
+      titleColor: 'text-rose-900',
+      Icon: AlertOctagon
+    },
+    neutral: {
+      bg: 'bg-gray-50',
+      border: 'border-gray-100',
+      iconBg: 'bg-gray-100',
+      iconColor: 'text-gray-600',
+      titleColor: 'text-gray-900',
+      Icon: Loader2
     }
   }
 
-  // Henüz veri yoksa
-  if (currentRevenue === 0 && currentExpense === 0) {
+  const currentStyle = data ? styles[data.sentiment] : styles.neutral
+  const IconComponent = currentStyle.Icon
+
+  if (loading) {
     return (
-        <div className="p-6 rounded-[2rem] bg-gray-50 border border-gray-100 text-center">
-            <p className="text-gray-400 font-bold text-sm">Henüz analiz için yeterli veri yok.</p>
+      <div className="w-full p-6 rounded-3xl border border-gray-100 bg-white shadow-sm animate-pulse flex items-center gap-4">
+        <div className="w-12 h-12 bg-gray-100 rounded-2xl"></div>
+        <div className="space-y-2 flex-1">
+          <div className="h-4 bg-gray-100 rounded w-1/3"></div>
+          <div className="h-3 bg-gray-100 rounded w-2/3"></div>
         </div>
+      </div>
     )
   }
 
   return (
-    <div className={`p-6 rounded-[2rem] border ${statusColor} transition-all`}>
-      <div className="flex items-start gap-4">
-        <div className={`p-3 rounded-2xl bg-white shadow-sm shrink-0`}>
-           <Icon size={24} className={statusColor.includes('rose') ? 'text-rose-600' : statusColor.includes('yellow') ? 'text-yellow-600' : 'text-emerald-600'} />
+    <div className={`w-full p-6 rounded-3xl border ${currentStyle.bg} ${currentStyle.border} shadow-sm transition-all duration-500`}>
+      <div className="flex items-start gap-5">
+        
+        {/* İKON KUTUSU */}
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${currentStyle.iconBg}`}>
+          <IconComponent size={28} className={currentStyle.iconColor} />
         </div>
+
+        {/* METİN ALANI */}
         <div>
-           <h3 className="font-black text-lg mb-1">{statusTitle}</h3>
-           <p className="text-sm font-medium opacity-90 leading-relaxed">
-             {statusMessage}
-           </p>
-           
-           {/* Özet Veri Hapları */}
-           <div className="flex flex-wrap gap-2 mt-4">
-              <span className="px-3 py-1 bg-white/60 rounded-lg text-xs font-bold border border-black/5">
-                Marj: %{margin.toFixed(1)}
-              </span>
-              <span className="px-3 py-1 bg-white/60 rounded-lg text-xs font-bold border border-black/5">
-                Net: {symbol}{convert(Math.abs(netProfit))}
-              </span>
-           </div>
+          <h3 className={`font-bold text-lg mb-1 ${currentStyle.titleColor}`}>
+            {data?.title}
+          </h3>
+          <p className="text-sm font-medium text-gray-600 leading-relaxed">
+            {data?.message}
+          </p>
+          
+          {/* Opsiyonel: Alt bilgi veya aksiyon butonu eklenebilir */}
+          {data?.sentiment === 'critical' && (
+            <div className="mt-3">
+               <span className="text-xs font-bold text-rose-600 bg-white px-2 py-1 rounded-md border border-rose-100 cursor-pointer hover:bg-rose-50">
+                 Detayları İncele →
+               </span>
+            </div>
+          )}
         </div>
       </div>
     </div>

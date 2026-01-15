@@ -1,118 +1,131 @@
 'use client'
 
-import { X, Rocket, Gift, MessageSquare, ShieldAlert, Layers } from 'lucide-react'
+import { X, Zap, CheckCircle2, Calendar, PartyPopper, ArrowRight } from 'lucide-react'
 
 interface BetaInfoModalProps {
   isOpen: boolean
   onClose: () => void
-  // YENİ PROPS: Buton metni ve aksiyonu özelleştirilebilir
-  actionLabel?: string 
-  onAction?: () => void
 }
 
-export default function BetaInfoModal({ isOpen, onClose, actionLabel, onAction }: BetaInfoModalProps) {
+// BURASI SİZİN KONTROL PANELİNİZ
+// Yeni bir özellik eklediğinizde bu listeye en üste eklemeniz yeterli.
+const UPDATES = [
+    {
+        date: 'Bugün',
+        title: 'Yapay Zeka Asistanı (Prificient AI)',
+        description: 'Artık verilerinizle sohbet edebilirsiniz. "Neden kârım düştü?" diye sorun, AI cevaplasın.',
+        type: 'new' // 'new' | 'fix' | 'update'
+    },
+    {
+        date: 'Dün',
+        title: 'Akıllı Platform Hafızası',
+        description: 'Excel yüklerken platform komisyonlarını (Shopify, Trendyol) otomatik hesaplayan modül eklendi.',
+        type: 'update'
+    },
+    {
+        date: '12 Oca',
+        title: 'Reklam Maliyet Dağıtımı',
+        description: 'Tek bir tuşla toplam reklam harcamanızı o günün siparişlerine adil şekilde dağıtabilirsiniz.',
+        type: 'new'
+    }
+]
+
+export default function BetaInfoModal({ isOpen, onClose }: BetaInfoModalProps) {
   if (!isOpen) return null
 
-  const handleButtonClick = () => {
-    if (onAction) {
-      onAction() // Eğer özel bir aksiyon varsa (örn: Login sayfasına git) onu çalıştır
-    } else {
-      onClose() // Yoksa sadece kapat (Dashboard davranışı)
-    }
-  }
-
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 relative">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 relative flex flex-col max-h-[90vh]">
         
-        {/* Dekoratif Arkaplan */}
-        <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style={{ backgroundImage: "url('https://grainy-gradients.vercel.app/noise.svg')" }}></div>
-
-        {/* Kapatma Butonu */}
-        <button 
-          onClick={onClose} 
-          className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/40 text-white rounded-full transition-colors backdrop-blur-md z-10"
-        >
-          <X size={20} />
-        </button>
-
-        {/* İçerik */}
-        <div className="relative pt-10 px-8 pb-8">
+        {/* HEADER & DEKORASYON */}
+        <div className="relative bg-black text-white p-8 overflow-hidden shrink-0">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/30 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-600/30 rounded-full blur-3xl -ml-10 -mb-10 pointer-events-none"></div>
             
-            <div className="w-20 h-20 bg-white rounded-[2rem] shadow-xl flex items-center justify-center mx-auto mb-6 relative z-10">
-                <Rocket size={40} className="text-blue-600" />
-            </div>
+            <button 
+                onClick={onClose} 
+                className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-all z-20 text-white/70 hover:text-white"
+            >
+                <X size={20} />
+            </button>
 
-            <div className="text-center mb-8">
-                <h2 className="text-2xl font-black text-gray-900">Erken Erişim Programı</h2>
-                <p className="text-gray-500 font-medium mt-2">Prificient'ı ilk deneyimleyenlerden olduğunuz için teşekkürler.</p>
-            </div>
-
-            {/* Bilgi Kartları */}
-            <div className="grid md:grid-cols-2 gap-4 mb-8">
-                <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                    <div className="flex items-center gap-2 mb-2">
-                        <Gift className="text-blue-600" size={18} />
-                        <h3 className="font-bold text-gray-900 text-sm">Tamamen Ücretsiz</h3>
-                    </div>
-                    <p className="text-xs text-gray-600 leading-relaxed font-medium">
-                        Beta süreci boyunca tüm özellikler (%100) ücretsizdir. Kredi kartı gerekmez, sürpriz fatura çıkmaz.
-                    </p>
+            <div className="relative z-10">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-300 text-[10px] font-bold uppercase tracking-widest mb-4">
+                    <Zap size={12} className="text-yellow-400 fill-yellow-400" />
+                    v1.0 Beta Sürümü
                 </div>
-
-                <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
-                    <div className="flex items-center gap-2 mb-2">
-                        <MessageSquare className="text-emerald-600" size={18} />
-                        <h3 className="font-bold text-gray-900 text-sm">Geri Bildiriminiz Değerli</h3>
-                    </div>
-                    <p className="text-xs text-gray-600 leading-relaxed font-medium">
-                        Hata mı buldunuz? Veya bir özellik mi istiyorsunuz? Bize yazın, öncelikli olarak geliştirelim.
-                    </p>
-                </div>
-            </div>
-
-            {/* Yol Haritası */}
-            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
-                <h3 className="font-black text-gray-900 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Layers size={16}/> Sırada Ne Var?
-                </h3>
-                <div className="space-y-4">
-                    <div className="flex items-center gap-3 opacity-50">
-                        <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-[10px] font-bold">✓</div>
-                        <span className="text-sm font-bold text-gray-900 line-through">Temel Finans Takibi</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <div className="w-5 h-5 rounded-full border-2 border-blue-600 flex items-center justify-center">
-                            <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
-                        </div>
-                        <span className="text-sm font-bold text-gray-900">Excel / CSV Entegrasyonu</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <div className="w-5 h-5 rounded-full border-2 border-gray-300"></div>
-                        <span className="text-sm font-medium text-gray-500">Pazaryeri API Bağlantıları (Trendyol, Amazon)</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Footer Uyarısı */}
-            <div className="flex items-start gap-3 bg-yellow-50 p-4 rounded-2xl border border-yellow-100">
-                <ShieldAlert className="text-yellow-600 shrink-0 mt-0.5" size={18} />
-                <p className="text-xs text-yellow-800 font-medium leading-relaxed">
-                    Beta sürümünde olduğumuz için arayüzde değişiklikler olabilir. Verileriniz her zaman güvendedir.
+                <h2 className="text-3xl font-black tracking-tight mb-2">Yenilikler & Güncellemeler</h2>
+                <p className="text-gray-400 text-sm font-medium max-w-md leading-relaxed">
+                    Prificient her gün gelişiyor. Beta süreci boyunca eklenen özellikleri buradan takip edebilirsiniz.
                 </p>
             </div>
+        </div>
 
-            <div className="mt-6 text-center">
-                <button 
-                    onClick={handleButtonClick} 
-                    className="bg-black text-white px-10 py-4 rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg shadow-black/10 active:scale-95 text-lg"
-                >
-                    {actionLabel || "Anlaşıldı, Devam Et"}
-                </button>
+        {/* İÇERİK: GÜNCELLEME LİSTESİ (SCROLLABLE) */}
+        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+            
+            {/* AVANTAJ KARTI */}
+            <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 p-5 rounded-3xl flex items-start gap-4 mb-8">
+                <div className="p-3 bg-white rounded-2xl shadow-sm text-indigo-600 shrink-0">
+                    <PartyPopper size={24} />
+                </div>
+                <div>
+                    <h3 className="font-bold text-indigo-900 text-sm">Sınırsız Erişim Hakkı</h3>
+                    <p className="text-xs text-indigo-700 mt-1 leading-relaxed">
+                        Beta kullanıcılarına özel olarak tüm Pro özellikler (AI, Sınırsız Veri, Excel Analizi) şu an tamamen ücretsiz ve kısıtlamasızdır.
+                    </p>
+                </div>
             </div>
 
+            {/* ZAMAN TÜNELİ */}
+            <div className="space-y-8 relative pl-2">
+                {/* Dikey Çizgi */}
+                <div className="absolute left-[27px] top-4 bottom-4 w-0.5 bg-gray-100"></div>
+
+                {UPDATES.map((update, index) => (
+                    <div key={index} className="relative flex gap-5 group">
+                        {/* İkon */}
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border-4 border-white shadow-sm z-10 ${
+                            update.type === 'new' ? 'bg-black text-white' : 'bg-gray-100 text-gray-500'
+                        }`}>
+                            {update.type === 'new' ? <Zap size={24} className="fill-yellow-400 text-yellow-400" /> : <CheckCircle2 size={24} />}
+                        </div>
+
+                        {/* İçerik */}
+                        <div className="pt-2 pb-4 border-b border-gray-50 w-full group-last:border-0">
+                            <div className="flex justify-between items-center mb-1">
+                                <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded ${
+                                    update.type === 'new' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-50 text-blue-600'
+                                }`}>
+                                    {update.type === 'new' ? 'YENİ ÖZELLİK' : 'GÜNCELLEME'}
+                                </span>
+                                <div className="flex items-center gap-1 text-gray-400 text-xs font-bold">
+                                    <Calendar size={12} /> {update.date}
+                                </div>
+                            </div>
+                            <h4 className="text-lg font-black text-gray-900 mb-1">{update.title}</h4>
+                            <p className="text-sm text-gray-500 font-medium leading-relaxed">
+                                {update.description}
+                            </p>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
+
+        {/* FOOTER */}
+        <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-between items-center shrink-0">
+            <p className="text-xs text-gray-400 font-bold">
+                Son Güncelleme: {UPDATES[0].date}
+            </p>
+            <button 
+                onClick={onClose}
+                className="bg-black text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-gray-900 transition-all flex items-center gap-2 hover:gap-3"
+            >
+                Panele Dön <ArrowRight size={16} />
+            </button>
+        </div>
+
       </div>
     </div>
   )
