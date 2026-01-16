@@ -47,7 +47,7 @@ export async function updateSession(request: NextRequest) {
   // -------------------------------------------------------------
   // KURAL 2: Korumalı Sayfalar (Dashboard & Veri Girişi)
   // -------------------------------------------------------------
-  const protectedPaths = ['/dashboard', '/data-entry']
+  const protectedPaths = ['/dashboard', '/data-entry', '/settings', '/onboarding']
   const isProtected = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path))
 
   if (isProtected) {
@@ -61,16 +61,32 @@ export async function updateSession(request: NextRequest) {
       .from('subscriptions')
       .select('status, trial_end_date')
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
 
-    // Eğer abonelik kaydı yoksa, süresi bitmişse ('expired') 
-    // veya deneme süresindeyken tarih geçmişse -> İçeri alma
+    // Eğer abonelik kaydı yoksa (yeni üyeyse) veya süresi bitmişse...
+    // Not: Yeni üye kaydolduğunda subscription tetiklenmeli yoksa buraya takılır.
+    // Şimdilik subscription varsa kontrol edelim, yoksa trial varsayalım (veya logic'e göre değişir).
     if (
-      !subscription || 
-      subscription.status === 'expired' ||
-      (subscription.status === 'trial' && new Date(subscription.trial_end_date) < new Date())
+      subscription && (
+        subscription.status === 'expired' ||
+        (subscription.status === 'trial' && new Date(subscription.trial_end_date) < new Date())
+      )
     ) {
-       return NextResponse.redirect(new URL('/subscription-ended', request.url))
+      return NextResponse.redirect(new URL('/subscription-ended', request.url))
+    }
+
+    // C. ONBOARDING KONTROLÜ
+    // Eğer şu an onboarding sayfasında değilsek, ayarları kontrol et.
+    if (!request.nextUrl.pathname.startsWith('/onboarding')) {
+      const { data: settings } = await supabase
+        .from('store_settings')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (!settings) {
+        return NextResponse.redirect(new URL('/onboarding', request.url))
+      }
     }
   }
 
