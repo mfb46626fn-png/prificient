@@ -39,16 +39,15 @@ export async function updateSession(request: NextRequest) {
 
   // -------------------------------------------------------------
   // KURAL 1: Kullanıcı giriş yapmışsa, Login sayfasına giremesin
-  // -------------------------------------------------------------
-  if (user && request.nextUrl.pathname.startsWith('/login')) {
+  if (user && request.nextUrl.pathname.startsWith('/login') && !request.nextUrl.pathname.startsWith('/demo')) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   // -------------------------------------------------------------
   // KURAL 2: Korumalı Sayfalar (Dashboard & Veri Girişi)
   // -------------------------------------------------------------
-  const protectedPaths = ['/dashboard', '/data-entry', '/settings', '/onboarding']
-  const isProtected = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path))
+  const protectedPaths = ['/dashboard', '/data-entry', '/settings', '/onboarding', '/connect']
+  const isProtected = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path)) && !request.nextUrl.pathname.startsWith('/demo')
 
   if (isProtected) {
     // A. Kullanıcı yoksa -> Login'e at
@@ -75,19 +74,8 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(new URL('/subscription-ended', request.url))
     }
 
-    // C. ONBOARDING KONTROLÜ
-    // Eğer şu an onboarding sayfasında değilsek, ayarları kontrol et.
-    if (!request.nextUrl.pathname.startsWith('/onboarding')) {
-      const { data: settings } = await supabase
-        .from('store_settings')
-        .select('user_id')
-        .eq('user_id', user.id)
-        .maybeSingle()
-
-      if (!settings) {
-        return NextResponse.redirect(new URL('/onboarding', request.url))
-      }
-    }
+    // C. ONBOARDING KONTROLÜ (V2: Şimdilik devre dışı, tablo silindi)
+    // if (!request.nextUrl.pathname.startsWith('/onboarding')) { ... }
   }
 
   return response

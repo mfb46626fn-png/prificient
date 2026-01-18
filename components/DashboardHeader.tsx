@@ -6,11 +6,10 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import {
   Bell, Package, Trash2, LogOut, User, Settings, ChevronDown, X,
-  LayoutDashboard, FolderInput, Menu, Sparkles, Clock, Crown
+  LayoutDashboard, FolderInput, Menu, Sparkles, Clock, Crown, History, PlugZap
 } from 'lucide-react'
 import GlobalLoader from '@/components/GlobalLoader'
 import { useCurrency } from '@/app/contexts/CurrencyContext'
-import { runNotificationEngine } from '@/utils/notificationEngine'
 import BetaInfoModal from '@/components/BetaInfoModal'
 import { useProfile } from '@/app/contexts/ProfileContext'
 import Image from 'next/image'
@@ -107,15 +106,9 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
 
   // 4. MOTOR & VERİ YÜKLEME
   useEffect(() => {
-    const triggerEngine = async () => {
-      if (isDemo || loading) return
-      try {
-        await runNotificationEngine(totalRevenue, totalExpense, (totalRevenue - totalExpense))
-        await fetchNotifications()
-      } catch (error) { console.error(error) }
-    }
-    triggerEngine()
-  }, [totalRevenue, totalExpense, loading, isDemo])
+    // Engine Removed in V2 Refactor
+    fetchNotifications()
+  }, [])
 
   useEffect(() => {
     const initData = async () => {
@@ -146,10 +139,10 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
 
   const displayName = isDemo ? 'Demo Kullanıcı' : (profile?.full_name || profile?.email?.split('@')[0] || 'Kullanıcı')
   const initial = displayName[0]?.toUpperCase() || 'D'
-  const netProfit = totalRevenue - totalExpense
-  const profitPercentage = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) : "0"
-  const status = netProfit > 0 ? "Kârda" : netProfit < 0 ? "Zararda" : "Stabil"
-  const statusColor = netProfit > 0 ? "text-emerald-600" : netProfit < 0 ? "text-rose-600" : "text-blue-600"
+
+  // V2 Placeholder Stats
+  const status = "V2 Hazır"
+  const statusColor = "text-emerald-600"
 
   // AKILLI ROZET RENDERER
   const renderStatusBadge = () => {
@@ -234,6 +227,15 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
             </div>
           </div>
 
+          {/* --- ORTA KISIM: ARAMA & Breadcrumb --- */}
+          <div className="flex-1 px-8">
+            {isDemo && (
+              <div className="hidden md:flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-xl text-sm font-bold w-fit">
+                <span className="animate-pulse">●</span> Demo Modu
+              </div>
+            )}
+          </div>
+
           <div className="flex items-center gap-3">
             {/* Bildirimler */}
             <div className="relative" ref={notificationRef}>
@@ -275,34 +277,57 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
               )}
             </div>
 
-            {/* Profil */}
-            {!isDemo ? (
-              <div className="relative" ref={menuRef}>
-                <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="flex items-center gap-2 p-1.5 pr-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all">
-                  <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold overflow-hidden shadow-sm">
-                    {profileLoading ? <div className="animate-pulse bg-gray-600 w-full h-full"></div> : avatarUrl ? <Image src={avatarUrl} alt="Profil" width={32} height={32} className="object-cover w-full h-full" unoptimized /> : initial}
+            {/* --- KULLANICI MENÜSÜ --- */}
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="flex items-center gap-3 p-1.5 rounded-xl hover:bg-gray-100 transition-colors"
+              >
+                <div className="w-10 h-10 bg-gray-900 text-white rounded-full flex items-center justify-center font-bold">
+                  {isDemo ? 'D' : (profile?.full_name?.[0] || 'U')}
+                </div>
+                <div className="hidden md:block text-left">
+                  <p className="text-sm font-bold text-gray-900 line-clamp-1">
+                    {isDemo ? 'Demo Kullanıcı' : (profile?.full_name || 'Kullanıcı')}
+                  </p>
+                  <p className="text-xs text-gray-500 font-medium">
+                    {isDemo ? 'Gözlemci' : (profile?.username || 'Hesap')}
+                  </p>
+                </div>
+                <ChevronDown size={16} className={`text-gray-400 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isMenuOpen && (
+                <div className="absolute right-0 top-full mt-3 w-64 bg-white rounded-[2rem] shadow-xl border border-gray-100 py-3 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                  <div className="px-6 py-4 border-b border-gray-50 mb-2">
+                    <p className="text-sm font-black text-gray-900 truncate">{displayName}</p>
+                    <p className="text-xs text-gray-500 truncate">{isDemo ? 'Demo Modu' : (profile?.username ? `@${profile.username}` : profile?.email)}</p>
                   </div>
-                  <span className="hidden md:block text-sm font-bold text-gray-700 truncate">{displayName}</span>
-                  <ChevronDown size={14} className={`text-gray-400 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
-                </button>
-                {isMenuOpen && (
-                  <div className="absolute right-0 top-full mt-3 w-64 bg-white rounded-[2rem] shadow-xl border border-gray-100 py-3 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
-                    <div className="px-6 py-4 border-b border-gray-50 mb-2">
-                      <p className="text-sm font-black text-gray-900 truncate">{displayName}</p>
-                      <p className="text-xs text-gray-500 truncate">{profile?.username ? `@${profile.username}` : profile?.email}</p>
-                    </div>
-                    <Link href="/profile" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 mx-2 rounded-xl"><User size={18} /> Profil</Link>
-                    <Link href="/settings" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 mx-2 rounded-xl"><Settings size={18} /> Ayarlar</Link>
-                    <div className="h-px bg-gray-50 my-2 mx-4"></div>
-                    <button onClick={async () => { await supabase.auth.signOut(); router.push('/login'); }} className="flex w-full items-center gap-3 px-4 py-3 text-sm font-black text-rose-600 hover:bg-rose-50 mx-2 rounded-xl"><LogOut size={18} /> Çıkış Yap</button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link href="/" className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-bold text-gray-700 transition-colors">
-                <LogOut size={14} /> Çıkış
-              </Link>
-            )}
+
+                  {!isDemo && (
+                    <>
+                      <Link href="/profile" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 mx-2 rounded-xl"><User size={18} /> Profil</Link>
+                      <Link href="/settings" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 mx-2 rounded-xl"><Settings size={18} /> Ayarlar</Link>
+                      <div className="h-px bg-gray-50 my-2 mx-4"></div>
+                    </>
+                  )}
+
+                  <button
+                    onClick={async () => {
+                      if (isDemo) {
+                        router.push('/')
+                      } else {
+                        await supabase.auth.signOut();
+                        router.push('/login');
+                      }
+                    }}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-sm font-black text-rose-600 hover:bg-rose-50 mx-2 rounded-xl"
+                  >
+                    <LogOut size={18} /> {isDemo ? 'Demodan Çık' : 'Çıkış Yap'}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -341,26 +366,19 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
           <Link href={isDemo ? "/demo" : "/dashboard"} onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all">
             <LayoutDashboard size={20} /> <span className="text-sm font-black uppercase tracking-wider">Dashboard</span>
           </Link>
-          <Link href={isDemo ? "/demo/transactions" : "/transactions"} onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all">
-            <FolderInput size={20} /> <span className="text-sm font-black uppercase tracking-wider">İşlemler & Veri</span>
+          <Link href={isDemo ? "#" : "/decisions"} onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all">
+            <History size={20} /> <span className="text-sm font-black uppercase tracking-wider">Karar Günlüğü</span>
           </Link>
-          <Link href={isDemo ? "#" : "/products"} onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all">
-            <Package size={20} /> <span className="text-sm font-black uppercase tracking-wider">Ürünler</span>
-          </Link>
-          <Link href={isDemo ? "#" : "/settings"} onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all">
-            <Settings size={20} /> <span className="text-sm font-black uppercase tracking-wider">Genel Ayarlar</span>
+          <Link href={isDemo ? "#" : "/connect/shopify"} onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all">
+            <PlugZap size={20} /> <span className="text-sm font-black uppercase tracking-wider">Entegrasyonlar</span>
           </Link>
         </nav>
 
         <div className="px-8 mt-auto mb-8 space-y-4">
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">İşletme Özeti</p>
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-emerald-50 p-4 rounded-3xl border border-emerald-100">
-              <p className="text-[10px] font-bold text-emerald-600 uppercase mb-1">Kârlılık</p>
-              <p className={`text-sm font-black ${netProfit >= 0 ? 'text-emerald-900' : 'text-rose-900'}`}>{netProfit >= 0 ? '+' : ''}%{profitPercentage}</p>
-            </div>
-            <div className="bg-blue-50 p-4 rounded-3xl border border-blue-100">
-              <p className="text-[10px] font-bold text-blue-600 uppercase mb-1">Durum</p>
+            <div className="bg-blue-50 p-4 rounded-3xl border border-blue-100 col-span-2">
+              <p className="text-[10px] font-bold text-blue-600 uppercase mb-1">Sistem Durumu</p>
               <p className={`text-sm font-black ${statusColor}`}>{status}</p>
             </div>
           </div>

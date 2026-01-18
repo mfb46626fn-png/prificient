@@ -1,39 +1,41 @@
-import { Loader2 } from 'lucide-react'
+'use client'
+
+import Image from 'next/image'
 
 export default function GlobalLoader() {
   return (
-    // z-index'i 9999 yaptım ki header'ın ve her şeyin üstünde dursun
-    <div className="fixed inset-0 z-9999 flex items-center justify-center bg-white/90 backdrop-blur-sm transition-all">
-      <div className="relative flex flex-col items-center gap-4 animate-in fade-in zoom-in-95 duration-300">
-        
-        {/* Animasyonlu Logo Konteyneri */}
-        <div className="relative h-20 w-20">
-          
-          {/* 1. Dış Halka (Yavaş Dönen Gri) */}
-          <div className="absolute inset-0 rounded-full border-4 border-gray-100"></div>
-          
-          {/* 2. Orta Halka (Hızlı Dönen Siyah - Kesik) */}
-          {/* Tasarım bütünlüğü için maviyi siyah/koyu gri yaptım, istersen blue-600 yapabilirsin */}
-          <div className="absolute inset-0 rounded-full border-4 border-black border-t-transparent animate-spin"></div>
-          
-          {/* 3. İç Logo (Nefes Alan 'P') */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="bg-black text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xl shadow-lg animate-pulse">
-              P
-            </div>
-          </div>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black transition-all">
+      <div className="relative flex flex-col items-center justify-center">
+
+        {/* Glow Effect Behind Logo */}
+        <div className="absolute inset-0 bg-blue-500/20 blur-[100px] rounded-full animate-pulse"></div>
+
+        {/* Logo Container with Breathing Animation */}
+        <div className="relative w-32 h-32 md:w-40 md:h-40 animate-[pulse_3s_ease-in-out_infinite]">
+          <Image
+            src="/logo.png"
+            alt="Prificient Logo"
+            fill
+            className="object-contain drop-shadow-2xl"
+            priority
+          />
         </div>
 
-        {/* Yükleniyor Yazısı */}
-        <div className="flex items-center gap-2 text-black font-medium animate-pulse">
-          <span className="text-sm tracking-widest uppercase">Yükleniyor</span>
-          <span className="flex gap-1">
-             <span className="w-1 h-1 bg-black rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-             <span className="w-1 h-1 bg-black rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-             <span className="w-1 h-1 bg-black rounded-full animate-bounce"></span>
-          </span>
+        {/* Loading Bar */}
+        <div className="mt-8 w-48 h-1 bg-gray-900 rounded-full overflow-hidden">
+          <div className="h-full bg-white animate-[loading_1.5s_ease-in-out_infinite_alternate] w-full origin-left"></div>
         </div>
 
+        <p className="mt-4 text-xs font-bold text-gray-500 tracking-[0.2em] uppercase animate-pulse">
+          Yükleniyor
+        </p>
+
+        <style jsx>{`
+            @keyframes loading {
+                0% { transform: translateX(-100%); }
+                100% { transform: translateX(0%); }
+            }
+        `}</style>
       </div>
     </div>
   )

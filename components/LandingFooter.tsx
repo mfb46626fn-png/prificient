@@ -7,10 +7,10 @@ export default function LandingFooter() {
   return (
     <footer className="bg-white border-t border-gray-100 pt-16 pb-8">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        
+
         {/* ÜST KISIM: LOGO, DEĞER ÖNERİSİ VE MENÜLER */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          
+
           {/* 1. KOLON: MARKA & DEĞER */}
           <div className="md:col-span-1 space-y-4">
             <div className="flex items-center gap-2">
@@ -21,9 +21,9 @@ export default function LandingFooter() {
               E-ticaret finansını yönetmenin en akıllı ve şeffaf yolu. Verilerinizle barışın, kârınızı artırın.
             </p>
             <div className="flex gap-4 pt-2">
-              <Link href="#" className="text-gray-400 hover:text-black transition-colors"><Twitter size={20}/></Link>
-              <Link href="#" className="text-gray-400 hover:text-black transition-colors"><Instagram size={20}/></Link>
-              <Link href="#" className="text-gray-400 hover:text-black transition-colors"><Linkedin size={20}/></Link>
+              <Link href="#" className="text-gray-400 hover:text-black transition-colors"><Twitter size={20} /></Link>
+              <Link href="#" className="text-gray-400 hover:text-black transition-colors"><Instagram size={20} /></Link>
+              <Link href="#" className="text-gray-400 hover:text-black transition-colors"><Linkedin size={20} /></Link>
             </div>
           </div>
 
@@ -33,8 +33,9 @@ export default function LandingFooter() {
             <ul className="space-y-3 text-sm font-medium text-gray-600">
               <li><Link href="#ozellikler" className="hover:text-blue-600 transition-colors">Özellikler</Link></li>
               <li><Link href="#nasil" className="hover:text-blue-600 transition-colors">Nasıl Çalışır?</Link></li>
-              <li><Link href="/pricing" className="hover:text-blue-600 transition-colors">Fiyatlandırma <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded ml-1">Beta'da Ücretsiz</span></Link></li>
-              <li><Link href="/demo" className="hover:text-blue-600 transition-colors">Demo Hesabı</Link></li>
+              <li><Link href="#pricing" className="hover:text-blue-600 transition-colors">Fiyatlandırma</Link></li>
+              <li><Link href="/login" className="hover:text-blue-600 transition-colors">Giriş Yap</Link></li>
+              <li><Link href="/demo/dashboard" className="hover:text-blue-600 transition-colors">Demo</Link></li>
             </ul>
           </div>
 
@@ -63,41 +64,41 @@ export default function LandingFooter() {
 
         {/* ORTA KISIM: GÜVEN ROZETLERİ (Trust Badges) */}
         <div className="border-t border-b border-gray-100 py-8 mb-8 bg-gray-50/50 rounded-3xl px-8">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-                
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-emerald-100 text-emerald-600 rounded-full"><ShieldCheck size={24}/></div>
-                    <div>
-                        <p className="font-bold text-gray-900 text-sm">KVKK Uyumlu</p>
-                        <p className="text-xs text-gray-500">Verileriniz Türkiye'de güvende.</p>
-                    </div>
-                </div>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
 
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 text-blue-600 rounded-full"><Lock size={24}/></div>
-                    <div>
-                        <p className="font-bold text-gray-900 text-sm">256-bit SSL Koruma</p>
-                        <p className="text-xs text-gray-500">Uçtan uca şifreli bağlantı.</p>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-100 text-purple-600 rounded-full"><Globe size={24}/></div>
-                    <div>
-                        <p className="font-bold text-gray-900 text-sm">Kredi Kartı Gerekmez</p>
-                        <p className="text-xs text-gray-500">Beta sürecinde %100 ücretsiz.</p>
-                    </div>
-                </div>
-
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-emerald-100 text-emerald-600 rounded-full"><ShieldCheck size={24} /></div>
+              <div>
+                <p className="font-bold text-gray-900 text-sm">KVKK Uyumlu</p>
+                <p className="text-xs text-gray-500">Verileriniz Türkiye'de güvende.</p>
+              </div>
             </div>
+
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 text-blue-600 rounded-full"><Lock size={24} /></div>
+              <div>
+                <p className="font-bold text-gray-900 text-sm">256-bit SSL Koruma</p>
+                <p className="text-xs text-gray-500">Uçtan uca şifreli bağlantı.</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 text-purple-600 rounded-full"><Globe size={24} /></div>
+              <div>
+                <p className="font-bold text-gray-900 text-sm">Kredi Kartı Gerekmez</p>
+                <p className="text-xs text-gray-500">Beta sürecinde %100 ücretsiz.</p>
+              </div>
+            </div>
+
+          </div>
         </div>
 
         {/* ALT KISIM: COPYRIGHT */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-bold text-gray-400">
           <p>&copy; {new Date().getFullYear()} Prificient Inc. Tüm hakları saklıdır.</p>
           <div className="flex items-center gap-1">
-            <span>Türkiye'de</span> 
-            <Heart size={12} className="text-rose-500 fill-rose-500" /> 
+            <span>Türkiye'de</span>
+            <Heart size={12} className="text-rose-500 fill-rose-500" />
             <span>ile geliştirildi.</span>
           </div>
         </div>
