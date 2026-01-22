@@ -5,7 +5,7 @@ import { MetaService } from '@/lib/meta'
 import { revalidatePath } from 'next/cache'
 
 export async function getIntegrationAndAccounts() {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Oturum açılmamış.' }
 
@@ -32,7 +32,7 @@ export async function getIntegrationAndAccounts() {
 }
 
 export async function saveAccountSelection(accountId: string) {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Unauthorized' }
 

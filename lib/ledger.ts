@@ -158,7 +158,7 @@ export class LedgerService {
         if (!accounts) throw new Error("Hesap planı bulunamadı.")
 
         const resolvedEntries = entries.map(entry => {
-            const acc = accounts.find(a => a.code === entry.account_code)
+            const acc = accounts.find((a: any) => a.code === entry.account_code)
             if (!acc) throw new Error(`Hesap Kodu Bulunamadı: ${entry.account_code}`)
             return {
                 user_id,

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import shopify from '@/lib/shopify'
 import { createClient } from '@/utils/supabase/server'
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
     const url = new URL(req.url)
     const shop = url.searchParams.get('shop')

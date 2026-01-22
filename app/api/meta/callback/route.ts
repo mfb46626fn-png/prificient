@@ -13,7 +13,7 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/settings?error=meta_auth_failed`);
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

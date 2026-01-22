@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import shopify from '@/lib/shopify'
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams
     const shop = searchParams.get('shop')

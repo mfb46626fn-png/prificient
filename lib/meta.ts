@@ -1,4 +1,4 @@
-import { FacebookAdsApi, AdAccount, Campaign } from 'facebook-nodejs-business-sdk';
+import { FacebookAdsApi, AdAccount, Campaign, User } from 'facebook-nodejs-business-sdk';
 
 const APP_ID = process.env.META_APP_ID!;
 const APP_SECRET = process.env.META_APP_SECRET!;
@@ -35,7 +35,7 @@ export const MetaService = {
     // 4. List Ad Accounts
     getAdAccounts: async (accessToken: string) => {
         FacebookAdsApi.init(accessToken);
-        const user = new AdAccount('me');
+        const user = new User('me');
         // 'account_id', 'name', 'currency'
         const accounts = await user.getAdAccounts(['account_id', 'name', 'account_status', 'currency', 'amount_spent']);
         return accounts.map((a: any) => ({
