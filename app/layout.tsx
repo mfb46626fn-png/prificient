@@ -6,7 +6,9 @@ import AutoLogoutProvider from '@/components/AutoLogoutProvider'
 import { ProfileProvider } from './contexts/ProfileContext'
 import { FinancialConfigProvider } from '@/app/contexts/FinancialConfigContext'
 import AIChatInterface from '@/components/AIChatInterface'
-import FeedbackWidget from '@/components/FeedbackWidget'
+import { ToastProvider } from '@/components/ui/toast'
+import ImpersonationBanner from '@/components/admin/ImpersonationBanner'
+import GlobalBanner from '@/components/GlobalBanner'
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -27,12 +29,15 @@ export default function RootLayout({
           <CurrencyProvider>
             <PreferencesProvider>
               <ProfileProvider>
-                <FinancialConfigProvider> {/* <--- BURAYI EKLEDİK */}
-                  {children}
-                  <AIChatInterface />
-                  <FeedbackWidget /> {/* Geri Bildirim Bileşenini Ekliyoruz */}
+                <FinancialConfigProvider>
+                  <ToastProvider>
+                    <GlobalBanner />
+                    <ImpersonationBanner />
+                    {children}
+                    <AIChatInterface />
+                  </ToastProvider>
                 </FinancialConfigProvider>
-                </ProfileProvider>
+              </ProfileProvider>
             </PreferencesProvider>
           </CurrencyProvider>
         </AutoLogoutProvider>

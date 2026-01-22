@@ -20,13 +20,12 @@ export const translations = {
     cancel: "İptal",
     delete_account: "Hesabı Sil",
     delete_confirm: "Bu işlem geri alınamaz. Emin misiniz?",
-    theme_light: "Aydınlık",
-    theme_dark: "Karanlık",
+
     language: "Dil",
     currency: "Para Birimi",
     currency_desc: "Tüm işlemlerde gösterilecek para birimi.",
     lang_desc: "Arayüzde kullanılacak dil.",
-    theme_desc: "Aydınlık veya karanlık mod tercihi.",
+
     upgrade_pro: "Pro'ya Yükselt",
     free_plan: "Ücretsiz Plan",
     current_plan: "Mevcut Plan",
@@ -54,13 +53,12 @@ export const translations = {
     cancel: "Cancel",
     delete_account: "Delete Account",
     delete_confirm: "This action cannot be undone. Are you sure?",
-    theme_light: "Light",
-    theme_dark: "Dark",
+
     language: "Language",
     currency: "Currency",
     currency_desc: "Currency to display in all transactions.",
     lang_desc: "Language used in the interface.",
-    theme_desc: "Light or dark mode preference.",
+
     upgrade_pro: "Upgrade to Pro",
     free_plan: "Free Plan",
     current_plan: "Current Plan",

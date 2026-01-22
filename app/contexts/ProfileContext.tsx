@@ -21,26 +21,48 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   // Profili Çeken Ana Fonksiyon
   const fetchProfile = useCallback(async (userId?: string) => {
     let uid = userId
-    
+
     // Eğer ID gelmediyse (manuel çağrılmadıysa) aktif kullanıcıyı bul
     if (!uid) {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-            setAvatarUrl(null)
-            setLoading(false)
-            return
-        }
-        uid = user.id
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        setAvatarUrl(null)
+        setLoading(false)
+        return
+      }
+      uid = user.id
     }
 
     if (uid) {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('avatar_url')
         .eq('id', uid)
-        .single()
-      
-      if (data && data.avatar_url) {
+        .maybeSingle() // Use maybeSingle to not error on 0 rows
+
+      if (!data && !error) {
+        // Profile missing! Restore it.
+        console.warn("Profile missing for auth user. Attempting to restore...")
+
+        // Get metadata to restore name
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (user) {
+          const { error: insertError } = await supabase.from('profiles').insert({
+            id: user.id,
+            full_name: user.user_metadata?.full_name || 'Kullanıcı',
+            is_onboarding_completed: false
+          })
+
+          if (insertError) {
+            console.error("Failed to restore profile:", insertError)
+          } else {
+            console.log("Profile restored successfully.")
+            // Retry fetch or just set defaults
+            setAvatarUrl(null)
+          }
+        }
+      } else if (data && data.avatar_url) {
         setAvatarUrl(`${data.avatar_url}?t=${new Date().getTime()}`)
       } else {
         setAvatarUrl(null)
@@ -52,12 +74,12 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   // 1. Sayfa ilk yüklendiğinde Session Kontrolü (Sayfa yenilenince çalışır)
   useEffect(() => {
     const initSession = async () => {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session?.user) {
-            fetchProfile(session.user.id)
-        } else {
-            setLoading(false)
-        }
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) {
+        fetchProfile(session.user.id)
+      } else {
+        setLoading(false)
+      }
     }
     initSession()
   }, [fetchProfile])
@@ -80,9 +102,9 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   // Manuel güncelleme
   const updateAvatarUrl = (newUrl: string | null) => {
     if (newUrl) {
-        setAvatarUrl(`${newUrl}?t=${new Date().getTime()}`)
+      setAvatarUrl(`${newUrl}?t=${new Date().getTime()}`)
     } else {
-        setAvatarUrl(null)
+      setAvatarUrl(null)
     }
   }
 

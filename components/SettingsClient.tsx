@@ -1,8 +1,8 @@
-'use client'
-
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import DashboardHeader from '@/components/DashboardHeader'
-import { Building2, Save, UserCircle } from 'lucide-react'
+import { Building2, Save, UserCircle, Bell } from 'lucide-react'
+import { createClient } from '@/utils/supabase/client'
+import { useToast } from '@/components/ui/toast'
 
 interface SettingsClientProps {
   initialProfile: { full_name: string, username: string, email?: string }
@@ -11,8 +11,24 @@ interface SettingsClientProps {
 
 export default function SettingsClient({ initialProfile, isDemo = false }: SettingsClientProps) {
   const [profile, setProfile] = useState(initialProfile)
+  const [frequency, setFrequency] = useState<string>('weekly')
   const [saving, setSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'general'>('general')
+  const [activeTab, setActiveTab] = useState<'general' | 'notifications'>('general')
+  const supabase = createClient()
+  const { showToast } = useToast()
+
+  useEffect(() => {
+    if (!isDemo) {
+      const fetchSettings = async () => {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data } = await supabase.from('notification_settings').select('report_frequency').eq('user_id', user.id).maybeSingle()
+          if (data) setFrequency(data.report_frequency)
+        }
+      }
+      fetchSettings()
+    }
+  }, [isDemo])
 
   const handleSave = async () => {
     setSaving(true)
@@ -25,16 +41,33 @@ export default function SettingsClient({ initialProfile, isDemo = false }: Setti
       return
     }
 
-    // Real save logic would be passed as a prop or handled here for non-demo
-    // preventing complexity, we'll assume the parent handles real saves or we use a server action
-    // For now, let's keep it simple: Real page logic handles real saves, 
-    // but since we extracted UI, we need to inject the save handler.
-    // Actually, for this refactor to be clean, let's just emit an event or handle logic if !isDemo
-  }
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        // 1. Save Profile
+        await supabase.from('profiles').upsert({
+          id: user.id,
+          full_name: profile.full_name,
+          username: profile.username,
+          updated_at: new Date().toISOString()
+        })
 
-  // Since we need to handle real saves, and we don't want to overcomplicate extracting the component right now,
-  // let's make this a UI component that accepts "onSave".
-  // Better yet, for the user's requesting "exact copy", let's handle the logic here but conditionally execute.
+        // 2. Save Notification Settings
+        await supabase.from('notification_settings').upsert({
+          user_id: user.id,
+          report_frequency: frequency,
+          updated_at: new Date().toISOString()
+        })
+
+        showToast({ type: 'success', title: 'Başarılı', message: 'Ayarlarınız kaydedildi.' })
+      }
+    } catch (error) {
+      console.error(error)
+      showToast({ type: 'error', title: 'Hata', message: 'Kaydedilirken bir sorun oluştu.' })
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans pb-20">
@@ -50,6 +83,12 @@ export default function SettingsClient({ initialProfile, isDemo = false }: Setti
               className={`w-full text-left px-5 py-4 rounded-xl font-bold flex items-center gap-3 transition-colors ${activeTab === 'general' ? 'bg-white text-black shadow-sm ring-1 ring-gray-200' : 'text-gray-500 hover:bg-white/50'}`}
             >
               <UserCircle size={20} /> Genel Profil
+            </button>
+            <button
+              onClick={() => setActiveTab('notifications')}
+              className={`w-full text-left px-5 py-4 rounded-xl font-bold flex items-center gap-3 transition-colors ${activeTab === 'notifications' ? 'bg-white text-black shadow-sm ring-1 ring-gray-200' : 'text-gray-500 hover:bg-white/50'}`}
+            >
+              <Bell size={20} /> Bildirim Ayarları
             </button>
           </aside>
 
@@ -110,6 +149,49 @@ export default function SettingsClient({ initialProfile, isDemo = false }: Setti
                       disabled
                       className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl font-bold text-gray-400 cursor-not-allowed"
                     />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'notifications' && (
+              <div className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm animate-in fade-in space-y-6">
+                <div className="flex items-start gap-4 mb-2">
+                  <div className="p-3 bg-gray-100 rounded-xl text-gray-500"><Bell size={24} /></div>
+                  <div>
+                    <h2 className="text-xl font-black text-gray-900">Bildirim Tercihleri</h2>
+                    <p className="text-sm text-gray-500 font-medium">E-posta rapor ve bildirim sıklığını yönetin.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <label className="text-lg font-bold text-gray-900 mb-2 block">Finansal Rapor Sıklığı</label>
+                    <p className="text-sm text-gray-500 mb-4">Size ne sıklıkla özet e-posta gönderelim?</p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[
+                        { val: 'daily', label: 'Günlük Rapor', desc: 'Her sabah önceki günün özeti.' },
+                        { val: 'weekly', label: 'Haftalık Rapor', desc: 'Her Pazartesi haftalık özet.' },
+                        { val: 'monthly', label: 'Aylık Rapor', desc: 'Her ayın 1\'inde aylık özet.' },
+                        { val: 'never', label: 'Gönderme', desc: 'Hiçbir rapor almak istemiyorum.' }
+                      ].map((opt) => (
+                        <button
+                          key={opt.val}
+                          onClick={() => setFrequency(opt.val)}
+                          className={`text-left p-4 rounded-xl border-2 transition-all ${frequency === opt.val
+                            ? 'border-indigo-600 bg-indigo-50/50'
+                            : 'border-gray-100 hover:border-gray-200'
+                            }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className={`font-bold ${frequency === opt.val ? 'text-indigo-700' : 'text-gray-900'}`}>{opt.label}</span>
+                            {frequency === opt.val && <div className="w-3 h-3 rounded-full bg-indigo-600"></div>}
+                          </div>
+                          <p className="text-xs text-gray-500 font-medium">{opt.desc}</p>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>

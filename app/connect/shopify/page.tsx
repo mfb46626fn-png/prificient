@@ -13,11 +13,26 @@ export default function ConnectShopifyPage() {
     const supabase = createClient()
 
     useEffect(() => {
-        const checkAuth = async () => {
+        const checkConnection = async () => {
             const { data: { user } } = await supabase.auth.getUser()
-            if (!user) router.push('/login')
+            if (!user) {
+                router.push('/login')
+                return
+            }
+
+            const { data } = await supabase
+                .from('integrations')
+                .select('shop_domain')
+                .eq('user_id', user.id)
+                .eq('platform', 'shopify')
+                .maybeSingle()
+
+            if (data) {
+                setIsConnected(true)
+                setShopUrl(data.shop_domain)
+            }
         }
-        checkAuth()
+        checkConnection()
     }, [])
 
     const handleConnect = async () => {

@@ -5,15 +5,15 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import {
-  Bell, Package, Trash2, LogOut, User, Settings, ChevronDown, X,
-  LayoutDashboard, FolderInput, Menu, Sparkles, Clock, Crown, History, PlugZap
+  Bell, Trash2, LogOut, User, Settings, ChevronDown, X,
+  LayoutDashboard, FolderInput, Menu, Sparkles, Clock, Crown, History, PlugZap, MessageCircle
 } from 'lucide-react'
 import GlobalLoader from '@/components/GlobalLoader'
 import { useCurrency } from '@/app/contexts/CurrencyContext'
 import BetaInfoModal from '@/components/BetaInfoModal'
+import FeedbackModal from '@/components/FeedbackModal'
 import { useProfile } from '@/app/contexts/ProfileContext'
 import Image from 'next/image'
-// Abonelik Hook'u (Dosya yolunu projene göre kontrol et, genelde @/hooks/...)
 import { useSubscription } from '@/app/hooks/useSubscription'
 
 type UserProfile = {
@@ -43,6 +43,7 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [isBetaModalOpen, setIsBetaModalOpen] = useState(false)
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false)
 
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<UserProfile | null>(null)
@@ -106,7 +107,6 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
 
   // 4. MOTOR & VERİ YÜKLEME
   useEffect(() => {
-    // Engine Removed in V2 Refactor
     fetchNotifications()
   }, [])
 
@@ -120,8 +120,21 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
       const dataFetch = async () => {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
-          const { data: profileData } = await supabase.from('profiles').select('full_name, username').eq('id', user.id).single()
-          if (profileData) setProfile({ full_name: profileData.full_name, username: profileData.username, email: user.email })
+          const { data: profileData } = await supabase.from('profiles').select('full_name, username').eq('id', user.id).maybeSingle()
+
+          if (profileData) {
+            setProfile({ full_name: profileData.full_name, username: profileData.username, email: user.email })
+          } else {
+            // Self-Healing
+            const { error: insertError } = await supabase.from('profiles').insert({
+              id: user.id,
+              full_name: user.user_metadata?.full_name || '',
+              username: user.email?.split('@')[0]
+            })
+            if (!insertError) {
+              setProfile({ full_name: user.user_metadata?.full_name || null, username: user.email?.split('@')[0] || null, email: user.email })
+            }
+          }
         }
       }
       await Promise.all([minLoadingTime, dataFetch(), fetchNotifications()])
@@ -138,7 +151,6 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
   }, [isDemo])
 
   const displayName = isDemo ? 'Demo Kullanıcı' : (profile?.full_name || profile?.email?.split('@')[0] || 'Kullanıcı')
-  const initial = displayName[0]?.toUpperCase() || 'D'
 
   // V2 Placeholder Stats
   const status = "V2 Hazır"
@@ -222,7 +234,6 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
                 />
               </Link>
 
-              {/* DİNAMİK ROZET BURAYA GELDİ */}
               {renderStatusBadge()}
             </div>
           </div>
@@ -308,6 +319,15 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
                     <>
                       <Link href="/profile" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 mx-2 rounded-xl"><User size={18} /> Profil</Link>
                       <Link href="/settings" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 mx-2 rounded-xl"><Settings size={18} /> Ayarlar</Link>
+                      <Link href="/support" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 mx-2 rounded-xl"><MessageCircle size={18} /> Destek</Link>
+
+                      <button
+                        onClick={() => { setIsMenuOpen(false); setIsFeedbackModalOpen(true); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 mx-2 rounded-xl"
+                      >
+                        <MessageCircle size={18} /> Geri Bildirim
+                      </button>
+
                       <div className="h-px bg-gray-50 my-2 mx-4"></div>
                     </>
                   )}
@@ -369,6 +389,9 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
           <Link href={isDemo ? "#" : "/decisions"} onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all">
             <History size={20} /> <span className="text-sm font-black uppercase tracking-wider">Karar Günlüğü</span>
           </Link>
+          <Link href={isDemo ? "#" : "/reports"} onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all">
+            <FolderInput size={20} /> <span className="text-sm font-black uppercase tracking-wider">Rapor Merkezi</span>
+          </Link>
           <Link href={isDemo ? "#" : "/connect/shopify"} onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all">
             <PlugZap size={20} /> <span className="text-sm font-black uppercase tracking-wider">Entegrasyonlar</span>
           </Link>
@@ -392,6 +415,7 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
       </div>
 
       <BetaInfoModal isOpen={isBetaModalOpen} onClose={() => setIsBetaModalOpen(false)} actionLabel="Kullanmaya Başla" onAction={() => router.push('/dashboard')} />
+      <FeedbackModal isOpen={isFeedbackModalOpen} onClose={() => setIsFeedbackModalOpen(false)} />
     </>
   )
 }

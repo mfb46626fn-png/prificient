@@ -23,8 +23,8 @@ export const DEFAULT_ACCOUNTS = [
 export class LedgerService {
 
     // 1. Hesap Planı Başlatıcı
-    static async initializeAccounts(user_id: string) {
-        const supabase = createClient()
+    static async initializeAccounts(user_id: string, supabaseClient?: any) {
+        const supabase = supabaseClient || createClient()
 
         // Hesaplar var mı kontrol et
         const { count } = await supabase.from('ledger_accounts').select('*', { count: 'exact', head: true }).eq('user_id', user_id)
@@ -38,14 +38,23 @@ export class LedgerService {
                 normal_balance: acc.normal
             }))
 
-            const { error } = await supabase.from('ledger_accounts').insert(payload)
-            if (error) console.error("Account Init Error:", error)
+            // count=0 olsa bile race condition ihtimaline karşı upsert kullanıyoruz.
+            const { error } = await supabase.from('ledger_accounts').upsert(payload, { onConflict: 'user_id, code' })
+
+            if (error) {
+                console.error("Account Init Error Details:", {
+                    message: error.message,
+                    details: error.details,
+                    hint: error.hint,
+                    code: error.code,
+                    fullError: JSON.stringify(error)
+                })
+            }
         }
     }
-
     // 2. Olay Kaydedici (Immutable Event Log)
-    static async recordEvent(user_id: string, stream_type: string, event_type: string, payload: any) {
-        const supabase = createClient()
+    static async recordEvent(user_id: string, stream_type: string, event_type: string, payload: any, supabaseClient?: any) {
+        const supabase = supabaseClient || createClient()
 
         const { data, error } = await supabase.from('financial_event_log').insert({
             user_id,
@@ -57,13 +66,19 @@ export class LedgerService {
         if (error) throw new Error(`Event Log Error: ${error.message}`)
         if (!data) throw new Error("Event ID not returned")
 
+        // Auto-process for immediate consistency (Optional: could be async worker)
+        // We pass the same client to keep context (e.g. Admin rights)
+        await this.processEvent(data.event_id, user_id, event_type, payload, supabase)
+
         return data.event_id
     }
 
     // 3. Muhasebeleştirici (Event -> Ledger)
-    static async processEvent(event_id: string, user_id: string, event_type: string, payload: any) {
+    static async processEvent(event_id: string, user_id: string, event_type: string, payload: any, supabaseClient?: any) {
+        const supabase = supabaseClient || createClient()
+
         // Hesap planının var olduğundan emin ol
-        await this.initializeAccounts(user_id)
+        await this.initializeAccounts(user_id, supabase) // Reuse client!
 
         switch (event_type) {
             case 'OrderCreated':
@@ -90,7 +105,31 @@ export class LedgerService {
                 )
                 break
 
-            // İleride eklenecek: 'AdSpendRecorded', 'RefundCreated' vs.
+            case 'AdSpendRecorded':
+                // payload = { provider: 'meta', campaign_name: '...', amount: 150.50, date: '2023-10-25' }
+                const expenseAmount = Number(payload.amount);
+                if (expenseAmount <= 0) return;
+
+                await this.postTransaction(
+                    user_id,
+                    `${payload.provider === 'meta' ? 'Meta Ads' : 'Ads'} Harcaması: ${payload.campaign_name}`,
+                    [
+                        // Borç: Pazarlama Giderleri (760) -> Gider Artışı
+                        { account_code: '760', direction: 'DEBIT', amount: expenseAmount },
+
+                        // Alacak: Satıcılar/Meta (320) -> Borç Artışı (Kredi Kartı borcu gibi düşünülebilir)
+                        // Şimdilik 100 Kasa'dan çıkmış gibi değil, bir yükümlülük (ödenecek) olarak kaydedelim.
+                        // Ya da direkt Kasa/Banka (100) düşelim eğer otomatik ödeme ise.
+                        // Güvenli yol 320 (Satıcılar) veya 300 (Banka Kredileri).
+                        // Ancak kullanıcı "Harcama yaptım" dediğinde genellikle karttan çekilmiştir.
+                        // MVP için varsayılan olarak 329 (Diğer Ticari Borçlar) veya 320 kullanalım.
+                        // Ancak DEFAULT_ACCOUNTS içinde 320 yok. 100 (Kasa/Banka) kullanalım (Nakit/Kart Çıkışı).
+                        { account_code: '100', direction: 'CREDIT', amount: expenseAmount }
+                    ],
+                    event_id
+                )
+                break;
+
             default:
                 console.warn(`Unknown Event Type: ${event_type}`)
         }
@@ -101,9 +140,10 @@ export class LedgerService {
         user_id: string,
         description: string,
         entries: LedgerEntryInput[],
-        event_id?: string
+        event_id?: string,
+        supabaseClient?: any
     ) {
-        const supabase = createClient()
+        const supabase = supabaseClient || createClient()
 
         // 1. Denge Kontrolü
         const totalDebit = entries.filter(e => e.direction === 'DEBIT').reduce((sum, e) => sum + e.amount, 0)
@@ -147,5 +187,74 @@ export class LedgerService {
         if (entryError) throw new Error(entryError.message)
 
         return trx.id
+    }
+
+    // 4. Haftalık Rapor Verisi (Helper)
+    static async getWeeklyFinancials(user_id: string, start_date: Date, end_date: Date) {
+        const supabase = createClient()
+
+        // Hesapları çek (760 Pazarlama Giderleri dahil)
+        const { data: accounts } = await supabase.from('ledger_accounts')
+            .select('id, type, code')
+            .eq('user_id', user_id)
+            .in('type', ['REVENUE', 'EXPENSE'])
+
+        if (!accounts) return { revenue: 0, expense: 0, netProfit: 0, adSpend: 0, roi: 0 }
+
+        const revenueAccountIds = accounts.filter(a => a.type === 'REVENUE').map(a => a.id)
+        const expenseAccountIds = accounts.filter(a => a.type === 'EXPENSE').map(a => a.id)
+        const adSpendAccountIds = accounts.filter(a => a.code === '760').map(a => a.id) // 760 = Pazarlama
+
+        // Transactionları çek
+        const { data: entries } = await supabase.from('ledger_entries')
+            .select(`
+                amount,
+                direction,
+                account_id,
+                transaction:ledger_transactions!inner(created_at)
+            `)
+            .eq('user_id', user_id)
+            .gte('transaction.created_at', start_date.toISOString())
+            .lte('transaction.created_at', end_date.toISOString())
+
+        if (!entries) return { revenue: 0, expense: 0, netProfit: 0, adSpend: 0, roi: 0 }
+
+        let revenue = 0
+        let expense = 0
+        let adSpend = 0
+
+        entries.forEach((e: any) => {
+            const amount = Number(e.amount)
+
+            // Gelir
+            if (revenueAccountIds.includes(e.account_id)) {
+                if (e.direction === 'CREDIT') revenue += amount
+                else revenue -= amount
+            }
+            // Gider
+            else if (expenseAccountIds.includes(e.account_id)) {
+                if (e.direction === 'DEBIT') expense += amount
+                else expense -= amount
+
+                // Ad Spend (Expenses içinde subset)
+                if (adSpendAccountIds.includes(e.account_id)) {
+                    if (e.direction === 'DEBIT') adSpend += amount
+                    else adSpend -= amount
+                }
+            }
+        })
+
+        const netProfit = revenue - expense
+        // ROI = (Revenue - AdSpend) / AdSpend * 100 ?? Or usually (Profit / Cost)
+        // Marketing ROI often: (Revenue - MarketingCost) / MarketingCost
+        const roi = adSpend > 0 ? ((revenue - adSpend) / adSpend) * 100 : 0
+
+        return {
+            revenue,
+            expense,
+            netProfit,
+            adSpend,
+            roi
+        }
     }
 }

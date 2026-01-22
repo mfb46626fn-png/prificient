@@ -1,53 +1,45 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { createClient } from '@/utils/supabase/server'
 import DashboardClient from '@/components/DashboardClient'
+import { LedgerService } from '@/lib/ledger'
+import { redirect } from 'next/navigation'
 
-export default function DashboardPage() {
-    const [metrics, setMetrics] = useState({
-        revenue: 0,
-        expenses: 0,
-        equity: 0,
-        loading: true,
-        connected: false, // Initial state
-    })
-    const supabase = createClient()
+export default async function DashboardPage() {
+    const supabase = await createClient()
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) return
+    // 1. Auth Check (Server Side)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+        redirect('/login')
+    }
 
-            // 1. Ledger Entries'den Veri Çek
-            // Net Gelir: 600'lü hesapların ALACAK bakiyesi (Revenue is Credit normal)
-            // Giderler: 700'lü hesapların BORÇ bakiyesi (Expense is Debit normal)
-            const { data: entries, error } = await supabase
-                .from('ledger_entries')
-                .select(`
-                    amount,
-                    direction,
-                    account:ledger_accounts!inner(code, type)
-                `)
-                .eq('user_id', user.id)
+    // 2. Initialize Data
+    let revenue = 0
+    let expenses = 0
+    let connected = false
 
-            if (error) {
-                console.error("Dashboard Error:", error)
-                return
-            }
+    try {
+        // A. Ledger Logic
+        // Pass the server-side client to LedgerService to respect impersonation!
+        await LedgerService.initializeAccounts(user.id, supabase)
 
-            let revenue = 0
-            let expenses = 0
+        const { data: entries, error } = await supabase
+            .from('ledger_entries')
+            .select(`
+                amount,
+                direction,
+                account:ledger_accounts!inner(code, type)
+            `)
+            .eq('user_id', user.id)
 
-            entries?.forEach((entry: any) => {
+        if (!error && entries) {
+            entries.forEach((entry: any) => {
                 const code = entry.account.code
                 const amount = Number(entry.amount)
 
-                // Basit Mantık:
                 // 600 serisi -> Gelir (Alacak çalışır)
                 if (code.startsWith('6')) {
                     if (entry.direction === 'CREDIT') revenue += amount
-                    else revenue -= amount // İade vs.
+                    else revenue -= amount
                 }
 
                 // 700 serisi -> Gider (Borç çalışır)
@@ -56,26 +48,30 @@ export default function DashboardPage() {
                     else expenses -= amount
                 }
             })
-
-            // 2. Integration Check
-            const { data: integration } = await supabase
-                .from('integrations')
-                .select('status')
-                .eq('user_id', user.id)
-                .eq('platform', 'shopify')
-                .maybeSingle()
-
-            setMetrics({
-                revenue,
-                expenses,
-                equity: revenue - expenses,
-                loading: false,
-                connected: !!integration // Yeni state
-            })
         }
 
-        fetchData()
-    }, [])
+        // B. Integration Check
+        const { data: integration } = await supabase
+            .from('integrations')
+            .select('status')
+            .eq('user_id', user.id)
+            .eq('platform', 'shopify')
+            .maybeSingle()
+
+        connected = !!integration
+
+    } catch (err) {
+        console.error("Dashboard Server Error:", err)
+    }
+
+    // 3. Prepare Metrics
+    const metrics = {
+        revenue,
+        expenses,
+        equity: revenue - expenses,
+        loading: false, // Server component always ready with data
+        connected
+    }
 
     return <DashboardClient metrics={metrics} />
 }

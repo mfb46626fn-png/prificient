@@ -37,10 +37,47 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // 1. Admin Kontrolü (Hızlı Check)
+  // 1. Admin Kontrolü (Hızlı Check)
+  const email = (user?.email || '').toLowerCase().trim();
+  const isExplicitAdmin = ['can@prificient.com', 'info@prificient.com', 'mcanakarofficial@gmail.com'].includes(email);
+
+  const isAdmin = user && (
+    user.app_metadata?.role === 'prificient_admin' ||
+    user.user_metadata?.role === 'prificient_admin' ||
+    isExplicitAdmin
+  )
+
   // -------------------------------------------------------------
   // KURAL 1: Kullanıcı giriş yapmışsa, Login sayfasına giremesin
   if (user && request.nextUrl.pathname.startsWith('/login') && !request.nextUrl.pathname.startsWith('/demo')) {
+    if (isAdmin) {
+      return NextResponse.redirect(new URL('/admin', request.url))
+    }
     return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  // -------------------------------------------------------------
+  // KURAL 1.5: Admin Sayfası Koruması
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    // Prevent redirect loop if impersonating: Force exit impersonation
+    if (request.cookies.get('impersonated_user_id')) {
+      const response = NextResponse.redirect(request.url);
+      response.cookies.delete('impersonated_user_id');
+      return response;
+    }
+
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+
+    // EMERGENCY BYPASS FOR info@prificient.com
+    if (user.email === 'info@prificient.com') {
+      // Allow
+    } else if (!isAdmin) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+    // Admin ise geçsin
   }
 
   // -------------------------------------------------------------
@@ -74,8 +111,10 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(new URL('/subscription-ended', request.url))
     }
 
-    // C. ONBOARDING KONTROLÜ (V2: Şimdilik devre dışı, tablo silindi)
-    // if (!request.nextUrl.pathname.startsWith('/onboarding')) { ... }
+    // C. ONBOARDING KONTROLÜ
+    if (!user.user_metadata?.is_onboarding_completed && !request.nextUrl.pathname.startsWith('/onboarding') && !request.nextUrl.pathname.startsWith('/api')) {
+      return NextResponse.redirect(new URL('/onboarding', request.url))
+    }
   }
 
   return response

@@ -6,6 +6,7 @@ import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Loader2, ArrowRight } from 'lucide-react'
+import { useToast } from '@/components/ui/toast'
 
 // Modern Google Icon
 const GoogleIcon = () => (
@@ -29,53 +30,97 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
 
+  // --- HOOKS ---
+  const { showToast } = useToast()
+
   // --- FORM İŞLEMLERİ ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    console.log("Form submitted. Mode:", mode)
 
-    if (mode === 'login') {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) {
-        alert(error.message)
-        setLoading(false)
+    try {
+      if (mode === 'login') {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+        if (error) {
+          console.error("Login Error:", error)
+          showToast({ type: 'error', title: 'Giriş Başarısız', message: error.message })
+        } else {
+          console.log("Login Success")
+          showToast({ type: 'success', title: 'Hoş Geldiniz', message: 'Yönlendiriliyorsunuz...' })
+
+          // Check for Admin
+          const user = data.user;
+          const userEmail = (user?.email || '').toLowerCase().trim();
+          const isAdmin = ['can@prificient.com', 'info@prificient.com', 'mcanakarofficial@gmail.com'].includes(userEmail) ||
+            user?.app_metadata?.role === 'prificient_admin' ||
+            user?.user_metadata?.role === 'prificient_admin';
+
+          if (isAdmin) {
+            router.push('/admin')
+          } else {
+            router.push('/dashboard')
+          }
+          router.refresh()
+        }
       } else {
-        router.push('/dashboard')
-        router.refresh()
-      }
-    } else {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            is_onboarding_completed: false
+        // --- SIGNUP MODE ---
+        const { error, data } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: fullName,
+              is_onboarding_completed: false
+            }
+          }
+        })
+
+        if (error) {
+          console.error("Signup Error:", error)
+          if (error.message.includes('already registered') || error.message.includes('already exists') || error.status === 422) {
+            showToast({ type: 'warning', title: 'Hesap Zaten Var', message: 'Bu e-posta adresiyle zaten bir hesap var. Lütfen giriş yapın.' })
+            // Optional: switch to login mode automatically?
+            // setMode('login') 
+          } else {
+            showToast({ type: 'error', title: 'Kayıt Başarısız', message: error.message })
+          }
+        } else {
+          console.log("Signup Success:", data)
+          // Check if user is created but waiting for confirmation
+          if (data.user && data.user.identities && data.user.identities.length === 0) {
+            showToast({ type: 'warning', title: 'Hesap Zaten Var', message: 'Bu e-posta adresiyle zaten bir hesap var. Lütfen giriş yapın.' })
+          } else {
+            showToast({ type: 'success', title: 'Kayıt Başarılı', message: 'Hesabınız oluşturuldu. Yönlendiriliyorsunuz...' })
+            router.push('/onboarding')
+            router.refresh()
           }
         }
-      })
-
-      if (error) {
-        alert(error.message)
-        setLoading(false)
-      } else {
-        router.push('/onboarding')
-        router.refresh()
       }
+    } catch (err: any) {
+      console.error("Unexpected Error in Auth:", err)
+      showToast({ type: 'error', title: 'Sistem Hatası', message: err.message || 'Beklenmedik bir hata oluştu.' })
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleGoogleAuth = async () => {
     setGoogleLoading(true)
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        queryParams: { access_type: 'offline', prompt: 'consent' },
-      },
-    })
-    if (error) {
-      alert(error.message)
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: { access_type: 'offline', prompt: 'consent' },
+        },
+      })
+      if (error) {
+        showToast({ type: 'error', message: error.message })
+      }
+    } catch (err: any) {
+      showToast({ type: 'error', message: err.message })
+    } finally {
       setGoogleLoading(false)
     }
   }

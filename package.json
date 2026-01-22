@@ -9,15 +9,22 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.12",
+    "@ai-sdk/react": "^3.0.41",
+    "@react-email/components": "^1.0.6",
+    "@react-email/render": "^2.0.4",
     "@shopify/shopify-api": "^12.3.0",
     "@supabase/auth-helpers-react": "^0.15.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.89.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/next": "^9.0.0",
+    "ai": "^6.0.39",
     "autoprefixer": "^10.4.23",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "exceljs": "^4.4.0",
+    "facebook-nodejs-business-sdk": "^24.0.1",
     "lucide-react": "^0.562.0",
     "next": "^16.1.1",
     "openai": "^6.15.0",
@@ -26,9 +33,11 @@
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
     "recharts": "^3.6.0",
+    "resend": "^6.8.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -36,6 +45,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
+    "tailwindcss-animate": "^1.0.7",
     "typescript": "^5"
   }
 }
