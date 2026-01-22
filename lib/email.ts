@@ -5,7 +5,8 @@ import { WeeklyFinancialReport } from '@/emails/WeeklyFinancialReport';
 import { TicketClosed } from '@/emails/TicketClosed';
 
 // Configuration
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Safe initialization for build time
+const resend = new Resend(process.env.RESEND_API_KEY || 're_123_dummy');
 const RESEND_FROM_EMAIL = 'Prificient <info@prificient.com>';
 
 type EmailPayload = {
