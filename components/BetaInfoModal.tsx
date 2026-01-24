@@ -13,21 +13,27 @@ interface BetaInfoModalProps {
 // Yeni bir özellik eklediğinizde bu listeye en üste eklemeniz yeterli.
 const UPDATES = [
     {
-        date: 'Bugün',
-        title: 'Yapay Zeka Asistanı',
-        description: 'Verilerinizle sohbet edin. "Satışlarım neden düştü?" veya "En çok ne iade ediliyor?" diye sorun, anında yanıt alın.',
+        date: '24 Ocak',
+        title: '7.0 Risk Protokolü',
+        description: 'Algoritmik Risk Kapsamı ve "Körlük Modu" devreye alındı. Abonelik sistemi artık işletmenizin risk seviyesine (Acı Puanı) göre otomatik paket öneriyor.',
         type: 'new' // 'new' | 'fix' | 'update'
     },
     {
-        date: 'Dün',
-        title: 'Otomatik Komisyon Hesabı',
-        description: 'Trendyol veya Shopify fark etmez; Excel yüklediğiniz an tüm kesintileri biz hesaplarız, size net kârı gösteririz.',
+        date: '23 Ocak',
+        title: 'CFO Simülasyonu',
+        description: 'Fiyat artışı, reklam kısıntısı veya iade oranlarındaki değişimin net kârınıza etkisini anlık olarak simüle edin.',
+        type: 'new'
+    },
+    {
+        date: '22 Ocak',
+        title: 'Finansal Otopsi',
+        description: 'Günlük kâr/zarar analiziniz artık "Birim Ekonomi" (Receipt View) ve "Gider Haritası" (Treemap) ile çok daha detaylı.',
         type: 'update'
     },
     {
-        date: '12 Oca',
-        title: 'Reklam Gider Dağıtımı',
-        description: 'Günlük reklam harcamanızı tek tuşla siparişlere dağıtın, ürün başına gerçek maliyeti görün.',
+        date: '20 Ocak',
+        title: 'Akıllı Bildirimler',
+        description: 'Kritik iade artışları veya marj düşüşlerinde anında haber veren web-hook tabanlı bildirim sistemi eklendi.',
         type: 'new'
     }
 ]

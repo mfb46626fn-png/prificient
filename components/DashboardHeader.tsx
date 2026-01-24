@@ -175,9 +175,17 @@ export default function DashboardHeader({ isDemo = false }: DashboardHeaderProps
     // BETA = VISION (User Request)
     if (subStatus === 'beta') {
       return (
-        <div className="hidden sm:flex px-3 py-1 bg-black text-white rounded-full text-[10px] font-black uppercase border border-gray-800 items-center gap-1.5 shadow-sm hover:scale-105 transition-transform cursor-help" title="Beta süresince VISION paketi ücretsiz tanımlanmıştır.">
-          <Crown size={12} className="text-amber-400" /> VISION
-        </div>
+        <button
+          onClick={() => setIsBetaModalOpen(true)}
+          className="hidden sm:flex px-3 py-1 bg-black text-white rounded-full text-[10px] font-black uppercase border border-gray-800 items-center gap-2 shadow-sm hover:scale-105 transition-transform hover:bg-gray-900 group"
+          title="Beta detaylarını görüntüle"
+        >
+          <div className="flex items-center gap-1">
+            <Crown size={12} className="text-amber-400 group-hover:rotate-12 transition-transform" />
+            <span className="text-gray-400">BETA</span>
+            <span className="text-white">VISION</span>
+          </div>
+        </button>
       )
     }
 
