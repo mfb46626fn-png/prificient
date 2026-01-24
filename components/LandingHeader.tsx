@@ -85,7 +85,10 @@ export default function LandingHeader() {
 
           {/* MOBİL MENÜ */}
           {isMobileMenuOpen && (
-            <div className="fixed inset-0 top-16 z-40 bg-white md:hidden flex flex-col pt-8 px-6 animate-in slide-in-from-top-10 fade-in duration-200">
+            <div
+              className="fixed inset-x-0 top-16 bottom-0 z-[60] md:hidden flex flex-col pt-8 px-6"
+              style={{ backgroundColor: '#ffffff' }}
+            >
 
               <div className="flex flex-col space-y-2">
                 <Link
