@@ -269,7 +269,7 @@ export default function DashboardHeader({ isDemo = false }: DashboardHeaderProps
                   title="Yenilikleri Gör"
                 >
                   <Sparkles size={8} className="sm:w-2.5 sm:h-2.5 group-hover:text-amber-400 transition-colors" />
-                  <span className="hidden xs:inline sm:inline">BETA</span>
+                  <span>BETA</span>
                 </button>
               )}
             </div>
