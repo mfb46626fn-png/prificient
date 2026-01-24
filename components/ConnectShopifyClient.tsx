@@ -31,7 +31,7 @@ export default function ConnectShopifyClient({
                     <p className="text-gray-500 font-medium">Verilerinizi senkronize etmek için mağaza adresinizi girin.</p>
                 </div>
 
-                <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl border border-gray-100 relative overflow-hidden">
+                <div className="bg-white rounded-[2.5rem] p-6 md:p-12 shadow-xl border border-gray-100 relative overflow-hidden">
                     {/* Background Pattern */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-[#95BF47]/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
 

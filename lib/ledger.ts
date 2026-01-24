@@ -8,16 +8,22 @@ interface LedgerEntryInput {
     account_code: string
     direction: 'DEBIT' | 'CREDIT'
     amount: number
+    metadata?: any
 }
 
 // --- Constants ---
 export const DEFAULT_ACCOUNTS = [
     { code: '100', name: 'Kasa / Banka', type: 'ASSET', normal: 'DEBIT' },
     { code: '120', name: 'Alıcılar', type: 'ASSET', normal: 'DEBIT' },
-    { code: '391', name: 'Hesaplanan KDV', type: 'LIABILITY', normal: 'CREDIT' },
+    { code: '200', name: 'Ödenecek KDV/Vergiler', type: 'LIABILITY', normal: 'CREDIT' }, // New User Request (Pass-Through)
+    { code: '391', name: 'Hesaplanan KDV', type: 'LIABILITY', normal: 'CREDIT' }, // Keeping for legacy/compatibility
     { code: '600', name: 'Yurt İçi Satışlar', type: 'REVENUE', normal: 'CREDIT' },
+    { code: '610', name: 'Satış İadeleri', type: 'REVENUE', normal: 'DEBIT' }, // Contra-Revenue
+    { code: '740', name: 'Hizmet Üretim Giderleri', type: 'EXPENSE', normal: 'DEBIT' }, // Fees
+    { code: '750', name: 'Kargo Giderleri', type: 'EXPENSE', normal: 'DEBIT' },
     { code: '760', name: 'Pazarlama Giderleri', type: 'EXPENSE', normal: 'DEBIT' },
     { code: '770', name: 'Genel Yönetim Giderleri', type: 'EXPENSE', normal: 'DEBIT' },
+    { code: '780', name: 'Finansman Giderleri (Kur Farkı)', type: 'EXPENSE', normal: 'DEBIT' },
 ] as const
 
 export class LedgerService {
@@ -98,8 +104,8 @@ export class LedgerService {
                         { account_code: '100', direction: 'DEBIT', amount: total },
                         // Alacak: Satışlar (Gelir) -> 100 TL
                         { account_code: '600', direction: 'CREDIT', amount: revenue },
-                        // Alacak: KDV (Yükümlülük) -> 20 TL
-                        { account_code: '391', direction: 'CREDIT', amount: tax }
+                        // Alacak: KDV/Vergiler (Yükümlülük) -> 20 TL (User Requested Account 200)
+                        { account_code: '200', direction: 'CREDIT', amount: tax }
                     ],
                     event_id
                 )
@@ -130,7 +136,100 @@ export class LedgerService {
                 )
                 break;
 
-            default:
+            case 'RefundCreated':
+                // payload is the Refund object from Shopify
+                // It has 'refund_line_items' and 'transactions'
+                // We need to calculate Total Refunded Amount and Tax Refunded.
+
+                // 1. Calculate Amounts
+                // transactions contain the actual money movement.
+                const refundTransactions = payload.transactions || []
+                let totalRefund = 0
+                for (const tx of refundTransactions) {
+                    // Only count successful refunds
+                    if (tx.kind === 'refund' && tx.status === 'success') {
+                        totalRefund += parseFloat(tx.amount)
+                    }
+                }
+
+                if (totalRefund === 0) return // No money moved
+
+                // Calculate Tax Refunded from refund_line_items ?
+                // Shopify refund_line_items has 'total_tax' (but it's per line item tax line).
+                // Also 'total_tax_set' property on the refund object root? usually not.
+                // We iterate refund_line_items to sum tax and net sales.
+
+                let refundTax = 0
+                let refundNet = 0
+
+                const refundEntries: LedgerEntryInput[] = []
+                const refundLineItems = payload.refund_line_items || []
+
+                for (const rli of refundLineItems) {
+                    const rAmount = parseFloat(rli.subtotal) // Revenue part
+                    const rTax = parseFloat(rli.total_tax)    // Tax part
+
+                    refundNet += rAmount
+                    refundTax += rTax
+
+                    // Debit Returns (610) - Revenue Contra
+                    // We store metadata here for Toxic Product analysis
+                    refundEntries.push({
+                        account_code: '610',
+                        direction: 'DEBIT',
+                        amount: rAmount,
+                        metadata: {
+                            variant_id: rli.line_item?.variant_id?.toString(),
+                            product_id: rli.line_item?.product_id?.toString(),
+                            sku: rli.line_item?.sku,
+                            title: rli.line_item?.title,
+                            refund_id: payload.id
+                        }
+                    })
+                }
+
+                // Adjustments? (Shipping refund?)
+                // If totalRefund > (refundNet + refundTax), the difference is usually Shipping Refund.
+                const mappedRefund = refundNet + refundTax
+                const diff = totalRefund - mappedRefund
+
+                if (diff > 0.05) {
+                    // This is likely Shipping Refund. 
+                    // We should Debit Shipping Revenue (600) or Returns (610)?
+                    // If we put it to 610, it increases Return stats.
+                    // Let's put it to 610 but metadata type 'shipping_refund'
+                    refundEntries.push({
+                        account_code: '610',
+                        direction: 'DEBIT',
+                        amount: diff,
+                        metadata: { type: 'shipping_refund' }
+                    })
+                }
+
+                // Debit Tax (200) - Reduce Liability
+                if (refundTax > 0) {
+                    refundEntries.push({
+                        account_code: '200',
+                        direction: 'DEBIT',
+                        amount: refundTax
+                    })
+                }
+
+                // Credit Bank (100) - Reduce Asset
+                refundEntries.push({
+                    account_code: '100',
+                    direction: 'CREDIT',
+                    amount: totalRefund
+                })
+
+                await this.postTransaction(
+                    user_id,
+                    `İade #${payload.order_id} (Ref: ${payload.id})`,
+                    refundEntries,
+                    event_id,
+                    supabase
+                )
+                break;
                 console.warn(`Unknown Event Type: ${event_type}`)
         }
     }
@@ -164,7 +263,8 @@ export class LedgerService {
                 user_id,
                 account_id: acc.id,
                 direction: entry.direction, // 'DEBIT' | 'CREDIT'
-                amount: entry.amount
+                amount: entry.amount,
+                metadata: entry.metadata // Pass metadata
             }
         })
 
@@ -255,6 +355,81 @@ export class LedgerService {
             netProfit,
             adSpend,
             roi
+        }
+    }
+    // 5. Günlük Otopsi (Daily Autopsy)
+    static async getDailyAutopsy(user_id: string, date: Date) {
+        const supabase = createClient()
+
+        // Start and End of the given date
+        const start = new Date(date)
+        start.setHours(0, 0, 0, 0)
+        const end = new Date(date)
+        end.setHours(23, 59, 59, 999)
+
+        // Fetch Accounts to Map Codes
+        const { data: accounts } = await supabase.from('ledger_accounts')
+            .select('id, code, type')
+            .eq('user_id', user_id)
+
+        if (!accounts) return null
+
+        // Fetch Entries for that Day
+        const { data: entries } = await supabase.from('ledger_entries')
+            .select(`
+                amount,
+                direction,
+                account_id,
+                transaction:ledger_transactions!inner(created_at)
+            `)
+            .eq('user_id', user_id)
+            .gte('transaction.created_at', start.toISOString())
+            .lte('transaction.created_at', end.toISOString())
+
+        let grossRevenue = 0
+        let returns = 0
+        let ads = 0
+        let cogsAndFees = 0
+
+        const accountMap = new Map(accounts.map(a => [a.id, a]))
+
+        entries?.forEach((e: any) => {
+            const acc = accountMap.get(e.account_id)
+            const amount = Number(e.amount)
+            if (!acc) return
+
+            // 600: Revenue
+            if (acc.code === '600') {
+                if (e.direction === 'CREDIT') grossRevenue += amount
+                else grossRevenue -= amount
+            }
+            // 610: Returns
+            else if (acc.code === '610') {
+                // Returns are Debit usually. 
+                if (e.direction === 'DEBIT') returns += amount
+                else returns -= amount
+            }
+            // 760: Marketing (Ads)
+            else if (acc.code === '760') {
+                if (e.direction === 'DEBIT') ads += amount
+                else ads -= amount
+            }
+            // 740, 750, 770, 780, etc: COGS/Fees/Overhead
+            else if (acc.type === 'EXPENSE' && acc.code !== '760') {
+                if (e.direction === 'DEBIT') cogsAndFees += amount
+                else cogsAndFees -= amount
+            }
+        })
+
+        const netPocket = grossRevenue - returns - ads - cogsAndFees
+
+        return {
+            grossRevenue,
+            returns: -returns, // Show as negative for display logic
+            ads: -ads,
+            cogsAndFees: -cogsAndFees,
+            netPocket,
+            date: date.toISOString()
         }
     }
 }

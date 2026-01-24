@@ -4,6 +4,7 @@ import DashboardHeader from '@/components/DashboardHeader'
 import { Activity, TrendingUp, TrendingDown, Scale, ArrowRight, Loader2, ShoppingCart, Info } from 'lucide-react'
 import Link from 'next/link'
 import { DEMO_DATA } from '@/lib/demo-data'
+import BenchmarkCard from '@/components/BenchmarkCard'
 
 interface DashboardClientProps {
     metrics: {
@@ -13,19 +14,23 @@ interface DashboardClientProps {
         loading: boolean
         connected: boolean
     }
+    benchmarks?: {
+        margin: any
+    }
+    toxicProducts?: any[]
     isDemo?: boolean
 }
 
-export default function DashboardClient({ metrics, isDemo = false }: DashboardClientProps) {
+export default function DashboardClient({ metrics, benchmarks, toxicProducts = [], isDemo = false }: DashboardClientProps) {
     const formatCurrency = (val: number) => {
         return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(val)
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
-            <DashboardHeader isDemo={isDemo} />
+        <div className="bg-gray-50 pb-20">
+            {/* DashboardHeader removed locally as it's provided by layout */}
 
-            <main className="max-w-7xl mx-auto px-4 pt-10">
+            <main className="max-w-7xl mx-auto px-4 pt-4">
                 {/* HERO SECTION */}
                 <div className="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
                     <h1 className="text-3xl font-black text-gray-900 tracking-tight">
@@ -37,9 +42,9 @@ export default function DashboardClient({ metrics, isDemo = false }: DashboardCl
                 </div>
 
                 {/* METRICS GRID */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-10">
                     {/* Card 1: Revenue */}
-                    <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 transition-all hover:scale-[1.01]">
+                    <div className="bg-white p-5 md:p-8 rounded-3xl md:rounded-[2rem] shadow-sm border border-gray-100 transition-all hover:scale-[1.01]">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><TrendingUp size={24} /></div>
                             <span className="text-sm font-bold text-gray-400 uppercase tracking-wide">Net Ciro</span>
@@ -53,7 +58,7 @@ export default function DashboardClient({ metrics, isDemo = false }: DashboardCl
                     </div>
 
                     {/* Card 2: Cost */}
-                    <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 transition-all hover:scale-[1.01]">
+                    <div className="bg-white p-5 md:p-8 rounded-3xl md:rounded-[2rem] shadow-sm border border-gray-100 transition-all hover:scale-[1.01]">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl"><TrendingDown size={24} /></div>
                             <span className="text-sm font-bold text-gray-400 uppercase tracking-wide">Giderler</span>
@@ -65,7 +70,7 @@ export default function DashboardClient({ metrics, isDemo = false }: DashboardCl
                     </div>
 
                     {/* Card 3: Net Profit */}
-                    <div className="bg-black text-white p-8 rounded-[2rem] shadow-xl shadow-black/20 relative overflow-hidden group cursor-pointer transition-all hover:scale-[1.01]">
+                    <div className="bg-black text-white p-5 md:p-8 rounded-3xl md:rounded-[2rem] shadow-xl shadow-black/20 relative overflow-hidden group cursor-pointer transition-all hover:scale-[1.01]">
                         <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity"><Activity size={80} /></div>
                         <div className="flex items-center gap-3 mb-4">
                             <div className="p-3 bg-white/10 text-white rounded-2xl"><Scale size={24} /></div>
@@ -119,6 +124,39 @@ export default function DashboardClient({ metrics, isDemo = false }: DashboardCl
                         </div>
                     </div>
                 )}
+
+                {/* BENCHMARK / COMPETITIVE STANDING */}
+                {metrics && metrics.connected && !isDemo && benchmarks && benchmarks.margin && (
+                    <div className="mb-10 animate-in fade-in slide-in-from-bottom-5">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 bg-amber-50 text-amber-600 rounded-lg animate-pulse"><TrendingUp size={20} /></div>
+                            <h3 className="text-xl font-black text-gray-900">Rekabet Analizi</h3>
+                            <span className="text-xs bg-amber-50 text-amber-600 px-2 py-1 rounded-full font-bold border border-amber-100">Yeni</span>
+                            <span className="text-xs text-gray-400 font-bold ml-auto hidden sm:block">Kohort: {benchmarks.margin.cohort}</span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <BenchmarkCard
+                                metricLabel="Kâr Marjı"
+                                userValue={benchmarks.margin.user_value ? Number((benchmarks.margin.user_value * 100).toFixed(1)) : 0}
+                                median={benchmarks.margin.benchmark_median ? Number((benchmarks.margin.benchmark_median * 100).toFixed(1)) : 10}
+                                top10={benchmarks.margin.benchmark_top10 ? Number((benchmarks.margin.benchmark_top10 * 100).toFixed(1)) : 25}
+                                status={benchmarks.margin.percentile_rank >= 75 ? 'success' : benchmarks.margin.percentile_rank < 25 ? 'warning' : 'neutral'}
+                                aiComment={benchmarks.margin.percentile_rank >= 75
+                                    ? "Mükemmel! Sektörün en kârlı %25'lik dilimindesiniz."
+                                    : benchmarks.margin.percentile_rank < 25
+                                        ? "Dikkat: Benzer mağazalara göre kârlılığınız düşük."
+                                        : "Ortalama seviyedesiniz. Reklam maliyetlerini optimize ederek Top %10'a girebilirsiniz."
+                                }
+                            />
+
+                            {/* Placeholder for Refund comparison or another card */}
+                            <div className="bg-gray-50 rounded-[2rem] p-6 border border-gray-100 border-dashed flex items-center justify-center text-gray-400 font-medium text-sm">
+                                Daha fazla kıyaslama verisi toplanıyor...
+                            </div>
+                        </div>
+                    </div>
+                )}
+
 
                 {/* EMPTY STATE (REAL USER NOT CONNECTED) */}
                 {!metrics.loading && !isDemo && metrics.revenue === 0 && (

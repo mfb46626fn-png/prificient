@@ -56,8 +56,29 @@ export async function GET(req: NextRequest) {
             session,
         })
 
-        // Redirect to Dashboard
-        return NextResponse.redirect(new URL('/dashboard', req.url))
+        // TRIGGER BACKGROUND SYNC (Fire and Forget)
+        // In a serverless environment (Vercel), correct way is to use `waitUntil` or a queue.
+        // For MVP on standard Node/VPS, not awaiting works but is risky if process dies.
+        // We will just call the internal library function if possible, but we don't have direct access here easily without importing logic.
+        // Plan: Let's import the library function if we can, or just let the Onboarding page trigger it via client-side fetch if preferred.
+        // But the request said "Trigger sync in background".
+        // Let's assume we can import `scanPastShopifyData` from `lib/sync/shopify-history`.
+
+        // Ensure user is defined before using it
+        if (user) {
+            import('@/lib/sync/shopify-history').then(({ ShopifyHistoryScanner }) => {
+                // Trigger full scan for last 60 days
+                const startDate = new Date()
+                startDate.setDate(startDate.getDate() - 60)
+                if (session.accessToken) {
+                    ShopifyHistoryScanner.scanPastShopifyData(user.id, session.shop, session.accessToken, 60)
+                        .catch(e => console.error("Background Sync Error:", e))
+                }
+            }).catch(e => console.error("Import Error:", e))
+        }
+
+        // Redirect to Cinematic Scanning Page
+        return NextResponse.redirect(new URL('/onboarding/scanning', req.url))
 
     } catch (error: any) {
         console.error("Shopify Callback Error:", error)

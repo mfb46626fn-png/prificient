@@ -36,7 +36,7 @@ export async function GET(request: Request) {
         supabaseAdmin.auth.admin.listUsers(),
         supabaseAdmin.from('support_tickets').select('*', { count: 'exact', head: true }),
         supabaseAdmin.from('financial_event_log').select('*', { count: 'exact', head: true }),
-        supabaseAdmin.from('auth.users').select('id').limit(1).single() // Latency Check
+        supabaseAdmin.from('profiles').select('id').limit(1).maybeSingle() // Latency Check (Public table)
     ]);
 
     const userCount = recentUsers.length;

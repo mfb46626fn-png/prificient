@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
         // 3. Record & Process
         let eventType = 'Unknown'
         if (topic === 'orders/create') eventType = 'OrderCreated'
+        else if (topic === 'refunds/create') eventType = 'RefundCreated'
         else if (topic === 'app/uninstalled') eventType = 'AppUninstalled'
 
         const eventId = await LedgerService.recordEvent(

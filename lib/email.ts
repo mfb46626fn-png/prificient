@@ -60,7 +60,7 @@ export const EmailService = {
         // replyTo could receive future automated processing emails like support+ticketId@prificient.com
         await sendEmail({
             to: userEmail,
-            subject: `Re: ${ticketSubject} (Ticket #${ticketId})`,
+            subject: `Destek Talebiniz Yanıtlandı (Ticket #${ticketId})`,
             react: TicketReplied({ userName, ticketSubject, ticketId, dashboardUrl }),
             replyTo: `support+${ticketId}@prificient.com` // Future-proof: direct reply processing
         });

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import {
   Bell, Trash2, LogOut, User, Settings, ChevronDown, X,
-  LayoutDashboard, FolderInput, Menu, Sparkles, Clock, Crown, History, PlugZap, MessageCircle
+  LayoutDashboard, FolderInput, Menu, Sparkles, Clock, Crown, History, PlugZap, MessageCircle, Calculator, ShieldAlert, Activity
 } from 'lucide-react'
 import GlobalLoader from '@/components/GlobalLoader'
 import { useCurrency } from '@/app/contexts/CurrencyContext'
@@ -31,12 +31,10 @@ type Notification = {
 }
 
 interface DashboardHeaderProps {
-  totalRevenue?: number
-  totalExpense?: number
   isDemo?: boolean
 }
 
-export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, isDemo = false }: DashboardHeaderProps) {
+export default function DashboardHeader({ isDemo = false }: DashboardHeaderProps) {
   // SIDEBAR STATE
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false)
 
@@ -105,9 +103,22 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
     }
   }
 
+  const [painScore, setPainScore] = useState(0)
+
   // 4. MOTOR & VERİ YÜKLEME
   useEffect(() => {
     fetchNotifications()
+
+    // Fetch Pulse Data (Lightweight)
+    async function checkPulse() {
+      if (isDemo) { setPainScore(85); return; } // Demo Pulse
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data } = await supabase.from('merchant_health_scores').select('pain_score').eq('user_id', user.id).maybeSingle()
+        if (data) setPainScore(data.pain_score)
+      }
+    }
+    checkPulse()
   }, [])
 
   useEffect(() => {
@@ -156,35 +167,16 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
   const status = "V2 Hazır"
   const statusColor = "text-emerald-600"
 
-  // AKILLI ROZET RENDERER
-  const renderStatusBadge = () => {
+  // AKILLI ROZET RENDERER (HEADER)
+  const renderHeaderBadge = () => {
     if (isDemo) return null
-    if (subLoading) return <div className="w-24 h-6 bg-gray-100 rounded-full animate-pulse hidden sm:block"></div>
+    if (subLoading) return <div className="w-20 h-6 bg-gray-100 rounded-full animate-pulse hidden sm:block"></div>
 
+    // BETA = VISION (User Request)
     if (subStatus === 'beta') {
       return (
-        <button
-          onClick={() => setIsBetaModalOpen(true)}
-          className="hidden sm:flex px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-[10px] font-black uppercase hover:bg-indigo-100 transition-all items-center justify-center gap-1.5"
-        >
-          <Sparkles size={12} className="text-indigo-500" />
-          Beta (Sınırsız)
-        </button>
-      )
-    }
-
-    if (subStatus === 'trial_active') {
-      return (
-        <div className={`hidden sm:flex px-3 py-1 rounded-full border text-[10px] font-black uppercase items-center gap-1.5 ${daysLeft < 3 ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
-          <Clock size={12} /> {daysLeft} Gün Kaldı
-        </div>
-      )
-    }
-
-    if (subStatus === 'trial_expired') {
-      return (
-        <div className="hidden sm:flex px-3 py-1 bg-gray-900 text-white rounded-full text-[10px] font-black uppercase border border-gray-700 items-center gap-1.5">
-          <LogOut size={12} /> Süre Doldu
+        <div className="hidden sm:flex px-3 py-1 bg-black text-white rounded-full text-[10px] font-black uppercase border border-gray-800 items-center gap-1.5 shadow-sm hover:scale-105 transition-transform cursor-help" title="Beta süresince VISION paketi ücretsiz tanımlanmıştır.">
+          <Crown size={12} className="text-amber-400" /> VISION
         </div>
       )
     }
@@ -196,7 +188,38 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
         </div>
       )
     }
+
+    // Fallback for Trial
+    if (subStatus === 'trial_active') {
+      return (
+        <div className={`hidden sm:flex px-3 py-1 rounded-full border text-[10px] font-black uppercase items-center gap-1.5 ${daysLeft < 3 ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+          <Clock size={12} /> {daysLeft} Gün
+        </div>
+      )
+    }
+
     return null
+  }
+
+  // SIDEBAR SUMMARY BADGE
+  const renderSidebarBadge = () => {
+    if (subStatus === 'beta') {
+      return (
+        <div className="flex items-center gap-1.5 px-2 py-1 bg-black border border-gray-800 rounded-lg shadow-sm">
+          <Crown size={12} className="text-amber-400" />
+          <span className="text-[10px] font-black uppercase text-white tracking-wider">VISION</span>
+        </div>
+      )
+    }
+    // ... existing logic for others or generic fallback
+    return (
+      <div className="flex items-center gap-1.5 px-2 py-1 bg-white border border-gray-200 rounded-lg shadow-sm">
+        <span className={`w-2 h-2 rounded-full ${subStatus === 'pro_active' ? 'bg-amber-400' : 'bg-emerald-500'}`}></span>
+        <span className="text-[10px] font-black uppercase text-gray-700">
+          {subStatus === 'pro_active' ? 'PRO' : 'Deneme'}
+        </span>
+      </div>
+    )
   }
 
   if (loading) return <GlobalLoader />
@@ -211,7 +234,7 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
 
       {/* HEADER */}
       <header className={`bg-white border-b border-gray-100 sticky top-0 z-30 transition-all duration-500 ${isDemo ? 'mt-7' : ''}`}>
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="max-w-[1600px] mx-auto px-4 h-16 flex items-center justify-between">
 
           <div className="flex items-center gap-6">
             {/* MENÜ BUTONU */}
@@ -234,7 +257,8 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
                 />
               </Link>
 
-              {renderStatusBadge()}
+              {/* HEADER PLAN BADGE */}
+              {renderHeaderBadge()}
             </div>
           </div>
 
@@ -259,9 +283,10 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
                   <span className="absolute top-2.5 right-3 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
                 )}
               </button>
-
+              {/* ... (Notifications Dropdown) ... */}
               {isNotificationsOpen && (
                 <div className="absolute right-0 top-full mt-3 w-80 bg-white rounded-[2rem] shadow-xl border border-gray-100 py-4 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                  {/* ... notifications content ... */}
                   <div className="px-6 pb-2 border-b border-gray-50 flex justify-between items-center">
                     <h4 className="font-bold text-sm text-gray-900">Bildirimler</h4>
                     <div className="flex gap-2">
@@ -307,7 +332,7 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
                 </div>
                 <ChevronDown size={16} className={`text-gray-400 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
               </button>
-
+              {/* ... (User Menu Dropdown) ... */}
               {isMenuOpen && (
                 <div className="absolute right-0 top-full mt-3 w-64 bg-white rounded-[2rem] shadow-xl border border-gray-100 py-3 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
                   <div className="px-6 py-4 border-b border-gray-50 mb-2">
@@ -317,8 +342,8 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
 
                   {!isDemo && (
                     <>
-                      <Link href="/profile" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 mx-2 rounded-xl"><User size={18} /> Profil</Link>
-                      <Link href="/settings" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 mx-2 rounded-xl"><Settings size={18} /> Ayarlar</Link>
+                      <Link href="/settings" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 mx-2 rounded-xl"><User size={18} /> Profil & Ayarlar</Link>
+                      <div className="hidden"><Settings size={18} /></div> {/* Keeps icon import usage for now or remove later */}
                       <Link href="/support" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 mx-2 rounded-xl"><MessageCircle size={18} /> Destek</Link>
 
                       <button
@@ -382,34 +407,66 @@ export default function DashboardHeader({ totalRevenue = 0, totalExpense = 0, is
           </div>
         </div>
 
-        <nav className="px-4 space-y-1">
-          <Link href={isDemo ? "/demo" : "/dashboard"} onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all">
-            <LayoutDashboard size={20} /> <span className="text-sm font-black uppercase tracking-wider">Dashboard</span>
+        <nav className="px-4 space-y-2">
+          <Link href="/dashboard" onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all group">
+            <LayoutDashboard size={20} className="group-hover:text-black" />
+            <span className="text-sm font-black uppercase tracking-wider">Karar Masası</span>
           </Link>
-          <Link href={isDemo ? "#" : "/decisions"} onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all">
-            <History size={20} /> <span className="text-sm font-black uppercase tracking-wider">Karar Günlüğü</span>
+
+
+
+          <Link href="/simulation" onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all group">
+            <Calculator size={20} className="group-hover:text-indigo-600" />
+            <span className="text-sm font-black uppercase tracking-wider">CFO Simülasyonu</span>
           </Link>
-          <Link href={isDemo ? "#" : "/reports"} onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all">
-            <FolderInput size={20} /> <span className="text-sm font-black uppercase tracking-wider">Rapor Merkezi</span>
+
+          <Link href="/dashboard/recovery" onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all group relative">
+            <ShieldAlert size={20} className={`group-hover:text-blue-600 ${painScore > 80 ? 'text-red-500 animate-pulse' : ''}`} />
+            <span className={`text-sm font-black uppercase tracking-wider ${painScore > 80 ? 'text-red-500' : ''}`}>Kurtarma Planı</span>
+
+            {painScore > 80 && (
+              <span className="absolute right-6 top-1/2 -translate-y-1/2 w-2 h-2 bg-red-600 rounded-full animate-ping"></span>
+            )}
           </Link>
-          <Link href={isDemo ? "#" : "/connect/shopify"} onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all">
-            <PlugZap size={20} /> <span className="text-sm font-black uppercase tracking-wider">Entegrasyonlar</span>
+
+          <Link href="/connect/shopify" onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all group">
+            <PlugZap size={20} />
+            <span className="text-sm font-black uppercase tracking-wider">Entegrasyonlar</span>
           </Link>
         </nav>
 
         <div className="px-8 mt-auto mb-8 space-y-4">
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">İşletme Özeti</p>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-blue-50 p-4 rounded-3xl border border-blue-100 col-span-2">
-              <p className="text-[10px] font-bold text-blue-600 uppercase mb-1">Sistem Durumu</p>
-              <p className={`text-sm font-black ${statusColor}`}>{status}</p>
-            </div>
-          </div>
 
-          <div className="bg-gray-100/80 rounded-2xl p-1 flex">
-            {['TRY', 'USD', 'EUR'].map((curr) => (
-              <button key={curr} onClick={() => updateCurrency(curr)} className={`flex-1 text-[10px] font-black py-2.5 rounded-xl transition-all ${currency === curr ? 'bg-white shadow-sm text-black' : 'text-gray-400 hover:text-black'}`}>{curr}</button>
-            ))}
+          <div className="bg-gray-50 p-5 rounded-[1.5rem] border border-gray-100 space-y-4">
+
+            {/* Health Score */}
+            <div>
+              <div className="flex justify-between items-end mb-2">
+                <span className="text-xs font-bold text-gray-500">Veri Puanı</span>
+                <span className={`text-xl font-black ${painScore > 50 ? 'text-rose-500' : 'text-emerald-500'}`}>
+                  {100 - painScore}
+                </span>
+              </div>
+              <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className={`h-full transition-all duration-1000 ${painScore > 50 ? 'bg-rose-500' : 'bg-emerald-500'}`}
+                  style={{ width: `${100 - painScore}%` }}
+                ></div>
+              </div>
+              <p className="text-[10px] text-gray-400 mt-1.5 font-medium leading-tight">
+                {painScore > 50 ? 'Risk seviyesi yüksek. Aksiyon alın.' : 'Finansal durum stabil görünüyor.'}
+              </p>
+            </div>
+
+            <div className="w-full h-px bg-gray-200"></div>
+
+            {/* Plan Status */}
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-bold text-gray-500">Abonelik</span>
+              {renderSidebarBadge()}
+            </div>
+
           </div>
         </div>
       </div>

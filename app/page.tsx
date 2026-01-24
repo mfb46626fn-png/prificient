@@ -222,50 +222,116 @@ export default function Home() {
             <div className="mb-16">
               <h2 className="text-4xl font-black text-gray-900 mb-4">Şeffaf Fiyatlandırma</h2>
               <p className="text-lg text-gray-600 font-medium">
-                Beta süreci boyunca hiçbir ücret talep etmiyoruz.
+                Sürpriz fatura yok. Sadece ihtiyacınız kadar ödeyin.
               </p>
+              <div className="mt-4 bg-blue-100 text-blue-800 text-sm font-bold px-4 py-2 rounded-full inline-block animate-pulse">
+                🚀 ŞU AN BETA SÜRECİNDEYİZ - TÜM ÖZELLİKLER ÜCRETSİZ!
+              </div>
             </div>
 
-            <div className="max-w-lg mx-auto">
-              <div className="bg-white rounded-[2.5rem] p-10 border-2 border-blue-600 shadow-2xl shadow-blue-500/10 relative">
-                <div className="absolute top-0 right-0 left-0 -mt-5 flex justify-center">
-                  <span className="bg-blue-600 text-white font-bold px-6 py-2 rounded-full uppercase text-xs tracking-widest shadow-lg shadow-blue-600/30">
-                    Sınırlı Süre
-                  </span>
+            <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+              {/* CLEAR PLAN */}
+              <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 hover:shadow-xl transition-all hover:scale-[1.02] flex flex-col relative">
+                <h3 className="text-xl font-black text-gray-900 mb-2">Clear</h3>
+                <p className="text-sm text-gray-500 font-medium min-h-[40px] mb-6">Başlangıç için ideal. Excel karmaşasından kurtulun.</p>
+                <div className="flex items-baseline justify-center gap-1 mb-8">
+                  <span className="text-4xl font-black text-gray-900">₺299</span>
+                  <span className="text-gray-400 font-bold">/ay</span>
                 </div>
 
-                <h3 className="text-2xl font-black text-gray-900 mt-4 mb-2">Erken Erişim</h3>
-                <div className="flex items-center justify-center gap-2 mb-6">
-                  <span className="text-5xl font-black text-gray-900">₺0</span>
-                  <span className="text-gray-400 font-bold text-lg">/ay</span>
-                </div>
-
-                <ul className="space-y-4 mb-10 text-left bg-gray-50 p-6 rounded-2xl">
-                  <li className="flex items-center gap-3 font-bold text-gray-700">
-                    <Check className="text-blue-600" size={20} /> Sınırsız Veri İşleme
+                <ul className="space-y-4 mb-10 flex-1 text-left">
+                  <li className="flex items-center gap-3 text-sm font-bold text-gray-600">
+                    <Check className="text-emerald-500 shrink-0" size={18} /> 1 Platform Entegrasyonu
                   </li>
-                  <li className="flex items-center gap-3 font-bold text-gray-700">
-                    <Check className="text-blue-600" size={20} /> Tüm Pazaryeri Entegrasyonları
+                  <li className="flex items-center gap-3 text-sm font-bold text-gray-600">
+                    <Check className="text-emerald-500 shrink-0" size={18} /> 3 Ay Geçmiş Veri
                   </li>
-                  <li className="flex items-center gap-3 font-bold text-gray-700">
-                    <Check className="text-blue-600" size={20} /> Yapay Zeka Asistanı
+                  <li className="flex items-center gap-3 text-sm font-bold text-gray-600">
+                    <Check className="text-emerald-500 shrink-0" size={18} /> Temel Raporlama
                   </li>
-                  <li className="flex items-center gap-3 font-bold text-gray-700">
-                    <Check className="text-blue-600" size={20} /> 7/24 Öncelikli Destek
+                  <li className="flex items-center gap-3 text-sm font-bold text-gray-600">
+                    <Check className="text-emerald-500 shrink-0" size={18} /> 30 AI Sorgusu / Ay
                   </li>
                 </ul>
 
-                <Link
-                  href="/login"
-                  className="block w-full py-4 rounded-xl bg-blue-600 text-white font-black text-lg hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/30 transition-all"
-                >
-                  Hemen Başla
+                <Link href="/login" className="w-full py-4 rounded-xl bg-gray-100 text-gray-900 font-black hover:bg-gray-200 transition-all">
+                  Şimdi Başla
                 </Link>
-                <p className="text-xs text-gray-400 font-bold mt-4">
-                  *Kredi kartı gerekmez. İptal derdi yok.
-                </p>
+              </div>
+
+              {/* CONTROL PLAN (POPULAR) */}
+              <div className="bg-white rounded-[2.5rem] p-8 border-2 border-blue-600 shadow-2xl shadow-blue-200 flex flex-col relative scale-105 z-10">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -mt-4 bg-blue-600 text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-lg tracking-widest uppercase">
+                  EN POPÜLER
+                </div>
+                <h3 className="text-xl font-black text-blue-900 mb-2">Control</h3>
+                <p className="text-sm text-gray-500 font-medium min-h-[40px] mb-6">Büyüyen mağazalar için tam kontrol.</p>
+                <div className="flex items-baseline justify-center gap-1 mb-8">
+                  <span className="text-5xl font-black text-gray-900">₺899</span>
+                  <span className="text-gray-400 font-bold">/ay</span>
+                </div>
+
+                <ul className="space-y-4 mb-10 flex-1 text-left">
+                  <li className="flex items-center gap-3 text-sm font-extrabold text-gray-800">
+                    <Check className="text-blue-600 shrink-0" size={18} /> 3 Platform Entegrasyonu
+                  </li>
+                  <li className="flex items-center gap-3 text-sm font-extrabold text-gray-800">
+                    <Check className="text-blue-600 shrink-0" size={18} /> 12 Ay Geçmiş Veri
+                  </li>
+                  <li className="flex items-center gap-3 text-sm font-extrabold text-gray-800">
+                    <Check className="text-blue-600 shrink-0" size={18} /> CFO Simülasyonu
+                  </li>
+                  <li className="flex items-center gap-3 text-sm font-extrabold text-gray-800">
+                    <Check className="text-blue-600 shrink-0" size={18} /> 100 AI Sorgusu / Ay
+                  </li>
+                  <li className="flex items-center gap-3 text-sm font-extrabold text-gray-800">
+                    <Check className="text-blue-600 shrink-0" size={18} /> Kârlılık Analizi (Ürün Bazlı)
+                  </li>
+                </ul>
+
+                <Link href="/login" className="w-full py-4 rounded-xl bg-blue-600 text-white font-black hover:bg-blue-700 hover:shadow-lg transition-all">
+                  Ücretsiz Dene
+                </Link>
+                <p className="text-[10px] text-gray-400 font-bold mt-3">*Beta süresince ücret talep edilmez.</p>
+              </div>
+
+              {/* VISION PLAN */}
+              <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 hover:shadow-xl transition-all hover:scale-[1.02] flex flex-col relative">
+                <h3 className="text-xl font-black text-gray-900 mb-2">Vision</h3>
+                <p className="text-sm text-gray-500 font-medium min-h-[40px] mb-6">CFO deneyimi ve sınırsız analiz.</p>
+                <div className="flex items-baseline justify-center gap-1 mb-8">
+                  <span className="text-4xl font-black text-gray-900">₺1.999</span>
+                  <span className="text-gray-400 font-bold">/ay</span>
+                </div>
+
+                <ul className="space-y-4 mb-10 flex-1 text-left">
+                  <li className="flex items-center gap-3 text-sm font-bold text-gray-600">
+                    <Check className="text-emerald-500 shrink-0" size={18} /> Sınırsız Platform
+                  </li>
+                  <li className="flex items-center gap-3 text-sm font-bold text-gray-600">
+                    <Check className="text-emerald-500 shrink-0" size={18} /> Sınırsız Geçmiş
+                  </li>
+                  <li className="flex items-center gap-3 text-sm font-bold text-gray-600">
+                    <Check className="text-emerald-500 shrink-0" size={18} /> Gelişmiş Simülasyon + Senaryolar
+                  </li>
+                  <li className="flex items-center gap-3 text-sm font-bold text-gray-600">
+                    <Check className="text-emerald-500 shrink-0" size={18} /> 200 AI Sorgusu / Ay
+                  </li>
+                  <li className="flex items-center gap-3 text-sm font-bold text-gray-600">
+                    <Check className="text-emerald-500 shrink-0" size={18} /> Öncelikli 7/24 Destek
+                  </li>
+                </ul>
+
+                <Link href="/login" className="w-full py-4 rounded-xl bg-black text-white font-black hover:bg-gray-800 transition-all">
+                  İletişime Geç
+                </Link>
               </div>
             </div>
+
+            <p className="mt-12 text-sm text-gray-500 font-medium max-w-2xl mx-auto">
+              Tüm paketlerde veri güvenliği, günlük yedekleme ve SSL şifreleme standarttır.
+              Beta sürecimiz boyunca hiçbir kart bilgisi girmeden tüm özelliklere erişebilirsiniz.
+            </p>
           </div>
         </section>
 

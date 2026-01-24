@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { ShieldCheck, Lock, Globe, Instagram, Linkedin, Twitter, Heart } from 'lucide-react'
 
 export default function LandingFooter() {
@@ -14,7 +15,13 @@ export default function LandingFooter() {
           {/* 1. KOLON: MARKA & DEĞER */}
           <div className="md:col-span-1 space-y-4">
             <div className="flex items-center gap-2">
-              <div className="bg-black text-white w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold">P</div>
+              <Image
+                src="/logo.png"
+                alt="Prificient"
+                width={32}
+                height={32}
+                className="w-8 h-auto object-contain"
+              />
               <span className="text-xl font-black tracking-tight text-gray-900">Prificient</span>
             </div>
             <p className="text-sm text-gray-500 leading-relaxed font-medium">

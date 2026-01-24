@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Plus, Send, MessageCircle, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
+import { Plus, Send, MessageCircle, AlertCircle, CheckCircle2, Clock, ChevronLeft, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 type Ticket = {
@@ -114,6 +114,7 @@ export default function SupportClientInterface({ initialTickets, userId, userEma
         e.preventDefault();
         if (!newSubject.trim() || !newTicketMessage.trim()) return;
 
+        setSending(true);
         try {
             const res = await fetch('/api/support', {
                 method: 'POST',
@@ -141,13 +142,17 @@ export default function SupportClientInterface({ initialTickets, userId, userEma
             }
         } catch (err) {
             console.error(err);
+        } finally {
+            setSending(false);
         }
     };
+
+    const showDetail = selectedTicketId || isCreating;
 
     return (
         <div className="flex h-full bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             {/* LEFT SIDEBAR: LIST */}
-            <div className="w-1/3 border-r border-gray-100 bg-gray-50/50 flex flex-col">
+            <div className={`${showDetail ? 'hidden md:flex' : 'flex'} w-full md:w-1/3 border-r border-gray-100 bg-gray-50/50 flex-col`}>
                 <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-white">
                     <h2 className="font-bold text-gray-900">Taleplerim</h2>
                     <button
@@ -191,10 +196,18 @@ export default function SupportClientInterface({ initialTickets, userId, userEma
             </div>
 
             {/* RIGHT MAIN: CHAT OR FORM */}
-            <div className="flex-1 flex flex-col bg-white">
+            <div className={`${showDetail ? 'flex' : 'hidden md:flex'} w-full md:flex-1 flex-col bg-white`}>
                 {isCreating ? (
-                    <div className="flex-1 p-8 flex flex-col items-center justify-center">
+                    <div className="flex-1 p-6 md:p-8 flex flex-col items-center justify-center">
                         <div className="w-full max-w-md space-y-4">
+                            {/* Mobile Back Button (Creating) */}
+                            <button
+                                onClick={() => setIsCreating(false)}
+                                className="md:hidden flex items-center gap-2 text-gray-500 font-bold mb-4 hover:text-black"
+                            >
+                                <ChevronLeft size={20} /> Geri Dön
+                            </button>
+
                             <div className="text-center mb-6">
                                 <h2 className="text-xl font-bold">Yeni Destek Talebi</h2>
                                 <p className="text-sm text-gray-500">Sorununuzu detaylı bir şekilde anlatın.</p>
@@ -230,9 +243,10 @@ export default function SupportClientInterface({ initialTickets, userId, userEma
                                     </button>
                                     <button
                                         type="submit"
-                                        className="flex-1 bg-black text-white py-3 rounded-xl font-bold hover:bg-gray-800 transition-all"
+                                        disabled={sending}
+                                        className="flex-1 bg-black text-white py-3 rounded-xl font-bold hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                     >
-                                        Talebi Gönder
+                                        {sending ? <Loader2 className="animate-spin" size={20} /> : 'Talebi Gönder'}
                                     </button>
                                 </div>
                             </form>
@@ -240,10 +254,18 @@ export default function SupportClientInterface({ initialTickets, userId, userEma
                     </div>
                 ) : selectedTicketId ? (
                     <>
-                        <div className="p-4 border-b border-gray-50 flex justify-between items-center bg-white shadow-sm z-10">
+                        <div className="p-4 border-b border-gray-50 flex items-center gap-3 bg-white shadow-sm z-10">
+                            {/* Mobile Back Button (Chat) */}
+                            <button
+                                onClick={() => setSelectedTicketId(null)}
+                                className="md:hidden p-2 -ml-2 text-gray-500 hover:text-black hover:bg-gray-50 rounded-full"
+                            >
+                                <ChevronLeft size={24} />
+                            </button>
+
                             <div>
-                                <h2 className="font-bold text-lg">{tickets.find(t => t.id === selectedTicketId)?.subject}</h2>
-                                <p className="text-xs text-gray-400">Ticket ID: {selectedTicketId}</p>
+                                <h2 className="font-bold text-lg truncate max-w-[200px] md:max-w-none">{tickets.find(t => t.id === selectedTicketId)?.subject}</h2>
+                                <p className="text-xs text-gray-400">Ticket ID: {selectedTicketId.slice(0, 8)}...</p>
                             </div>
                         </div>
 
@@ -252,15 +274,10 @@ export default function SupportClientInterface({ initialTickets, userId, userEma
                                 <div className="flex justify-center py-10"><div className="animate-spin w-6 h-6 border-2 border-black border-t-transparent rounded-full"></div></div>
                             ) : (
                                 messages.map(msg => {
-                                    const isMe = msg.user_id === userId; // User messages have user_id = current user (usually)
-                                    // Wait, admin replies usually have user_id as admin's UUID or NULL?
-                                    // In `lib/support.ts`, replyToTicket (Admin) uses `params.userId` (which is Admin ID).
-                                    // So `msg.user_id` will be Admin ID, which is != Current User ID.
-                                    // So `isMe` logic: msg.user_id === userId.
-
+                                    const isMe = msg.user_id === userId;
                                     return (
                                         <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                                            <div className={`max-w-[75%] p-3 rounded-2xl text-sm ${isMe
+                                            <div className={`max-w-[85%] md:max-w-[75%] p-3 rounded-2xl text-sm ${isMe
                                                 ? 'bg-black text-white rounded-br-none shadow-sm'
                                                 : 'bg-white text-gray-800 border border-gray-100 rounded-bl-none shadow-sm'
                                                 }`}>

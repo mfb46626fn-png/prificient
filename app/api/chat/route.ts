@@ -1,7 +1,9 @@
 import { openai } from '@ai-sdk/openai';
-import { streamText } from 'ai';
+import { streamText, tool } from 'ai';
+import { z } from 'zod';
 import { createClient } from '@/utils/supabase/server';
 import { getMetricDefinitionPrompt } from '@/lib/ai/semantic-layer';
+import { BenchmarkEngine } from '@/lib/benchmarks';
 
 export const maxDuration = 30;
 
@@ -10,7 +12,10 @@ export async function POST(req: Request) {
     const supabase = await createClient();
     const { data: { user }, error } = await supabase.auth.getUser();
 
-    if (error) console.error("Auth Error:", error);
+    if (error || !user) {
+      console.error("Auth Error:", error);
+      return new Response("Unauthorized", { status: 401 });
+    }
 
     // --- SMART ONBOARDING CHECK ---
     // 1. Check Store Connection Logic
@@ -41,81 +46,92 @@ export async function POST(req: Request) {
     const { messages } = await req.json();
     const semanticContext = getMetricDefinitionPrompt();
 
+    // 3. Fetch Pain Score (Forensic Context)
+    const { data: health } = await supabase
+      .from('merchant_health_scores')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    const painScore = health?.pain_score || 0;
+    const painLevel = health?.pain_level || 'safe';
+    const painFactors = health?.factors ? JSON.stringify(health.factors) : 'Analyzing...';
+
     // Dynamically adjust System Prompt based on detailed state
     let systemPrompt = `
-      You are the Prificient AI Financial Assistant.
-      Your goal is to provide deterministic, accurate financial insights based STRICTLY on the data found in the database.
+      You are NOT a helpful assistant. You are a **Forensic Accountant** and **Crisis Manager** for Prificient.
+      Your job is to reveal the "Cost of Inaction" and find where the user is bleeding money.
+
+      USER CONTEXT:
+      - Store Status: ${storeConnectionStatus}
+      - Pain Score: ${painScore}/100 (Level: ${painLevel})
+      - Risk Factors: ${painFactors}
+
+      CORE RULES (STRICT):
+      1. **NO GREETINGS**: Never say "Hello", "How can I help?", "Welcome". Start directly with the financial reality.
+      2. **BE BRUTAL**: If the user says "Sales are up", you check the Net Profit. If Net Profit is down, say: "Revenue is vanity. You lost margin. This is not success."
+      3. **FOCUS ON LOSS**: Always frame insights around what they are LOSING by not acting. "You are losing X TL daily by ignoring this."
+      4. **USE "PAIN SCORE"**: If Pain Score > 80, speak with ALARM urgency. If < 30, be skeptical and look for hidden risks.
       
-      CURRENT USER STATE: ${storeConnectionStatus}
+      TONE: Professional, Cold, mathematically precise, urgent.
     `;
 
     if (storeConnectionStatus === "NO_STORE_CONNECTED") {
       systemPrompt += `
-        ⚠️ CRITICAL INSTRUCTION: NO STORE DETECTED ⚠️
-        The user has NOT connected their Shopify store yet.
-        1. INFORM the user politely that you cannot see any store.
-        2. GUIDE them to connect their store: "Verilerinizi analiz edebilmem için önce mağazanızı bağlamanız gerekiyor."
-        3. PROVIDE this specific link for them to click: [Mağaza Bağla](../connect/shopify)
+        ⚠️ CRITICAL: NO EVIDENCE FOUND ⚠️
+        I cannot audit what I cannot see.
+        You must connect your store immediately. Every minute you wait is a blind spot in your finance.
+        [Connect Store](../connect/shopify)
         `;
-    } else if (storeConnectionStatus === "CONNECTED_BUT_NO_DATA") {
-      systemPrompt += `
-        ⚠️ CRITICAL INSTRUCTION: STORE CONNECTED BUT EMPTY ⚠️
-        The user has successfully connected their store, BUT the data synchronization is NOT complete yet (0 records found).
-        1. ACKNOWLEDGE connection: "Mağaza bağlantınızı görüyorum, tebrikler."
-        2. EXPLAIN missing data: "Ancak finansal verileriniz henüz tam olarak senkronize olmamış veya veritabanına düşmemiş."
-        3. ADVICE: "Verilerin işlenmesi mağaza büyüklüğüne göre biraz zaman alabilir. Lütfen teknik ekibe durumu bildirin veya biraz bekleyin."
-        4. DO NOT show the 'Connect Store' link again.
-       `;
     } else {
       systemPrompt += `
-        IDENTITY & RULES:
-        1. Adhere to Double-Entry Bookkeeping principles. Revenue is generally Credit, Expenses are Debit.
-        2. You currently DO NOT have access to live database tools (Maintenance Mode). 
-           - If user asks for numbers, say: "Veritabanı bağlantısı şu an bakımda, ancak genel finansal sorularınızı yanıtlayabilirim."
-        
-        SEMANTIC LAYER (Metric Definitions):
-        ${semanticContext}
-
-        INTERACTION STYLE:
-        - Be professional, concise, and helpful.
+        INSTRUCTIONS:
+        - Use "Double-Entry Bookkeeping" logic (Assets, Liabilities, Equity).
+        - Use the 'get_competitive_standing' tool to shame or validate the user.
+        - If they seem complacent, remind them of their Risk Factors: ${painFactors}.
         `;
     }
 
-    // Manual message normalization to bypass SDK schema validation issues
+    // Manual message normalization
     const validMessages = messages.map((m: any) => {
       let content = m.content;
-
-      // If content is missing but parts exist (typical in AI SDK UI for tool results), try to extract text
       if (!content && Array.isArray(m.parts)) {
         content = m.parts
           .filter((p: any) => p.type === 'text')
           .map((p: any) => p.text)
           .join('\n');
       }
-
-      // Fallback or ensure string
-      if (typeof content !== 'string') {
-        content = '';
-      }
-
-      // Only keep simple role/content to satisfy strict CoreMessage schema for text generation
-      return {
-        role: m.role,
-        content: content
-      };
+      if (typeof content !== 'string') content = '';
+      return { role: m.role, content: content };
     }).filter((m: any) => m.content.trim() !== '' || m.role === 'user');
 
     const result = streamText({
       model: openai('gpt-4o'),
       system: systemPrompt,
       messages: validMessages,
-      // tools: { ... } // Disabled for stability
+      // tools: {
+      //   get_competitive_standing: tool({
+      //     description: 'Get user performance ranking compared to similar stores. keys: profit_margin, net_profit, refund_rate, revenue.',
+      //     parameters: z.object({
+      //       metric: z.enum(['profit_margin', 'net_profit', 'refund_rate', 'revenue']).describe('The metric to benchmark'),
+      //     }),
+      //     execute: async ({ metric }: any) => {
+      //       try {
+      //         if (!user?.id) return { error: "User not identified" };
+      //         const standing = await BenchmarkEngine.getUserStanding(user.id, metric);
+      //         if (!standing) return { error: "No benchmark data available yet. (Run scan?)" };
+      //         return standing;
+      //       } catch (e: any) {
+      //         return { error: e.message };
+      //       }
+      //     }
+      //   })
+      // }
     });
 
     if (typeof (result as any).toDataStreamResponse === 'function') {
       return (result as any).toDataStreamResponse();
     }
-
     if (typeof (result as any).toUIMessageStreamResponse === 'function') {
       return (result as any).toUIMessageStreamResponse();
     }
