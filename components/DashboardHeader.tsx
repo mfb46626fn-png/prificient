@@ -177,18 +177,18 @@ export default function DashboardHeader({ isDemo = false }: DashboardHeaderProps
     // BETA = VISION
     if (subStatus === 'beta') {
       return (
-        <button onClick={() => setIsSubscriptionModalOpen(true)} className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-black/5 border border-black/10 rounded-full hover:bg-black hover:text-white transition-colors group">
-          <Crown size={12} className="text-black fill-black group-hover:text-white group-hover:fill-white" />
-          <span className="text-[10px] font-black uppercase tracking-widest">VISION</span>
+        <button onClick={() => setIsSubscriptionModalOpen(true)} className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 sm:py-1 bg-black/5 border border-black/10 rounded-full hover:bg-black hover:text-white transition-colors group shrink-0">
+          <Crown size={10} className="sm:w-3 sm:h-3 text-black fill-black group-hover:text-white group-hover:fill-white" />
+          <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-wide sm:tracking-widest">VISION</span>
         </button>
       )
     }
 
     if (subStatus === 'pro_active') {
       return (
-        <button onClick={() => setIsSubscriptionModalOpen(true)} className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-100 rounded-full text-amber-700 hover:bg-amber-100 transition-colors">
-          <Crown size={12} className="fill-amber-700" />
-          <span className="text-[10px] font-black uppercase tracking-widest">PRO</span>
+        <button onClick={() => setIsSubscriptionModalOpen(true)} className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 sm:py-1 bg-amber-50 border border-amber-100 rounded-full text-amber-700 hover:bg-amber-100 transition-colors shrink-0">
+          <Crown size={10} className="sm:w-3 sm:h-3 fill-amber-700" />
+          <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-wide sm:tracking-widest">PRO</span>
         </button>
       )
     }
@@ -196,8 +196,8 @@ export default function DashboardHeader({ isDemo = false }: DashboardHeaderProps
     // Fallback for Trial
     if (subStatus === 'trial_active') {
       return (
-        <button onClick={() => setIsSubscriptionModalOpen(true)} className={`hidden md:flex px-3 py-1 rounded-full border text-[10px] font-black uppercase items-center gap-1.5 hover:opacity-80 transition-opacity ${daysLeft < 3 ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
-          <Clock size={12} /> {daysLeft} Gün
+        <button onClick={() => setIsSubscriptionModalOpen(true)} className={`flex px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border text-[8px] sm:text-[10px] font-black uppercase items-center gap-1 sm:gap-1.5 hover:opacity-80 transition-opacity shrink-0 ${daysLeft < 3 ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+          <Clock size={10} className="sm:w-3 sm:h-3" /> {daysLeft}G
         </button>
       )
     }
@@ -265,11 +265,11 @@ export default function DashboardHeader({ isDemo = false }: DashboardHeaderProps
               {subStatus === 'beta' && (
                 <button
                   onClick={() => setIsBetaModalOpen(true)}
-                  className="hidden sm:flex px-2.5 py-0.5 bg-gray-100 text-gray-600 rounded-lg text-[10px] font-black uppercase border border-gray-200 items-center gap-1.5 hover:bg-black hover:text-white transition-colors group"
+                  className="flex px-1.5 sm:px-2.5 py-0.5 bg-gray-100 text-gray-600 rounded-md sm:rounded-lg text-[8px] sm:text-[10px] font-black uppercase border border-gray-200 items-center gap-1 sm:gap-1.5 hover:bg-black hover:text-white transition-colors group shrink-0"
                   title="Yenilikleri Gör"
                 >
-                  <Sparkles size={10} className="group-hover:text-amber-400 transition-colors" />
-                  <span>BETA v1.0</span>
+                  <Sparkles size={8} className="sm:w-2.5 sm:h-2.5 group-hover:text-amber-400 transition-colors" />
+                  <span className="hidden xs:inline sm:inline">BETA</span>
                 </button>
               )}
             </div>
@@ -284,7 +284,7 @@ export default function DashboardHeader({ isDemo = false }: DashboardHeaderProps
             )}
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* SUBSCRIPTION BADGE (Right - Profile Area) */}
             {renderSubscriptionBadge()}
 
