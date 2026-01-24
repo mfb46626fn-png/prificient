@@ -15,6 +15,7 @@ import FeedbackModal from '@/components/FeedbackModal'
 import { useProfile } from '@/app/contexts/ProfileContext'
 import Image from 'next/image'
 import { useSubscription } from '@/app/hooks/useSubscription'
+import SubscriptionDetailModal from '@/components/SubscriptionDetailModal'
 
 type UserProfile = {
   full_name: string | null
@@ -42,6 +43,7 @@ export default function DashboardHeader({ isDemo = false }: DashboardHeaderProps
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [isBetaModalOpen, setIsBetaModalOpen] = useState(false)
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false)
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false)
 
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<UserProfile | null>(null)
@@ -175,28 +177,28 @@ export default function DashboardHeader({ isDemo = false }: DashboardHeaderProps
     // BETA = VISION
     if (subStatus === 'beta') {
       return (
-        <div className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-black/5 border border-black/10 rounded-full">
-          <Crown size={12} className="text-black fill-black" />
-          <span className="text-[10px] font-black uppercase text-black tracking-widest">VISION</span>
-        </div>
+        <button onClick={() => setIsSubscriptionModalOpen(true)} className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-black/5 border border-black/10 rounded-full hover:bg-black hover:text-white transition-colors group">
+          <Crown size={12} className="text-black fill-black group-hover:text-white group-hover:fill-white" />
+          <span className="text-[10px] font-black uppercase tracking-widest">VISION</span>
+        </button>
       )
     }
 
     if (subStatus === 'pro_active') {
       return (
-        <div className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-100 rounded-full text-amber-700">
+        <button onClick={() => setIsSubscriptionModalOpen(true)} className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-100 rounded-full text-amber-700 hover:bg-amber-100 transition-colors">
           <Crown size={12} className="fill-amber-700" />
           <span className="text-[10px] font-black uppercase tracking-widest">PRO</span>
-        </div>
+        </button>
       )
     }
 
     // Fallback for Trial
     if (subStatus === 'trial_active') {
       return (
-        <div className={`hidden md:flex px-3 py-1 rounded-full border text-[10px] font-black uppercase items-center gap-1.5 ${daysLeft < 3 ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+        <button onClick={() => setIsSubscriptionModalOpen(true)} className={`hidden md:flex px-3 py-1 rounded-full border text-[10px] font-black uppercase items-center gap-1.5 hover:opacity-80 transition-opacity ${daysLeft < 3 ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
           <Clock size={12} /> {daysLeft} Gün
-        </div>
+        </button>
       )
     }
 
@@ -487,6 +489,7 @@ export default function DashboardHeader({ isDemo = false }: DashboardHeaderProps
 
       <BetaInfoModal isOpen={isBetaModalOpen} onClose={() => setIsBetaModalOpen(false)} actionLabel="Kullanmaya Başla" onAction={() => router.push('/dashboard')} />
       <FeedbackModal isOpen={isFeedbackModalOpen} onClose={() => setIsFeedbackModalOpen(false)} />
+      <SubscriptionDetailModal isOpen={isSubscriptionModalOpen} onClose={() => setIsSubscriptionModalOpen(false)} status={subStatus} daysLeft={daysLeft} />
     </>
   )
 }
