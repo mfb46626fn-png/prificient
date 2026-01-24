@@ -34,7 +34,7 @@ export default function LandingHeader() {
 
   return (
     <>
-      <header className={`sticky top-0 z-50 w-full border-b border-gray-100 backdrop-blur-md ${isMobileMenuOpen ? 'bg-white' : 'bg-white/90'}`}>
+      <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white md:bg-white/90 md:backdrop-blur-md">
         <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
           {/* LOGO */}
