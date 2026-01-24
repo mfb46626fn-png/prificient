@@ -240,7 +240,7 @@ export default function DashboardHeader({ isDemo = false }: DashboardHeaderProps
       <header className={`bg-white border-b border-gray-100 sticky top-0 z-30 transition-all duration-500 ${isDemo ? 'mt-7' : ''}`}>
         <div className="max-w-[1600px] mx-auto px-4 h-16 flex items-center justify-between">
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* MENÜ BUTONU */}
             <button
               onClick={() => setIsSideMenuOpen(true)}
