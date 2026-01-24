@@ -249,14 +249,14 @@ export default function DashboardHeader({ isDemo = false }: DashboardHeaderProps
               <Menu size={24} />
             </button>
 
-            <div className="flex items-center gap-3">
-              <Link href={isDemo ? "/demo" : "/dashboard"} className="hover:opacity-80 transition-opacity">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Link href={isDemo ? "/demo" : "/dashboard"} className="hover:opacity-80 transition-opacity shrink-0">
                 <Image
                   src="/logo.png"
                   alt="Prificient"
                   width={120}
                   height={40}
-                  className="object-contain h-8 w-auto"
+                  className="object-contain h-6 sm:h-8 w-auto min-w-[80px] sm:min-w-[120px]"
                   priority
                 />
               </Link>
