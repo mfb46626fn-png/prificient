@@ -16,6 +16,11 @@ export default function RecoveryClient({ diagnosis }: RecoveryClientProps) {
 
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [activating, setActivating] = useState(false)
+    const [activeActions, setActiveActions] = useState<string[]>([])
+
+    const toggleAction = (id: string) => {
+        setActiveActions(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+    }
 
     // SCENARIO A: SAFE (Score < 60)
     if (!isCritical) {
@@ -147,15 +152,29 @@ export default function RecoveryClient({ diagnosis }: RecoveryClientProps) {
 
                         <div className="space-y-4 mb-10">
                             {[
-                                'Toksik Ürün Otomatik Kapatma',
-                                'Reklam Bütçesi Koruma Kalkanı',
-                                'Acil Nakit Akış Planı'
-                            ].map((item, i) => (
-                                <div key={i} className="flex items-center gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0">
-                                        <Check size={12} strokeWidth={4} />
+                                { id: 'toxic', label: 'Toksik Ürün Otomatik Kapatma', icon: ShieldAlert },
+                                { id: 'ads', label: 'Reklam Bütçesi Koruma Kalkanı', icon: Activity },
+                                { id: 'cash', label: 'Acil Nakit Akış Planı', icon: Lock }
+                            ].map((item) => (
+                                <div key={item.id} className="flex items-center justify-between bg-gray-50 p-4 rounded-xl border border-gray-100 group hover:border-red-100 transition-colors">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${activeActions.includes(item.id) ? 'bg-red-100 text-red-600' : 'bg-gray-200 text-gray-400'
+                                            }`}>
+                                            {activeActions.includes(item.id) ? <Check size={16} strokeWidth={4} /> : <item.icon size={16} />}
+                                        </div>
+                                        <span className={`font-bold text-sm ${activeActions.includes(item.id) ? 'text-gray-900' : 'text-gray-500'}`}>
+                                            {item.label}
+                                        </span>
                                     </div>
-                                    <span className="font-bold text-sm">{item}</span>
+                                    <button
+                                        onClick={() => toggleAction(item.id)}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeActions.includes(item.id)
+                                            ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                            : 'bg-black text-white hover:bg-gray-800'
+                                            }`}
+                                    >
+                                        {activeActions.includes(item.id) ? 'AKTİF' : 'SEÇ'}
+                                    </button>
                                 </div>
                             ))}
                         </div>
@@ -163,10 +182,12 @@ export default function RecoveryClient({ diagnosis }: RecoveryClientProps) {
                         <button
                             onClick={handleActivate}
                             disabled={activating}
-                            className="w-full py-5 bg-red-600 hover:bg-red-700 text-white text-lg font-black rounded-xl shadow-xl shadow-red-600/30 transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed group"
+                            className={`w-full py-5 text-white text-lg font-black rounded-xl shadow-xl transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed group relative overflow-hidden ${activeActions.length > 0 ? 'bg-red-600 hover:bg-red-700 shadow-red-600/30' : 'bg-gray-400 cursor-not-allowed'
+                                }`}
                         >
-                            {activating ? <Activity className="animate-spin" /> : <Siren className="group-hover:animate-pulse" />}
-                            {activating ? 'BAŞLATILIYOR...' : 'PROTOKOLÜ BAŞLAT'}
+                            <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] bg-[length:250%_250%] animate-[shimmer_2s_infinite]"></div>
+                            {activating ? <Activity className="animate-spin" /> : <Siren className={activeActions.length > 0 ? "group-hover:animate-pulse" : ""} />}
+                            {activating ? 'BAŞLATILIYOR...' : activeActions.length > 0 ? 'PROTOKOLÜ BAŞLAT' : 'AKSİYON SEÇİNİZ'}
                         </button>
 
                         <p className="text-center text-xs text-gray-400 font-bold mt-4 uppercase tracking-wide">

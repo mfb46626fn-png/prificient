@@ -167,32 +167,26 @@ export default function DashboardHeader({ isDemo = false }: DashboardHeaderProps
   const status = "V2 Hazır"
   const statusColor = "text-emerald-600"
 
-  // AKILLI ROZET RENDERER (HEADER)
-  const renderHeaderBadge = () => {
+  // ABONELİK ROZETİ (SAĞ)
+  const renderSubscriptionBadge = () => {
     if (isDemo) return null
-    if (subLoading) return <div className="w-20 h-6 bg-gray-100 rounded-full animate-pulse hidden sm:block"></div>
+    if (subLoading) return <div className="w-16 h-6 bg-gray-50 rounded-lg animate-pulse hidden sm:block"></div>
 
-    // BETA = VISION (User Request)
+    // BETA = VISION
     if (subStatus === 'beta') {
       return (
-        <button
-          onClick={() => setIsBetaModalOpen(true)}
-          className="hidden sm:flex px-3 py-1 bg-black text-white rounded-full text-[10px] font-black uppercase border border-gray-800 items-center gap-2 shadow-sm hover:scale-105 transition-transform hover:bg-gray-900 group"
-          title="Beta detaylarını görüntüle"
-        >
-          <div className="flex items-center gap-1">
-            <Crown size={12} className="text-amber-400 group-hover:rotate-12 transition-transform" />
-            <span className="text-gray-400">BETA</span>
-            <span className="text-white">VISION</span>
-          </div>
-        </button>
+        <div className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-black/5 border border-black/10 rounded-full">
+          <Crown size={12} className="text-black fill-black" />
+          <span className="text-[10px] font-black uppercase text-black tracking-widest">VISION</span>
+        </div>
       )
     }
 
     if (subStatus === 'pro_active') {
       return (
-        <div className="hidden sm:flex px-3 py-1 bg-black text-amber-400 rounded-full text-[10px] font-black uppercase border border-gray-800 items-center gap-1.5 shadow-sm">
-          <Crown size={12} /> PRO
+        <div className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-100 rounded-full text-amber-700">
+          <Crown size={12} className="fill-amber-700" />
+          <span className="text-[10px] font-black uppercase tracking-widest">PRO</span>
         </div>
       )
     }
@@ -200,7 +194,7 @@ export default function DashboardHeader({ isDemo = false }: DashboardHeaderProps
     // Fallback for Trial
     if (subStatus === 'trial_active') {
       return (
-        <div className={`hidden sm:flex px-3 py-1 rounded-full border text-[10px] font-black uppercase items-center gap-1.5 ${daysLeft < 3 ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+        <div className={`hidden md:flex px-3 py-1 rounded-full border text-[10px] font-black uppercase items-center gap-1.5 ${daysLeft < 3 ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
           <Clock size={12} /> {daysLeft} Gün
         </div>
       )
@@ -265,8 +259,17 @@ export default function DashboardHeader({ isDemo = false }: DashboardHeaderProps
                 />
               </Link>
 
-              {/* HEADER PLAN BADGE */}
-              {renderHeaderBadge()}
+              {/* BETA BADGE (Left - Clickable) */}
+              {subStatus === 'beta' && (
+                <button
+                  onClick={() => setIsBetaModalOpen(true)}
+                  className="hidden sm:flex px-2.5 py-0.5 bg-gray-100 text-gray-600 rounded-lg text-[10px] font-black uppercase border border-gray-200 items-center gap-1.5 hover:bg-black hover:text-white transition-colors group"
+                  title="Yenilikleri Gör"
+                >
+                  <Sparkles size={10} className="group-hover:text-amber-400 transition-colors" />
+                  <span>BETA v1.0</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -279,7 +282,10 @@ export default function DashboardHeader({ isDemo = false }: DashboardHeaderProps
             )}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            {/* SUBSCRIPTION BADGE (Right - Profile Area) */}
+            {renderSubscriptionBadge()}
+
             {/* Bildirimler */}
             <div className="relative" ref={notificationRef}>
               <button
