@@ -34,7 +34,7 @@ export default function LandingHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/90 backdrop-blur-md">
+      <header className={`sticky top-0 z-50 w-full border-b border-gray-100 backdrop-blur-md ${isMobileMenuOpen ? 'bg-white' : 'bg-white/90'}`}>
         <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
           {/* LOGO */}
@@ -85,34 +85,34 @@ export default function LandingHeader() {
 
           {/* MOBİL MENÜ */}
           {isMobileMenuOpen && (
-            <div className="fixed inset-0 z-[100] bg-white md:hidden flex flex-col pt-20 px-6 overflow-y-auto">
+            <div className="fixed inset-0 top-16 z-40 bg-white md:hidden flex flex-col pt-8 px-6 animate-in slide-in-from-top-10 fade-in duration-200">
 
               <div className="flex flex-col space-y-2">
                 <Link
                   href="#ozellikler"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-xl font-black text-gray-900 py-3 border-b border-gray-100 tracking-tight"
+                  className="text-2xl font-black text-gray-900 py-4 border-b border-gray-100 tracking-tight"
                 >
                   Özellikler
                 </Link>
                 <Link
                   href="#nasil"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-xl font-black text-gray-900 py-3 border-b border-gray-100 tracking-tight"
+                  className="text-2xl font-black text-gray-900 py-4 border-b border-gray-100 tracking-tight"
                 >
                   Nasıl Çalışır?
                 </Link>
                 <Link
                   href="#pricing"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-xl font-black text-gray-900 py-3 border-b border-gray-100 tracking-tight"
+                  className="text-2xl font-black text-gray-900 py-4 border-b border-gray-100 tracking-tight"
                 >
                   Fiyatlar
                 </Link>
                 <Link
                   href="#vision"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-xl font-black text-gray-900 py-3 border-b border-gray-100 tracking-tight"
+                  className="text-2xl font-black text-gray-900 py-4 border-b border-gray-100 tracking-tight"
                 >
                   Vizyonumuz
                 </Link>
