@@ -9,6 +9,7 @@ import BillingSettings from '@/components/BillingSettings'
 import Image from 'next/image'
 import { useProfile } from '@/app/contexts/ProfileContext'
 import { useRouter } from 'next/navigation'
+import { updatePassword, deleteAccount } from '@/lib/actions/auth'
 
 interface SettingsClientProps {
   initialProfile: { full_name: string, username: string, email?: string }
@@ -121,17 +122,23 @@ export default function SettingsClient({ initialProfile, isDemo = false }: Setti
     }
   }
 
+
+
   // --- SAVE PASSWORD ---
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault()
     setPasswordSaving(true)
-    if (passData.newPassword !== passData.confirmPassword) {
-      showToast({ type: 'error', title: 'Hata', message: 'Şifreler uyuşmuyor.' }); setPasswordSaving(false); return;
-    }
-    const { error } = await supabase.auth.updateUser({ password: passData.newPassword })
-    if (error) showToast({ type: 'error', title: 'Hata', message: error.message })
-    else {
-      showToast({ type: 'success', title: 'Başarılı', message: 'Şifre güncellendi.' })
+
+    const formData = new FormData()
+    formData.append('password', passData.newPassword)
+    formData.append('confirmPassword', passData.confirmPassword)
+
+    const result = await updatePassword(formData)
+
+    if (result.error) {
+      showToast({ type: 'error', title: 'Hata', message: result.error })
+    } else {
+      showToast({ type: 'success', title: 'Başarılı', message: result.success as string })
       setPassData({ newPassword: '', confirmPassword: '' })
     }
     setPasswordSaving(false)
@@ -139,9 +146,16 @@ export default function SettingsClient({ initialProfile, isDemo = false }: Setti
 
   // --- DELETE ACCOUNT ---
   const handleDeleteAccount = async () => {
-    if (window.confirm("HESABINIZI TAMAMEN SİLMEK İSTEDİĞİNİZE EMİN MİSİNİZ?")) {
-      await supabase.auth.signOut()
-      router.push('/login')
+    if (window.confirm("HESABINIZI TAMAMEN SİLMEK İSTEDİĞİNİZE EMİN MİSİNİZ? BU İŞLEM GERİ ALINAMAZ.")) {
+      const result = await deleteAccount()
+
+      if (result.error) {
+        showToast({ type: 'error', title: 'Hata', message: result.error })
+      } else {
+        await supabase.auth.signOut()
+        router.push('/login')
+        showToast({ type: 'success', title: 'Hesap Silindi', message: 'Hesabınız başarıyla silindi. Sizi özleyeceğiz.' })
+      }
     }
   }
 

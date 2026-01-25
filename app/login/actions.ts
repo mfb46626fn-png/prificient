@@ -20,7 +20,7 @@ export async function login(formData: FormData) {
 
   // --- KRİTİK GÜNCELLEME: Onboarding Kontrolü ---
   // Giriş başarılıysa, kullanıcının onboarding'i bitirip bitirmediğine bakıyoruz.
-  
+
   const { data: { user } } = await supabase.auth.getUser()
 
   if (user) {
@@ -58,17 +58,29 @@ export async function signup(formData: FormData) {
         full_name: data.full_name,
         username: data.username,
         // YENİ: Başlangıçta false olarak işaretliyoruz
-        is_onboarding_completed: false 
+        is_onboarding_completed: false
       },
     },
   })
+
+  if (!error) {
+    // Send Welcome Email
+    // Note: We don't await this to keep the response fast, 
+    // or we can wrap it in a try-catch to prevent failure if email fails.
+    try {
+      const { EmailService } = await import('@/lib/email');
+      await EmailService.sendWelcome(data.email, data.full_name);
+    } catch (e) {
+      console.error('Failed to send welcome email:', e);
+    }
+  }
 
   if (error) {
     return { error: error.message }
   }
 
   revalidatePath('/', 'layout')
-  
+
   // YENİ: Kayıt başarılı olduğu an Dashboard'a değil, 
   // soruları soracağımız Onboarding sayfasına yönlendiriyoruz.
   redirect('/onboarding')

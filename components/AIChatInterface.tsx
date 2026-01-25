@@ -15,7 +15,7 @@ export default function AIChatInterface() {
   // Visibility Control: Hide on public pages
   const isPublicRoute = pathname === '/' || pathname === '/login' || pathname === '/register' || pathname?.startsWith('/auth')
 
-  if (isPublicRoute) return null;
+
 
   // Vercel AI SDK Hook - Cast to any to bypass version mismatch type errors
   const { messages, setMessages, regenerate, status } = useChat({
@@ -93,6 +93,8 @@ export default function AIChatInterface() {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
     }
   }, [messages])
+
+  if (isPublicRoute) return null;
 
   return (
     <>

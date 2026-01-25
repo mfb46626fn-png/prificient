@@ -30,7 +30,7 @@ export const SupportService = {
         if (messageError) throw messageError;
 
         // 3. Send Email
-        await EmailService.sendTicketNotification(ticket.userEmail, ticketData.id, ticket.subject);
+        await EmailService.sendTicketCreated(ticket.userEmail, ticketData.id, ticket.subject);
 
         return ticketData;
     },
@@ -74,12 +74,11 @@ export const SupportService = {
                 // Fetch ticket details for subject if not already available
                 const { data: ticketDetails } = await supabaseAdmin.from('support_tickets').select('subject, user_id').eq('id', params.ticketId).single();
 
-                await EmailService.sendTicketReply(
+                await EmailService.sendTicketReplied(
                     emailToSend,
                     params.ticketId,
                     ticketDetails?.subject || 'Destek Talebi',
-                    params.message,
-                    `${process.env.NEXT_PUBLIC_APP_URL}/support`
+                    `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`
                 );
             } else {
                 const { data: ticketDetails } = await supabaseAdmin.from('support_tickets').select('user_id').eq('id', params.ticketId).single();

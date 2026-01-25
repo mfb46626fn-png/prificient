@@ -1,97 +1,201 @@
 import { Resend } from 'resend';
-import { TicketCreated } from '@/emails/TicketCreated';
-import { TicketReplied } from '@/emails/TicketReplied';
-import { WeeklyFinancialReport } from '@/emails/WeeklyFinancialReport';
-import { TicketClosed } from '@/emails/TicketClosed';
+import ResetPasswordEmail from '@/emails/ResetPasswordEmail';
+import WelcomeEmail from '@/emails/WelcomeEmail';
+import SecurityAlertEmail from '@/emails/SecurityAlertEmail';
+import WeeklyFinancialReport from '@/emails/WeeklyFinancialReport';
+import TicketClosed from '@/emails/TicketClosed';
+import TicketCreated from '@/emails/TicketCreated';
+import TicketReplied from '@/emails/TicketReplied';
 
-// Configuration
-// Safe initialization for build time
-const resend = new Resend(process.env.RESEND_API_KEY || 're_123_dummy');
-const RESEND_FROM_EMAIL = 'Prificient <info@prificient.com>';
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-type EmailPayload = {
-    to: string;
+const FROM_EMAIL = 'Prificient <onboarding@prificient.com>'; // Make sure this domain is verified in Resend
+
+export const sendEmail = async ({
+    to,
+    subject,
+    react,
+}: {
+    to: string | string[];
     subject: string;
-    react: React.ReactElement; // Using ReactElement type from React
-    replyTo?: string;
-};
-
-// Generic Wrapper Function
-export const sendEmail = async ({ to, subject, react, replyTo }: EmailPayload) => {
-    if (!process.env.RESEND_API_KEY) {
-        console.warn('RESEND_API_KEY is missing. Email skipped.');
-        return { success: false, error: 'Missing API Key' };
-    }
-
+    react: React.ReactElement;
+}) => {
     try {
         const { data, error } = await resend.emails.send({
-            from: RESEND_FROM_EMAIL,
+            from: FROM_EMAIL,
             to,
             subject,
             react,
-            replyTo: replyTo,
         });
 
         if (error) {
-            console.error('Resend Error:', error);
+            console.error('Error sending email:', error);
             return { success: false, error };
         }
 
         return { success: true, data };
     } catch (error) {
-        console.error('Unexpected Email Error:', error);
+        console.error('Exception sending email:', error);
         return { success: false, error };
     }
 };
 
-// Specialized Functions
 export const EmailService = {
-    // Triggered when user creates a ticket
-    async sendTicketNotification(userEmail: string, ticketId: string, ticketSubject: string, userName?: string) {
-        await sendEmail({
-            to: userEmail,
-            subject: `Destek Talebiniz Alındı (Ticket #${ticketId})`,
-            react: TicketCreated({ userName, ticketId, subject: ticketSubject })
-        });
+    sendResetPassword: async (email: string, url: string) => {
+        try {
+            const { data, error } = await resend.emails.send({
+                from: FROM_EMAIL,
+                to: [email],
+                subject: 'Şifrenizi Sıfırlayın - Prificient',
+                react: ResetPasswordEmail({ resetLink: url }),
+            });
+
+            if (error) {
+                console.error('Error sending reset password email:', error);
+                return { success: false, error };
+            }
+
+            return { success: true, data };
+        } catch (error) {
+            console.error('Exception sending reset password email:', error);
+            return { success: false, error };
+        }
     },
 
-    // Triggered when support replies
-    async sendTicketReply(userEmail: string, ticketId: string, ticketSubject: string, replyMessage: string, dashboardUrl: string, userName?: string) {
-        // replyTo could receive future automated processing emails like support+ticketId@prificient.com
-        await sendEmail({
-            to: userEmail,
-            subject: `Destek Talebiniz Yanıtlandı (Ticket #${ticketId})`,
-            react: TicketReplied({ userName, ticketSubject, ticketId, dashboardUrl }),
-            replyTo: `support+${ticketId}@prificient.com` // Future-proof: direct reply processing
-        });
+    sendWelcome: async (email: string, name?: string) => {
+        try {
+            const { data, error } = await resend.emails.send({
+                from: FROM_EMAIL,
+                to: [email],
+                subject: "Prificient'a Hoş Geldiniz - Gerçekler Başlıyor",
+                react: WelcomeEmail({ name }),
+            });
+
+            if (error) {
+                console.error('Error sending welcome email:', error);
+                return { success: false, error };
+            }
+
+            return { success: true, data };
+        } catch (error) {
+            console.error('Exception sending welcome email:', error);
+            return { success: false, error };
+        }
     },
 
-    // Weekly Report Cron Job
-    // Weekly/Daily/Monthly Report Cron Job
-    async sendWeeklyReport(userEmail: string, reportData: { title?: string, netProfit: string, revenue: string, adSpend: string, roi: string, dashboardUrl: string, dateRange: string, userName?: string }) {
-        const title = reportData.title || "Haftalık Finansal Özet";
-        await sendEmail({
-            to: userEmail,
-            subject: `${title}: ${reportData.dateRange}`,
-            react: WeeklyFinancialReport({
-                title: title, // Updated Prop
-                userName: reportData.userName,
-                netProfit: reportData.netProfit,
-                revenue: reportData.revenue,
-                adSpend: reportData.adSpend,
-                roi: reportData.roi,
-                dashboardUrl: reportData.dashboardUrl,
-                dateRange: reportData.dateRange,
-            })
-        });
+    sendSecurityAlert: async (email: string, type: 'password_changed' | 'account_deleted') => {
+        const subjects = {
+            password_changed: '⚠️ Güvenlik Uyarısı: Şifreniz Değiştirildi',
+            account_deleted: '⚠️ Güvenlik Uyarısı: Hesabınız Silindi',
+        };
+
+        try {
+            const { data, error } = await resend.emails.send({
+                from: FROM_EMAIL,
+                to: [email],
+                subject: subjects[type],
+                react: SecurityAlertEmail({
+                    type,
+                    date: new Date().toLocaleDateString('tr-TR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
+                }),
+            });
+
+            if (error) {
+                console.error('Error sending security alert email:', error);
+                return { success: false, error };
+            }
+
+            return { success: true, data };
+        } catch (error) {
+            console.error('Exception sending security alert email:', error);
+            return { success: false, error };
+        }
     },
 
-    // Triggered when ticket is closed
-    async sendTicketClosed(userEmail: string, ticketId: string, ticketSubject: string, userName?: string) {
-        await sendEmail({
-            to: userEmail,
-            subject: `Talebiniz Kapatıldı (Ticket #${ticketId})`,
-            react: TicketClosed({ userName, ticketSubject, ticketId })
-        });
-    }
+    sendWeeklyReport: async (email: string, props: any) => {
+        try {
+            const { data, error } = await resend.emails.send({
+                from: FROM_EMAIL,
+                to: [email],
+                subject: `${props.title || 'Haftalık Özet'} - Prificient`,
+                react: WeeklyFinancialReport(props),
+            });
+
+            if (error) {
+                console.error('Error sending weekly report:', error);
+                return { success: false, error };
+            }
+
+            return { success: true, data };
+        } catch (error) {
+            console.error('Exception sending weekly report:', error);
+            return { success: false, error };
+        }
+    },
+
+    sendTicketCreated: async (email: string, ticketId: string, subject: string, userName?: string) => {
+        try {
+            const { data, error } = await resend.emails.send({
+                from: FROM_EMAIL,
+                to: [email],
+                subject: `Destek Talebi Oluşturuldu: ${subject} (#${ticketId})`,
+                react: TicketCreated({ userName, ticketId, subject }),
+            });
+
+            if (error) {
+                console.error('Error sending ticket created email:', error);
+                return { success: false, error };
+            }
+            return { success: true, data };
+        } catch (error) {
+            console.error('Exception sending ticket created email:', error);
+            return { success: false, error };
+        }
+    },
+
+    sendTicketReplied: async (email: string, ticketId: string, ticketSubject: string, dashboardUrl: string, userName?: string) => {
+        try {
+            const { data, error } = await resend.emails.send({
+                from: FROM_EMAIL,
+                to: [email],
+                subject: `Destek Talebinize Yanıt: ${ticketSubject} (#${ticketId})`,
+                react: TicketReplied({ userName, ticketSubject, ticketId, dashboardUrl }),
+            });
+
+            if (error) {
+                console.error('Error sending ticket replied email:', error);
+                return { success: false, error };
+            }
+            return { success: true, data };
+        } catch (error) {
+            console.error('Exception sending ticket replied email:', error);
+            return { success: false, error };
+        }
+    },
+
+    sendTicketClosed: async (email: string, ticketId: string, ticketSubject: string, userName?: string) => {
+        try {
+            const { data, error } = await resend.emails.send({
+                from: FROM_EMAIL,
+                to: [email],
+                subject: `Destek Talebi Kapatıldı: ${ticketSubject} (#${ticketId})`,
+                react: TicketClosed({ userName, ticketSubject, ticketId }),
+            });
+
+            if (error) {
+                console.error('Error sending ticket closed email:', error);
+                return { success: false, error };
+            }
+            return { success: true, data };
+        } catch (error) {
+            console.error('Exception sending ticket closed email:', error);
+            return { success: false, error };
+        }
+    },
 };
