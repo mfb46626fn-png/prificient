@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import ConnectShopifyClient from '@/components/ConnectShopifyClient'
+import ShopifySettingsModal from '@/components/ShopifySettingsModal'
 
 export default function ConnectShopifyPage() {
     const [shopUrl, setShopUrl] = useState('')
     const [loading, setLoading] = useState(false)
-    const [isConnected, setIsConnected] = useState(false) // Normally verify with backend
+    const [isConnected, setIsConnected] = useState(false)
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false)
     const router = useRouter()
     const supabase = createClient()
 
@@ -64,13 +66,39 @@ export default function ConnectShopifyPage() {
         }
     }
 
+    const handleDisconnect = async () => {
+        const response = await fetch('/api/shopify/disconnect', {
+            method: 'POST'
+        })
+
+        if (!response.ok) {
+            const data = await response.json()
+            throw new Error(data.error || 'Bağlantı iptal edilemedi')
+        }
+
+        // Reset state
+        setIsConnected(false)
+        setShopUrl('')
+        setIsSettingsOpen(false)
+    }
+
     return (
-        <ConnectShopifyClient
-            shopUrl={shopUrl}
-            setShopUrl={setShopUrl}
-            loading={loading}
-            handleConnect={handleConnect}
-            isConnected={isConnected}
-        />
+        <>
+            <ConnectShopifyClient
+                shopUrl={shopUrl}
+                setShopUrl={setShopUrl}
+                loading={loading}
+                handleConnect={handleConnect}
+                isConnected={isConnected}
+                onOpenSettings={() => setIsSettingsOpen(true)}
+            />
+
+            <ShopifySettingsModal
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                shopDomain={shopUrl}
+                onDisconnect={handleDisconnect}
+            />
+        </>
     )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import DashboardHeader from '@/components/DashboardHeader'
-import { ShoppingBag, ArrowRight, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { ShoppingBag, ArrowRight, CheckCircle2, AlertCircle, Loader2, Settings } from 'lucide-react'
 import Image from 'next/image'
 
 interface ConnectShopifyClientProps {
@@ -11,6 +11,7 @@ interface ConnectShopifyClientProps {
     handleConnect: () => void
     isConnected: boolean
     isDemo?: boolean
+    onOpenSettings?: () => void
 }
 
 export default function ConnectShopifyClient({
@@ -19,7 +20,8 @@ export default function ConnectShopifyClient({
     loading,
     handleConnect,
     isConnected,
-    isDemo = false
+    isDemo = false,
+    onOpenSettings
 }: ConnectShopifyClientProps) {
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
@@ -47,8 +49,13 @@ export default function ConnectShopifyClient({
                                     Bağlantı Aktif
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900 mb-2">Tebrikler!</h3>
-                                <p className="text-gray-500 mb-8">Mağazanız başarıyla bağlandı. Analizler hazırlanıyor.</p>
-                                <button className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold hover:bg-black transition-all" disabled>
+                                <p className="text-gray-500 mb-2">{shopUrl}</p>
+                                <p className="text-gray-400 text-sm mb-8">Mağazanız başarıyla bağlandı. Analizler hazırlanıyor.</p>
+                                <button
+                                    onClick={onOpenSettings}
+                                    className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold hover:bg-black transition-all flex items-center justify-center gap-2"
+                                >
+                                    <Settings size={20} />
                                     Ayarları Yönet
                                 </button>
                             </div>

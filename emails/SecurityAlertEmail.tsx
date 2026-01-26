@@ -15,11 +15,15 @@ import * as React from "react";
 interface SecurityAlertEmailProps {
     type: 'password_changed' | 'account_deleted';
     date: string;
+    name?: string;
+    ipAddress?: string;
 }
 
 export const SecurityAlertEmail = ({
     type,
     date,
+    name,
+    ipAddress,
 }: SecurityAlertEmailProps) => {
     const isDeletion = type === 'account_deleted';
     const title = isDeletion ? "Hesabınız Silindi" : "Şifreniz Değiştirildi";

@@ -41,13 +41,13 @@ export const sendEmail = async ({
 };
 
 export const EmailService = {
-    sendResetPassword: async (email: string, url: string) => {
+    sendResetPassword: async (email: string, url: string, name?: string) => {
         try {
             const { data, error } = await resend.emails.send({
                 from: FROM_EMAIL,
                 to: [email],
                 subject: 'Şifrenizi Sıfırlayın - Prificient',
-                react: ResetPasswordEmail({ resetLink: url }),
+                react: ResetPasswordEmail({ resetLink: url, name }),
             });
 
             if (error) {
@@ -83,7 +83,7 @@ export const EmailService = {
         }
     },
 
-    sendSecurityAlert: async (email: string, type: 'password_changed' | 'account_deleted') => {
+    sendSecurityAlert: async (email: string, type: 'password_changed' | 'account_deleted', name?: string, ipAddress?: string) => {
         const subjects = {
             password_changed: '⚠️ Güvenlik Uyarısı: Şifreniz Değiştirildi',
             account_deleted: '⚠️ Güvenlik Uyarısı: Hesabınız Silindi',
@@ -96,6 +96,8 @@ export const EmailService = {
                 subject: subjects[type],
                 react: SecurityAlertEmail({
                     type,
+                    name,
+                    ipAddress,
                     date: new Date().toLocaleDateString('tr-TR', {
                         day: 'numeric',
                         month: 'long',
