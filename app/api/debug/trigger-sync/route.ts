@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
             user.id,
             integration.shop_domain,
             integration.access_token,
-            7 // Reduced to 7 days for stability
+            90 // Restore to 90 days
         );
 
         // Fetch & Update Currency (Async)

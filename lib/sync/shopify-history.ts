@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase-admin';
 import { Session } from '@shopify/shopify-api';
 
 export const ShopifyHistoryScanner = {
-    async scanPastShopifyData(userId: string, shopDomain: string, accessToken: string, daysToScan = 7) { // Reduced to 7 days for stability
+    async scanPastShopifyData(userId: string, shopDomain: string, accessToken: string, daysToScan = 90) {
         console.log(`[HistoryScan] === STARTING SYNC ===`);
         console.log(`[HistoryScan] User: ${userId}`);
         console.log(`[HistoryScan] Shop: ${shopDomain}`);
