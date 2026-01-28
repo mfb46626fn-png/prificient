@@ -8,7 +8,7 @@ import DailyAutopsy from '@/components/DailyAutopsy'
 import { ProductAnalysis } from '@/lib/analysis/product-profitability'
 import { LedgerService } from '@/lib/ledger'
 import Link from 'next/link'
-import { LayoutDashboard, BarChart3 } from 'lucide-react'
+import { LayoutDashboard, BarChart3, TrendingDown } from 'lucide-react'
 import DeepScanTrigger from '@/components/DeepScanTrigger'
 import AnalyticsDashboard from '@/components/AnalyticsDashboard'
 import GhostExpenseCard from '@/components/GhostExpenseCard'
@@ -175,19 +175,23 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     // 2. Analytics Data (Financial)
     let analyticsData = null
     let productPerformance = []
+    let analyticsError = null
 
     if (view === 'analytics') {
-        const finData = await getFinancialData(user, supabase, startDate, now)
+        try {
+            const finData = await getFinancialData(user, supabase, startDate, now)
 
-        // Fetch Product Data (Re-using polarity logic or custom query)
-        // For MVP, reusing getProductsByProfitability (it scans recent history)
-        // TODO: Pass date range to ProductAnalysis in future
-        const prodData = await ProductAnalysis.getProductsByProfitability(user.id)
-        productPerformance = [...prodData.heroes, ...prodData.villains].sort((a, b) => b.profit - a.profit)
+            // Product Data
+            const prodData = await ProductAnalysis.getProductsByProfitability(user.id)
+            productPerformance = [...prodData.heroes, ...prodData.villains].sort((a, b) => b.profit - a.profit)
 
-        analyticsData = {
-            ...finData,
-            products: productPerformance
+            analyticsData = {
+                ...finData,
+                products: productPerformance
+            }
+        } catch (err: any) {
+            console.error("Analytics Fetch Error:", err)
+            analyticsError = "Veri çekilirken bir hata oluştu: " + (err.message || "Bilinmeyen Hata")
         }
     }
 
@@ -244,15 +248,36 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             )}
 
             {/* VIEW: ANALYTICS (NEW) */}
-            {view === 'analytics' && analyticsData && (
+            {view === 'analytics' && (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="flex justify-end mb-4 md:hidden">
-                        <DeepScanTrigger autoTrigger={syncStart} />
-                    </div>
-                    <AnalyticsDashboard
-                        currency={analyticsData.currency}
-                        data={analyticsData}
-                    />
+                    {analyticsError ? (
+                        <div className="bg-red-50 text-red-700 p-6 rounded-xl border border-red-200 mb-6 shadow-sm">
+                            <h3 className="font-bold flex items-center gap-2">
+                                <TrendingDown size={20} />
+                                Veri Yüklenemedi
+                            </h3>
+                            <p className="text-sm mt-2 font-medium">{analyticsError}</p>
+                            <p className="text-xs mt-4 opacity-75">Lütfen "Analizi Yenile" butonunu kullanarak verilerinizi güncellemeyi deneyin veya destek ekibiyle iletişime geçin.</p>
+                            <div className="mt-4">
+                                <DeepScanTrigger autoTrigger={false} />
+                            </div>
+                        </div>
+                    ) : analyticsData ? (
+                        <>
+                            <div className="flex justify-end mb-4 md:hidden">
+                                <DeepScanTrigger autoTrigger={syncStart} />
+                            </div>
+                            <AnalyticsDashboard
+                                currency={analyticsData.currency}
+                                data={analyticsData}
+                            />
+                        </>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center p-20 text-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-4"></div>
+                            <p className="text-gray-500 font-medium">Verileriniz analiz ediliyor...</p>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

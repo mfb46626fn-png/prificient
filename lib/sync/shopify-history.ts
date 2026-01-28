@@ -19,6 +19,7 @@ export const ShopifyHistoryScanner = {
 
         // 1. Fetch Product Costs (Global Map: VariantID -> Cost)
         let variantCostMap: Record<string, number> = {};
+        /* 
         try {
             console.log(`[HistoryScan] Fetching product costs...`);
             variantCostMap = await fetchVariantCosts(client);
@@ -26,6 +27,7 @@ export const ShopifyHistoryScanner = {
         } catch (e: any) {
             console.error(`[HistoryScan] Failed to fetch costs (Check scopes?):`, e.message);
         }
+        */
 
         // Calculate Date Range
         const sinceDate = new Date();
