@@ -107,7 +107,8 @@ export class LedgerService {
                         // Alacak: KDV/Vergiler (Yükümlülük) -> 20 TL (User Requested Account 200)
                         { account_code: '200', direction: 'CREDIT', amount: tax }
                     ],
-                    event_id
+                    event_id,
+                    supabase // Pass client!
                 )
                 break
 
@@ -132,7 +133,8 @@ export class LedgerService {
                         // Ancak DEFAULT_ACCOUNTS içinde 320 yok. 100 (Kasa/Banka) kullanalım (Nakit/Kart Çıkışı).
                         { account_code: '100', direction: 'CREDIT', amount: expenseAmount }
                     ],
-                    event_id
+                    event_id,
+                    supabase // Pass client!
                 )
                 break;
 
@@ -227,7 +229,7 @@ export class LedgerService {
                     `İade #${payload.order_id} (Ref: ${payload.id})`,
                     refundEntries,
                     event_id,
-                    supabase
+                    supabase // Pass client!
                 )
                 break;
                 console.warn(`Unknown Event Type: ${event_type}`)
