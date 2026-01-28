@@ -15,10 +15,12 @@ interface LedgerEntryInput {
 export const DEFAULT_ACCOUNTS = [
     { code: '100', name: 'Kasa / Banka', type: 'ASSET', normal: 'DEBIT' },
     { code: '120', name: 'Alıcılar', type: 'ASSET', normal: 'DEBIT' },
+    { code: '153', name: 'Ticari Mallar (Stok)', type: 'ASSET', normal: 'DEBIT' }, // Inventory
     { code: '200', name: 'Ödenecek KDV/Vergiler', type: 'LIABILITY', normal: 'CREDIT' }, // New User Request (Pass-Through)
-    { code: '391', name: 'Hesaplanan KDV', type: 'LIABILITY', normal: 'CREDIT' }, // Keeping for legacy/compatibility
+    { code: '391', name: 'Hesaplanan KDV', type: 'LIABILITY', normal: 'CREDIT' },
     { code: '600', name: 'Yurt İçi Satışlar', type: 'REVENUE', normal: 'CREDIT' },
-    { code: '610', name: 'Satış İadeleri', type: 'REVENUE', normal: 'DEBIT' }, // Contra-Revenue
+    { code: '610', name: 'Satış İadeleri', type: 'REVENUE', normal: 'DEBIT' },
+    { code: '621', name: 'Satılan Malın Maliyeti', type: 'EXPENSE', normal: 'DEBIT' }, // COGS
     { code: '740', name: 'Hizmet Üretim Giderleri', type: 'EXPENSE', normal: 'DEBIT' }, // Fees
     { code: '750', name: 'Kargo Giderleri', type: 'EXPENSE', normal: 'DEBIT' },
     { code: '760', name: 'Pazarlama Giderleri', type: 'EXPENSE', normal: 'DEBIT' },
@@ -107,6 +109,30 @@ export class LedgerService {
                     event_id,
                     supabase // Pass client!
                 )
+
+                // 2. Maliyet Kaydı (COGS)
+                // History Scanner tarafından 'line_items' içine '__cost' enjekte edildiğini varsayıyoruz.
+                let totalCost = 0
+                if (payload.line_items && Array.isArray(payload.line_items)) {
+                    totalCost = payload.line_items.reduce((sum: number, item: any) => {
+                        const unitCost = Number(item.__cost || item.cost_per_item || 0)
+                        return sum + (unitCost * (item.quantity || 1))
+                    }, 0)
+                }
+
+                if (totalCost > 0) {
+                    await this.postTransaction(
+                        user_id,
+                        `Maliyet Fişi: Sipariş #${payload.order_number}`,
+                        [
+                            { account_code: '621', direction: 'DEBIT', amount: totalCost }, // Satılan Malın Maliyeti
+                            { account_code: '153', direction: 'CREDIT', amount: totalCost } // Ticari Mallar (Stoktan Çıkış)
+                        ],
+                        event_id,
+                        supabase
+                    )
+                }
+
                 break
 
             case 'AdSpendRecorded':

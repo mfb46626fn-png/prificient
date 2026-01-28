@@ -15,9 +15,17 @@ export const ShopifyHistoryScanner = {
         };
 
         const client = new shopify.clients.Rest({ session: session as any });
-
-        // Use ADMIN client to bypass RLS policies
         const supabase = createAdminClient();
+
+        // 1. Fetch Product Costs (Global Map: VariantID -> Cost)
+        let variantCostMap: Record<string, number> = {};
+        try {
+            console.log(`[HistoryScan] Fetching product costs...`);
+            variantCostMap = await fetchVariantCosts(client);
+            console.log(`[HistoryScan] Cost Map built for ${Object.keys(variantCostMap).length} variants.`);
+        } catch (e: any) {
+            console.error(`[HistoryScan] Failed to fetch costs (Check scopes?):`, e.message);
+        }
 
         // Calculate Date Range
         const sinceDate = new Date();
@@ -75,6 +83,16 @@ export const ShopifyHistoryScanner = {
                             continue;
                         }
 
+                        // INJECT COST DATA
+                        if (order.line_items) {
+                            order.line_items = order.line_items.map((item: any) => {
+                                // Variant ID might be null (custom item), number or string
+                                const vId = item.variant_id;
+                                const cost = vId && variantCostMap[String(vId)] ? variantCostMap[String(vId)] : 0;
+                                return { ...item, __cost: cost };
+                            });
+                        }
+
                         // Record Event - Pass admin client
                         await LedgerService.recordEvent(
                             userId,
@@ -111,3 +129,56 @@ export const ShopifyHistoryScanner = {
     }
 };
 
+// --- HELPER FUNC ---
+async function fetchVariantCosts(client: any): Promise<Record<string, number>> {
+    const costMap: Record<string, number> = {};
+
+    // 1. Fetch Products to get Variant->InventoryItem mapping
+    // Assuming < 250 products for MVP. If more, need pagination.
+    const productsRes: any = await client.get({ path: 'products', query: { limit: 250, fields: 'id,variants' } });
+    const products = productsRes.body.products || [];
+
+    const inventoryItemIds: number[] = [];
+    const invIdToVariantId: Record<string, string[]> = {}; // One InvItem could belong to multiple variants theoretically
+
+    products.forEach((p: any) => {
+        p.variants?.forEach((v: any) => {
+            if (v.inventory_item_id) {
+                inventoryItemIds.push(v.inventory_item_id);
+                const iid = String(v.inventory_item_id);
+                if (!invIdToVariantId[iid]) invIdToVariantId[iid] = [];
+                invIdToVariantId[iid].push(String(v.id));
+            }
+        });
+    });
+
+    // 2. Fetch Inventory Items Cost
+    // Batch into 50s
+    const chunks = [];
+    for (let i = 0; i < inventoryItemIds.length; i += 50) {
+        chunks.push(inventoryItemIds.slice(i, i + 50));
+    }
+
+    for (const chunk of chunks) {
+        if (chunk.length === 0) continue;
+        const invRes: any = await client.get({
+            path: 'inventory_items',
+            query: { ids: chunk.join(','), limit: 50 }
+        });
+
+        const items = invRes.body.inventory_items || [];
+        items.forEach((item: any) => {
+            const cost = parseFloat(item.cost || '0');
+            const iid = String(item.id);
+            // Map cost back to Variant ID(s)
+            const variantIds = invIdToVariantId[iid];
+            if (variantIds) {
+                variantIds.forEach(vid => {
+                    costMap[vid] = cost;
+                });
+            }
+        });
+    }
+
+    return costMap;
+}
