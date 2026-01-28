@@ -257,8 +257,14 @@ export class LedgerService {
         if (!accounts) throw new Error("Hesap planı bulunamadı.")
 
         const resolvedEntries = entries.map(entry => {
-            const acc = accounts.find((a: any) => a.code === entry.account_code)
-            if (!acc) throw new Error(`Hesap Kodu Bulunamadı: ${entry.account_code}`)
+            // Robust check: cast to string and trim
+            const searchCode = String(entry.account_code).trim();
+            const acc = accounts.find((a: any) => String(a.code).trim() === searchCode);
+
+            if (!acc) {
+                const availableCodes = accounts.map((a: any) => a.code).join(', ');
+                throw new Error(`Hesap Kodu Bulunamadı: "${entry.account_code}" (Aranan: "${searchCode}"). Mevcut Kodlar: [${availableCodes}]`)
+            }
             return {
                 user_id,
                 account_id: acc.id,
