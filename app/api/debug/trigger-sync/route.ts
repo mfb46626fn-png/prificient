@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { ShopifyHistoryScanner } from '@/lib/sync/shopify-history';
+import shopify from '@/lib/shopify';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // Vercel Pro max
@@ -54,6 +55,21 @@ export async function POST(req: NextRequest) {
             90 // Last 90 days
         );
 
+        // Fetch & Update Currency (Async)
+        try {
+            const session = { shop: integration.shop_domain, accessToken: integration.access_token };
+            const client = new shopify.clients.Rest({ session: session as any });
+            const shopInfo: any = await client.get({ path: 'shop' });
+            const currency = shopInfo.body?.shop?.currency;
+
+            if (currency) {
+                await supabaseAdmin.from('store_settings').update({ currency }).eq('user_id', user.id);
+                console.log(`[ManualSync] Currency updated: ${currency}`);
+            }
+        } catch (err) {
+            console.error('[ManualSync] Currency update warning:', err);
+        }
+
         const duration = Date.now() - startTime;
 
         console.log('[ManualSync] === SYNC COMPLETE ===');
@@ -62,7 +78,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            syncedOrders: syncedCount,
+            syncedOrders: syncedCount || 0, // Ensure number
             shopDomain: integration.shop_domain,
             durationMs: duration
         });

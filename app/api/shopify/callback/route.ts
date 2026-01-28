@@ -53,6 +53,38 @@ export async function GET(req: NextRequest) {
             console.log('[Shopify Callback] Integration saved successfully')
         }
 
+        // Fetch Shop Currency & Update Settings
+        try {
+            const client = new shopify.clients.Rest({ session: session as any })
+            const shopInfo: any = await client.get({ path: 'shop' })
+            const currency = shopInfo.body?.shop?.currency
+
+            if (currency) {
+                // Try to update existing settings first
+                const { error: settingsUpdateError } = await supabase
+                    .from('store_settings')
+                    .update({ currency: currency })
+                    .eq('user_id', user.id)
+
+                if (settingsUpdateError) {
+                    console.warn('[Shopify Callback] Currency update failed, trying upsert...', settingsUpdateError)
+                    // Fallback: Create settings if not exists (with dummy defaults)
+                    await supabase.from('store_settings').upsert({
+                        user_id: user.id,
+                        currency: currency,
+                        company_type: 'other', // Default
+                        active_channels: {},
+                        payment_gateways: {},
+                        avg_shipping_cost: 0,
+                        avg_packaging_cost: 0
+                    }, { onConflict: 'user_id' })
+                }
+                console.log(`[Shopify Callback] Currency updated: ${currency}`)
+            }
+        } catch (currencyError) {
+            console.error('[Shopify Callback] Failed to fetch/save currency:', currencyError)
+        }
+
         // Webhook Registration (optional, can fail silently)
         try {
             await shopify.webhooks.register({ session })

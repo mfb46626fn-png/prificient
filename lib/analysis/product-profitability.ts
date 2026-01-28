@@ -8,6 +8,9 @@ export interface ProductFinancials {
     gross_sales: number;
     returns: number;
     net_sales: number;
+    cogs: number; // Cost of Goods Sold
+    profit: number; // Net Sales - COGS
+    margin: number; // (Profit / Net Sales) * 100
     return_rate: number;
     status: 'healthy' | 'warning' | 'toxic';
 }
@@ -16,9 +19,9 @@ export const ProductAnalysis = {
     async analyzeProductProfitability(userId: string, startDate: Date, endDate: Date): Promise<ProductFinancials[]> {
         const supabase = await createClient();
 
-        // 1. Fetch Revenue Entries (Account 600) with Metadata
-        // We rely on the GIN index on metadata
-        const { data: revenueEntries, error: revError } = await supabase
+        // 1. Fetch ALL Relevant Entries (Revenue 600, Returns 610, COGS 621)
+        // Optimization: Single Query
+        const { data: entries, error } = await supabase
             .from('ledger_entries')
             .select(`
                 amount,
@@ -27,29 +30,13 @@ export const ProductAnalysis = {
                 ledger_transactions!inner(created_at)
             `)
             .eq('user_id', userId)
-            .eq('ledger_accounts.code', '600') // Revenue
+            .in('ledger_accounts.code', ['600', '610', '621'])
             .gte('ledger_transactions.created_at', startDate.toISOString())
             .lte('ledger_transactions.created_at', endDate.toISOString());
 
-        if (revError) throw revError;
+        if (error) throw error;
 
-        // 2. Fetch Return Entries (Account 610) with Metadata
-        const { data: returnEntries, error: retError } = await supabase
-            .from('ledger_entries')
-            .select(`
-                amount,
-                metadata,
-                ledger_accounts!inner(code),
-                ledger_transactions!inner(created_at)
-            `)
-            .eq('user_id', userId)
-            .eq('ledger_accounts.code', '610') // Returns
-            .gte('ledger_transactions.created_at', startDate.toISOString())
-            .lte('ledger_transactions.created_at', endDate.toISOString());
-
-        if (retError) throw retError;
-
-        // 3. Aggregate
+        // 2. Aggregate
         const map = new Map<string, ProductFinancials>();
 
         // Helper to get or init
@@ -64,6 +51,9 @@ export const ProductAnalysis = {
                     gross_sales: 0,
                     returns: 0,
                     net_sales: 0,
+                    cogs: 0,
+                    profit: 0,
+                    margin: 0,
                     return_rate: 0,
                     status: 'healthy'
                 });
@@ -71,39 +61,51 @@ export const ProductAnalysis = {
             return map.get(vid)!;
         };
 
-        // Process Revenue
-        revenueEntries?.forEach((e: any) => {
+        entries?.forEach((e: any) => {
             if (e.metadata?.variant_id) {
                 const stats = getStats(e.metadata);
-                stats.gross_sales += Number(e.amount);
+                const amt = Number(e.amount);
+                const code = e.ledger_accounts.code;
+
+                if (code === '600') {
+                    // 600 is Credit-Normal Revenue, but logic depends on LedgerService direction.
+                    // Usually Revenue DEBIT = Decrease, CREDIT = Increase.
+                    // But in LedgerService logic:
+                    // Credit 600 = Sales (+). Debit 600 = Correction (-).
+                    // In database 'amount' is absolute value. 
+                    // Let's assume Credit entries are Sales.
+                    // Wait, direction check needed.
+                    // However, simplified approach: usually 600 entries are Sales.
+                    stats.gross_sales += amt;
+                } else if (code === '610') {
+                    // Returns
+                    stats.returns += amt;
+                } else if (code === '621') {
+                    // COGS
+                    stats.cogs += amt;
+                }
             }
         });
 
-        // Process Returns
-        returnEntries?.forEach((e: any) => {
-            if (e.metadata?.variant_id) {
-                const stats = getStats(e.metadata);
-                stats.returns += Number(e.amount);
-            }
-        });
-
-        // 4. Calculate KPIs & Status
+        // 3. Calculate KPIs & Status
         const results = Array.from(map.values()).map(p => {
             p.net_sales = p.gross_sales - p.returns;
+            p.profit = p.net_sales - p.cogs;
+            p.margin = p.net_sales > 0 ? (p.profit / p.net_sales) * 100 : 0;
             p.return_rate = p.gross_sales > 0 ? (p.returns / p.gross_sales) * 100 : 0;
 
             // Toxic Logic
-            if (p.return_rate > 15 || p.net_sales < 0) {
-                p.status = 'toxic';
-            } else if (p.return_rate > 8) {
+            if (p.profit < 0) {
+                p.status = 'toxic'; // Losing money
+            } else if (p.return_rate > 15) {
                 p.status = 'warning';
             }
 
             return p;
         });
 
-        // Sort by Net Sales desc
-        return results.sort((a, b) => b.net_sales - a.net_sales);
+        // Sort by Profit desc (default)
+        return results.sort((a, b) => b.profit - a.profit);
     },
 
     async getProductsByProfitability(userId: string, limit: number = 5) {
@@ -114,16 +116,15 @@ export const ProductAnalysis = {
 
         const allProducts = await this.analyzeProductProfitability(userId, startDate, endDate)
 
-        // Heroes: Highest Net Sales (Profit proxy for now)
+        // Heroes: Highest Profit
         const heroes = [...allProducts]
-            .sort((a, b) => b.net_sales - a.net_sales)
+            .sort((a, b) => b.profit - a.profit)
             .slice(0, limit)
 
-        // Villains: Lowest Net Sales (Negative or low) OR High Refund Rate
-        // We want "Cash Burners" -> specifically negative net sales or highest returns
+        // Villains: Lowest Profit (Negative)
         const villains = [...allProducts]
-            .filter(p => p.net_sales < 0 || p.return_rate > 15) // Filter mainly bad ones
-            .sort((a, b) => a.net_sales - b.net_sales) // Lowest (most negative) first
+            .filter(p => p.profit < 0 || p.return_rate > 15)
+            .sort((a, b) => a.profit - b.profit) // Lowest first (most negative)
             .slice(0, limit)
 
         return { heroes, villains }

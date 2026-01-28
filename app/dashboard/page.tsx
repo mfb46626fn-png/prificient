@@ -8,69 +8,124 @@ import DailyAutopsy from '@/components/DailyAutopsy'
 import { ProductAnalysis } from '@/lib/analysis/product-profitability'
 import { LedgerService } from '@/lib/ledger'
 import Link from 'next/link'
-import { LayoutDashboard, BarChart3, TrendingDown, Users, Activity } from 'lucide-react'
-import DashboardClient from '@/components/DashboardClient'
-import { BenchmarkEngine } from '@/lib/benchmarks'
-import GhostExpenseCard from '@/components/GhostExpenseCard'
-import FinancialAutopsy from '@/components/FinancialAutopsy'
+import { LayoutDashboard, BarChart3 } from 'lucide-react'
 import DeepScanTrigger from '@/components/DeepScanTrigger'
+import AnalyticsDashboard from '@/components/AnalyticsDashboard'
+import GhostExpenseCard from '@/components/GhostExpenseCard'
 
-// Reusing Analytics Fetch Logic for the "Analytics" Tab
-
-
-// Helper to Fetch Financial Autopsy Data
-// Helper to Fetch Financial Autopsy Data (Updated with Date Filter)
-async function getFinancialData(user: any, supabase: any, startDate: string, endDate: string) {
+// Helper to Fetch Financial Autopsy Data with Filters
+async function getFinancialData(user: any, supabase: any, startDate: Date, endDate: Date) {
     await LedgerService.initializeAccounts(user.id, supabase)
 
+    // 1. Get Currency
+    const { data: settings } = await supabase.from('store_settings').select('currency').eq('user_id', user.id).single()
+    const currency = settings?.currency || 'TRY'
+
+    // Aggregates
     let grossRevenue = 0
     let returns = 0
     let cogs = 0
     let ads = 0
     let fees = 0
-    let shipping = 0
 
-    // Fetch entries with date filter via transaction join
+    // We filter by CREATED AT for simplicity in MVP, or Transaction Date if strictly accounting.
+    // Ledger Entries link to Transactions.
+    // Supabase filtering on joined table:
     const { data: entries } = await supabase
         .from('ledger_entries')
         .select(`
-            amount, direction, account:ledger_accounts!inner(code),
-            transaction:ledger_transactions!inner(created_at)
+            amount, 
+            direction, 
+            account:ledger_accounts!inner(code),
+            transaction:ledger_transactions!inner(transaction_date)
         `)
         .eq('user_id', user.id)
-        .gte('transaction.created_at', startDate)
-        .lte('transaction.created_at', endDate)
+        .gte('transaction.transaction_date', startDate.toISOString())
+        .lte('transaction.transaction_date', endDate.toISOString())
+
+    const trendMap: Record<string, { revenue: number, profit: number }> = {}
+
+    // Init Trend Map (fill empty days)
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        const key = d.toISOString().split('T')[0]
+        trendMap[key] = { revenue: 0, profit: 0 }
+    }
 
     if (entries) {
         entries.forEach((entry: any) => {
             const code = entry.account.code
             const amt = Number(entry.amount)
             const isDebit = entry.direction === 'DEBIT'
+            const dateKey = entry.transaction?.transaction_date ? entry.transaction.transaction_date.split('T')[0] : null
 
-            if (code === '600') {
-                if (!isDebit) grossRevenue += amt
-                else grossRevenue -= amt
+            // Values
+            let revenueImpact = 0
+            let profitImpact = 0
+
+            if (code === '600') { // Sales
+                if (!isDebit) {
+                    grossRevenue += amt
+                    revenueImpact += amt
+                    profitImpact += amt
+                } else {
+                    grossRevenue -= amt
+                    revenueImpact -= amt
+                    profitImpact -= amt
+                }
             }
-            if (code === '610') isDebit ? returns += amt : returns -= amt
-            if (code === '621') isDebit ? cogs += amt : cogs -= amt
-            if (code === '760') isDebit ? ads += amt : ads -= amt
-            if (['780', '740', '770'].includes(code)) isDebit ? fees += amt : fees -= amt
+            if (code === '610') { // Returns
+                const val = isDebit ? amt : -amt
+                returns += val
+                profitImpact -= val
+            }
+            if (code === '621') { // COGS
+                const val = isDebit ? amt : -amt
+                cogs += val
+                profitImpact -= val
+            }
+            if (code === '760') { // Marketing
+                const val = isDebit ? amt : -amt
+                ads += val
+                profitImpact -= val
+            }
+            if (['780', '740', '770'].includes(code)) { // Fees
+                const val = isDebit ? amt : -amt
+                fees += val
+                profitImpact -= val
+            }
+
+            // Update Trend
+            if (dateKey && trendMap[dateKey]) {
+                trendMap[dateKey].revenue += revenueImpact
+                trendMap[dateKey].profit += profitImpact
+            }
         })
     }
 
-    const netProfit = grossRevenue - returns - cogs - ads - fees - shipping
+    const netProfit = grossRevenue - returns - cogs - ads - fees
     const margin = grossRevenue > 0 ? (netProfit / grossRevenue) * 100 : 0
 
+    // Convert Trend Map to Array
+    const trend = Object.entries(trendMap).map(([date, val]) => ({
+        date: new Date(date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }),
+        revenue: val.revenue,
+        profit: val.profit
+    }))
+
     return {
-        grossRevenue,
-        netProfit,
-        margin,
-        cogs,
-        ads,
-        returns,
-        fees
+        currency,
+        kpi: {
+            revenue: grossRevenue,
+            profit: netProfit,
+            margin,
+            cogs,
+            ads,
+            returns
+        },
+        trend
     }
 }
+
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const supabase = await createClient()
@@ -78,210 +133,128 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     if (!user) redirect('/login')
 
     const params = await searchParams
-    const view = (params.view as string) || 'overview' // Default to new Clean Overview
+    const view = params.view || 'action'
+    const syncStart = params.sync_start === 'true'
 
-    // Date Filtering
+    // Date Logic
+    const range = (params.range as string) || '30d'
     const now = new Date()
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-    const fromParam = params.from as string
-    const toParam = params.to as string
+    const startDate = new Date()
 
-    const startDate = fromParam ? new Date(fromParam).toISOString() : startOfMonth.toISOString()
-    const endDate = toParam ? new Date(toParam).toISOString() : now.toISOString()
-
-    // Fetch User Currency Preference
-    const currency = user.user_metadata?.currency || 'TRY'
-    const currencyFormat = user.user_metadata?.currency_format || '{{amount}} TL'
-
-    // Fetch Financial Data
-    const financials = await getFinancialData(user, supabase, startDate, endDate)
-
-    // Fetch Product Performance (Mock for now, or real if we had products table)
-    // For MVP, we'll use Polarity data if 'overview' is selected, but polarity is complex.
-    // Let's create a simple product list from Polarity's getProductsByProfitability logic if possible,
-    // Or just show placeholders until we implement full product analytics.
-    // Actually, let's use the existing ProductAnalysis engine but simplified.
-    let topProducts: any[] = []
-    if (view === 'overview') {
-        const polarity = await ProductAnalysis.getProductsByProfitability(user.id)
-        // Merge and sort by profit (ensure property access is safe)
-        const allProducts = [...polarity.heroes, ...polarity.villains]
-        topProducts = allProducts.sort((a: any, b: any) => {
-            const profitA = a.net_profit || a.profit || 0
-            const profitB = b.net_profit || b.profit || 0
-            return profitB - profitA
-        }).slice(0, 5)
+    if (range === '7d') startDate.setDate(now.getDate() - 7)
+    else if (range === '30d') startDate.setDate(now.getDate() - 30)
+    else if (range === 'this_month') startDate.setDate(1)
+    else if (range === 'last_month') {
+        startDate.setMonth(startDate.getMonth() - 1)
+        startDate.setDate(1)
+        now.setDate(0) // Last day of previous month
+    } else if (range === 'all') {
+        startDate.setFullYear(2020) // Way back
     }
 
-    // --- OLD DATA FETCHING (Conditional) ---
-    let diagnosis, polarity, autopsy
-    if (view === 'advanced') {
-        diagnosis = await PainEngine.diagnose(user.id)
-        const rawPolarity = await ProductAnalysis.getProductsByProfitability(user.id)
+    // --- FETCH DATA ---
 
-        // Fix types for Polarity Component (title?: string -> title: string)
-        polarity = {
-            heroes: rawPolarity.heroes.map((h: any) => ({ ...h, title: h.title || 'Bilinmeyen Ürün' })),
-            villains: rawPolarity.villains.map((v: any) => ({ ...v, title: v.title || 'Bilinmeyen Ürün' }))
+    // 1. Action Data (Diagnosis)
+    let diagnosis
+    let polarity: { heroes: any[], villains: any[] } = { heroes: [], villains: [] }
+    let autopsy = null
+
+    if (view === 'action') {
+        try {
+            diagnosis = await PainEngine.diagnose(user.id)
+            polarity = await ProductAnalysis.getProductsByProfitability(user.id)
+
+            const yesterday = new Date()
+            yesterday.setDate(yesterday.getDate() - 1)
+            autopsy = await LedgerService.getDailyAutopsy(user.id, yesterday)
+        } catch (e) {
+            console.error("Action Data Error", e)
         }
+    }
 
-        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1)
-        autopsy = await LedgerService.getDailyAutopsy(user.id, yesterday)
+    // 2. Analytics Data (Financial)
+    let analyticsData = null
+    let productPerformance = []
+
+    if (view === 'analytics') {
+        const finData = await getFinancialData(user, supabase, startDate, now)
+
+        // Fetch Product Data (Re-using polarity logic or custom query)
+        // For MVP, reusing getProductsByProfitability (it scans recent history)
+        // TODO: Pass date range to ProductAnalysis in future
+        const prodData = await ProductAnalysis.getProductsByProfitability(user.id)
+        productPerformance = [...prodData.heroes, ...prodData.villains].sort((a, b) => b.profit - a.profit)
+
+        analyticsData = {
+            ...finData,
+            products: productPerformance
+        }
     }
 
     return (
         <div className="space-y-8 pb-20">
-            {/* TABS */}
+            {/* TABS CONTAINER */}
             <div className="w-full flex justify-center mb-8">
                 <div className="bg-white p-1 rounded-2xl inline-flex shadow-sm border border-gray-100">
                     <Link
-                        href="/dashboard?view=overview"
+                        href="/dashboard?view=action"
                         scroll={false}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${view === 'overview' ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-gray-400 hover:text-gray-900'}`}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${view === 'action' ? 'bg-red-50 text-red-600 shadow-sm' : 'text-gray-400 hover:text-gray-900'}`}
                     >
-                        <LayoutDashboard size={18} /> Genel Bakış
+                        <LayoutDashboard size={18} /> Karar Masası
                     </Link>
                     <Link
-                        href="/dashboard?view=advanced"
+                        href="/dashboard?view=analytics"
                         scroll={false}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${view === 'advanced' ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-gray-400 hover:text-gray-900'}`}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${view === 'analytics' ? 'bg-blue-50 text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-900'}`}
                     >
-                        <BarChart3 size={18} /> Detaylı Analiz
+                        <BarChart3 size={18} /> Veri Analizi
                     </Link>
                 </div>
             </div>
 
-            {/* DATE FILTER & SYNC TRIGGER (Always Visible) */}
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-gray-500">Tarih Aralığı:</span>
-                    <div className="flex gap-2">
-                        {/* Simple Date Presets using Links */}
-                        <Link href={`/dashboard?view=${view}&from=${new Date(Date.now() - 7 * 86400000).toISOString()}&to=${now.toISOString()}`} className="px-3 py-1 bg-gray-50 rounded-lg text-xs font-medium hover:bg-gray-100">Son 7 Gün</Link>
-                        <Link href={`/dashboard?view=${view}&from=${new Date(Date.now() - 30 * 86400000).toISOString()}&to=${now.toISOString()}`} className="px-3 py-1 bg-gray-50 rounded-lg text-xs font-medium hover:bg-gray-100">Son 30 Gün</Link>
-                        <Link href={`/dashboard?view=${view}&from=${startOfMonth.toISOString()}&to=${now.toISOString()}`} className="px-3 py-1 bg-gray-50 rounded-lg text-xs font-medium hover:bg-gray-100">Bu Ay</Link>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                    <span className="text-xs text-gray-400 font-mono">Para Birimi: {currency}</span>
-                    <DeepScanTrigger autoTrigger={params['sync_start'] === 'true'} />
-                </div>
-            </div>
-
-            {/* VIEW: OVERVIEW (NEW SIMPLIFIED DASHBOARD) */}
-            {view === 'overview' && (
-                <div className="space-y-8 animate-in fade-in duration-500">
-                    {/* KPI CARDS */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        <KPICard title="Toplam Ciro" value={financials.grossRevenue} currency={currency} icon={BarChart3} color="blue" />
-                        <KPICard title="Net Kâr" value={financials.netProfit} currency={currency} icon={TrendingDown} color={financials.netProfit >= 0 ? "emerald" : "red"} />
-                        <KPICard title="Kâr Marjı" value={financials.margin} percent icon={Activity} color="indigo" />
-                        <KPICard title="Reklam Harcaması" value={financials.ads} currency={currency} icon={Users} color="purple" />
-                    </div>
-
-                    {/* CHARTS (Simplify Financial Autopsy Logic here or Reuse) */}
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                        <h3 className="text-lg font-bold text-gray-800 mb-4">Kâr & Zarar Dağılımı</h3>
-                        {/* We can reuse FinancialAutopsy or simpler chart here. For now simpler text visualization */}
-                        <div className="flex flex-col gap-4">
-                            <ProgressBar label="Ürün Maliyeti" value={financials.cogs} total={financials.grossRevenue} color="bg-orange-400" currency={currency} />
-                            <ProgressBar label="Reklam" value={financials.ads} total={financials.grossRevenue} color="bg-blue-400" currency={currency} />
-                            <ProgressBar label="Operasyon & İade" value={financials.fees + financials.returns} total={financials.grossRevenue} color="bg-purple-400" currency={currency} />
-                            <div className="pt-4 border-t border-gray-100 flex justify-between items-center">
-                                <span className="font-bold text-gray-600">Net Kalan</span>
-                                <span className={`font-bold text-xl ${financials.netProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                                    {new Intl.NumberFormat('tr-TR', { style: 'currency', currency }).format(financials.netProfit)}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* TOP PRODUCTS */}
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                        <h3 className="text-lg font-bold text-gray-800 mb-4">Ürün Performansı (Tahmini)</h3>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm">
-                                <thead className="text-gray-400 font-medium border-b border-gray-100">
-                                    <tr>
-                                        <th className="pb-3">Ürün</th>
-                                        <th className="pb-3 text-right">Adet</th>
-                                        <th className="pb-3 text-right">Ciro</th>
-                                        <th className="pb-3 text-right">Kâr</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-50">
-                                    {topProducts.map((p: any, i: number) => (
-                                        <tr key={i} className="group hover:bg-gray-50">
-                                            <td className="py-3 font-medium text-gray-700">{p.title}</td>
-                                            <td className="py-3 text-right text-gray-500">{p.sold}</td>
-                                            <td className="py-3 text-right text-gray-600 font-mono">
-                                                {new Intl.NumberFormat('tr-TR', { style: 'currency', currency }).format(p.revenue)}
-                                            </td>
-                                            <td className="py-3 text-right font-bold font-mono text-emerald-600">
-                                                {new Intl.NumberFormat('tr-TR', { style: 'currency', currency }).format(p.profit)}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {topProducts.length === 0 && (
-                                        <tr><td colSpan={4} className="py-8 text-center text-gray-400">Veri bulunamadı.</td></tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* VIEW: ADVANCED (OLD UI) */}
-            {view === 'advanced' && diagnosis && polarity && autopsy && (
+            {/* VIEW: ACTION */}
+            {view === 'action' && diagnosis && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <RiskGauge score={diagnosis.score} level={diagnosis.level} context="Detaylı analiz görünümü." />
+                    <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-start">
+                        <div className="flex-1">
+                            <RiskGauge
+                                score={diagnosis.score}
+                                level={diagnosis.level}
+                                context="İşletme risk analizi güncel."
+                            />
+                        </div>
+                        <div className="shrink-0">
+                            <DeepScanTrigger autoTrigger={syncStart} />
+                        </div>
+                    </div>
+
                     <DecisionDesk diagnosis={diagnosis} userName={user.email || ''} />
-                    <ProfitabilityPolarity heroes={polarity.heroes} villains={polarity.villains} />
-                    <DailyAutopsy data={autopsy} />
+
+                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                        <div className="xl:col-span-2">
+                            <ProfitabilityPolarity heroes={polarity.heroes} villains={polarity.villains} />
+                        </div>
+                        <div className="xl:col-span-1 grid grid-cols-1 gap-8">
+                            <DailyAutopsy data={autopsy} />
+                            <GhostExpenseCard amount={diagnosis.financials.fees} />
+                        </div>
+                    </div>
                 </div>
             )}
 
-        </div>
-    )
-}
-
-// --- MICRO COMPONENTS ---
-function KPICard({ title, value, currency, percent, icon: Icon, color }: any) {
-    return (
-        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 hover:border-gray-200 transition-colors">
-            <div className="flex justify-between items-start">
-                <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">{title}</span>
-                <div className={`p-2 rounded-lg bg-${color}-50 text-${color}-600`}>
-                    <Icon size={16} />
+            {/* VIEW: ANALYTICS (NEW) */}
+            {view === 'analytics' && analyticsData && (
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="flex justify-end mb-4 md:hidden">
+                        <DeepScanTrigger autoTrigger={syncStart} />
+                    </div>
+                    <AnalyticsDashboard
+                        currency={analyticsData.currency}
+                        data={analyticsData}
+                    />
                 </div>
-            </div>
-            <div>
-                <div className="text-2xl font-black text-gray-900 tracking-tight">
-                    {percent
-                        ? `%${value.toFixed(1)}`
-                        : new Intl.NumberFormat('tr-TR', { style: 'currency', currency: currency || 'TRY' }).format(value)
-                    }
-                </div>
-            </div>
-        </div>
-    )
-}
-
-function ProgressBar({ label, value, total, color, currency }: any) {
-    const pct = total > 0 ? Math.min(100, Math.max(0, (value / total) * 100)) : 0
-    return (
-        <div>
-            <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600 font-medium">{label}</span>
-                <span className="text-gray-900 font-mono">
-                    {new Intl.NumberFormat('tr-TR', { style: 'currency', currency: currency || 'TRY' }).format(value)}
-                </span>
-            </div>
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div className={`h-full ${color}`} style={{ width: `${pct}%` }}></div>
-            </div>
+            )}
         </div>
     )
 }
