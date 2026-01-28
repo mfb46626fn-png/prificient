@@ -8,9 +8,17 @@ export const maxDuration = 60; // Vercel Pro max
 
 /**
  * Manual Shopify Sync Trigger
- * Call: POST /api/debug/trigger-sync
+ * Call: GET or POST /api/debug/trigger-sync
  */
+export async function GET(req: NextRequest) {
+    return triggerSync();
+}
+
 export async function POST(req: NextRequest) {
+    return triggerSync();
+}
+
+async function triggerSync() {
     const startTime = Date.now();
 
     try {
