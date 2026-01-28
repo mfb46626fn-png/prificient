@@ -1,0 +1,53 @@
+---
+title: "Excel Dosyası Nasıl Yüklenir?"
+description: "Prificient'a Excel veya CSV dosyası ile veri aktarma rehberi."
+lastUpdated: "28 Ocak 2026"
+order: 1
+---
+
+Prificient'a veri aktarmanın en hızlı yolu **Excel veya CSV dosyalarını** kullanmaktır. Bu işlem sadece saniyeler sürer.
+
+## Adım Adım Yükleme
+
+1. Sol menüden **Veri Girişi (Transactions)** sayfasına gidin
+2. Sağ üst köşedeki siyah **"Excel Yükle"** butonuna tıklayın
+3. Açılan pencereye dosyanızı sürükleyin veya seçin
+
+> 💡 **İpucu**: Dosyanızda sütun isimlerinin tam olarak eşleşmesine gerek yoktur. Prificient'ın yapay zekası sütunları otomatik tanır.
+
+## Gerekli Sütunlar
+
+Dosyanızda aşağıdaki bilgilerin olması yeterlidir:
+
+| Sütun | Açıklama | Zorunlu |
+|-------|----------|---------|
+| **Tarih** | İşlemin gerçekleştiği gün | ✓ |
+| **Açıklama/Ürün** | Satılan ürünün ismi | ✓ |
+| **Tutar** | Satış fiyatı | ✓ |
+| Kategori | Ürün kategorisi | Opsiyonel |
+| Maliyet | Ürün maliyeti | Opsiyonel |
+
+## Desteklenen Formatlar
+
+- **.xlsx** - Microsoft Excel
+- **.xls** - Eski Excel formatı
+- **.csv** - Virgülle ayrılmış değerler
+
+> ⚠️ **Dikkat**: Şifreli Excel dosyaları desteklenmez.
+
+## Sık Karşılaşılan Sorunlar
+
+### Tarih Formatı Sorunu
+
+Eğer tarihleriniz tanınmıyorsa:
+- Türkçe format kullanın: `28.01.2026`
+- Veya ISO format: `2026-01-28`
+
+### Tutar Formatı Sorunu
+
+- Binlik ayraç olarak nokta kullanmayın
+- Virgül ondalık ayraç olarak kullanılabilir
+
+---
+
+**Destek lazım mı?** [Bize yazın](/contact).

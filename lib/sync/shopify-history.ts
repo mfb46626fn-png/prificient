@@ -56,12 +56,13 @@ export const ShopifyHistoryScanner = {
                 // Prepare Payload (Map to webhook structure ideally, or just use Order object)
                 // Webhook payload usually is the Order JSON.
 
-                // Record Event
+                // Record Event - Pass server supabase client
                 await LedgerService.recordEvent(
                     userId,
                     'shopify_history_scan',
                     'OrderCreated',
-                    order
+                    order,
+                    supabase // Pass server-side client
                 );
 
                 totalProcessed++;
