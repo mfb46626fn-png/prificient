@@ -17,6 +17,20 @@ export const ShopifyHistoryScanner = {
         const client = new shopify.clients.Rest({ session: session as any });
         const supabase = createAdminClient();
 
+        // 0. Fetch Shop Details & Update Currency
+        try {
+            const shopRes: any = await client.get({ path: 'shop' });
+            const shopData = shopRes.body?.shop;
+            if (shopData && shopData.currency) {
+                console.log(`[HistoryScan] Shop Currency: ${shopData.currency}`);
+                await supabase.auth.admin.updateUserById(userId, {
+                    user_metadata: { currency: shopData.currency }
+                });
+            }
+        } catch (shopError: any) {
+            console.error(`[HistoryScan] Failed to fetch shop details:`, shopError.message);
+        }
+
         // 1. Fetch Product Costs (Global Map: VariantID -> Cost)
         let variantCostMap: Record<string, number> = {};
         try {
