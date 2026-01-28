@@ -36,14 +36,19 @@ export const ShopifyHistoryScanner = {
                 // Fetch Orders
                 console.log(`[HistoryScan] Fetching order batch...`);
 
-                const response: any = await client.get({
-                    path: 'orders',
-                    query: {
+                // Prepare Query
+                // Important: If page_info is present, it contains all filters. We should NOT send other params.
+                const queryParams = nextPageInfo
+                    ? { limit: 250, page_info: nextPageInfo }
+                    : {
                         status: 'any',
                         created_at_min: sinceIso,
-                        limit: 250,
-                        page_info: nextPageInfo as any
-                    }
+                        limit: 250
+                    };
+
+                const response: any = await client.get({
+                    path: 'orders',
+                    query: queryParams as any
                 });
 
                 const orders = response.body?.orders || [];
