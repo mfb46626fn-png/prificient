@@ -32,30 +32,27 @@ export class LedgerService {
     static async initializeAccounts(user_id: string, supabaseClient?: any) {
         const supabase = supabaseClient || createClient()
 
-        // Hesaplar var mı kontrol et
-        const { count } = await supabase.from('ledger_accounts').select('*', { count: 'exact', head: true }).eq('user_id', user_id)
+        // Always try to ensure Default Accounts exist (UPSERT)
+        // This fixes the issue where old users don't get new default accounts (like '200')
+        const payload = DEFAULT_ACCOUNTS.map(acc => ({
+            user_id,
+            code: acc.code,
+            name: acc.name,
+            type: acc.type,
+            normal_balance: acc.normal
+        }))
 
-        if (count === 0) {
-            const payload = DEFAULT_ACCOUNTS.map(acc => ({
-                user_id,
-                code: acc.code,
-                name: acc.name,
-                type: acc.type,
-                normal_balance: acc.normal
-            }))
+        // Conflict on (user_id, code) means we won't duplicate, but we ensure existence.
+        const { error } = await supabase.from('ledger_accounts').upsert(payload, { onConflict: 'user_id, code', ignoreDuplicates: true })
 
-            // count=0 olsa bile race condition ihtimaline karşı upsert kullanıyoruz.
-            const { error } = await supabase.from('ledger_accounts').upsert(payload, { onConflict: 'user_id, code' })
-
-            if (error) {
-                console.error("Account Init Error Details:", {
-                    message: error.message,
-                    details: error.details,
-                    hint: error.hint,
-                    code: error.code,
-                    fullError: JSON.stringify(error)
-                })
-            }
+        if (error) {
+            console.error("Account Init Error Details:", {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code,
+                fullError: JSON.stringify(error)
+            })
         }
     }
     // 2. Olay Kaydedici (Immutable Event Log)
