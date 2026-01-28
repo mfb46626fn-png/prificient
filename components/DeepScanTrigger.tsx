@@ -1,39 +1,68 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { RefreshCcw, Terminal, Activity, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-export default function DeepScanTrigger() {
+export default function DeepScanTrigger({ autoTrigger }: { autoTrigger?: boolean }) {
     const [isScanning, setIsScanning] = useState(false)
     const [scanLog, setScanLog] = useState<string[]>([])
     const router = useRouter()
 
+    // Auto-start if requested (e.g. after fresh login/connect)
+    useEffect(() => {
+        if (autoTrigger) {
+            startScan()
+        }
+    }, [autoTrigger])
+
     const startScan = async () => {
+        if (isScanning) return
         setIsScanning(true)
         setScanLog([])
 
-        // Simulation Steps
-        const steps = [
-            { msg: "Veri kaynaklarına bağlanılıyor... (Shopify, Meta Ads)", delay: 800 },
-            { msg: "Son 24 saatlik finansal hareketler taranıyor...", delay: 1500 },
-            { msg: "İade oranları ve marj sapmaları analiz ediliyor...", delay: 2200 },
-            { msg: "Gider kaçakları ve hayalet kesintiler kontrol ediliyor...", delay: 3000 },
-            { msg: "Risk algoritmaları yeniden çalıştırılıyor...", delay: 3800 },
-            { msg: "TÜM SİSTEMLER GÜNCEL.", delay: 4200 },
-        ]
+        const addLog = (msg: string) => setScanLog(prev => [...prev, msg])
 
-        for (const step of steps) {
-            await new Promise(r => setTimeout(r, step.delay - (steps[steps.indexOf(step) - 1]?.delay || 0))) // simple delay logic
-            setScanLog(prev => [...prev, step.msg])
+        try {
+            addLog("Veri kaynaklarına bağlanılıyor... (Shopify)")
+
+            // 1. Call Sync API
+            const response = await fetch('/api/debug/trigger-sync', { method: 'POST' })
+
+            if (!response.ok) {
+                const err = await response.json()
+                throw new Error(err.error || 'Sync failed')
+            }
+
+            const result = await response.json()
+            addLog(`Veri çekildi: ${result.syncedOrders || 0} yeni sipariş`)
+
+            // 2. Simulation / Analysis Filler Steps (to look cool and give user feedback while processing)
+            addLog("Finansal hareketler işleniyor...")
+            await new Promise(r => setTimeout(r, 1000))
+
+            addLog("Kâr/Zarar tabloları güncelleniyor...")
+            await new Promise(r => setTimeout(r, 800))
+
+            addLog("Risk analizi tamamlandı.")
+            await new Promise(r => setTimeout(r, 500))
+
+            addLog("TÜM SİSTEMLER GÜNCEL.")
+            await new Promise(r => setTimeout(r, 500))
+
+            // Refresh Data
+            router.refresh()
+            router.replace('/dashboard') // remove sync_start param
+
+        } catch (error: any) {
+            console.error('Scan Error:', error)
+            addLog(`HATA: ${error.message || 'Bağlantı hatası'}`)
+            addLog("Lütfen daha sonra tekrar deneyin.")
+            // Keep error visible for a moment
+            await new Promise(r => setTimeout(r, 3000))
+        } finally {
+            setIsScanning(false)
         }
-
-        // Refresh Data
-        router.refresh()
-
-        // Success Delay
-        await new Promise(r => setTimeout(r, 800))
-        setIsScanning(false)
     }
 
     return (

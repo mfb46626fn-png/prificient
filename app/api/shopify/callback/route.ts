@@ -61,24 +61,12 @@ export async function GET(req: NextRequest) {
             console.warn('[Shopify Callback] Webhook registration failed:', webhookError)
         }
 
-        // SYNC DATA SYNCHRONOUSLY (Vercel serverless kills async jobs after response)
-        // This must complete before we redirect
-        console.log('[Shopify Callback] Starting history sync...')
-        try {
-            const syncedCount = await ShopifyHistoryScanner.scanPastShopifyData(
-                user.id,
-                session.shop,
-                session.accessToken,
-                60 // Last 60 days
-            )
-            console.log('[Shopify Callback] Sync completed. Orders synced:', syncedCount)
-        } catch (syncError) {
-            console.error('[Shopify Callback] Sync Error:', syncError)
-            // Don't fail the whole callback, just log and continue
-        }
+        // NOT: Sync işlemini callback içinde yapmıyoruz çünkü Vercel timeout sınırına takılıyor (çok veri varsa).
+        // Bunun yerine Dashboard'a yönlendirip orada tetikleyeceğiz.
+        console.log('[Shopify Callback] Skipping sync in callback to prevent timeout. Redirecting...')
 
-        // Redirect to Dashboard (scanning page was removed)
-        return NextResponse.redirect(new URL('/dashboard?shopify=connected', req.url))
+        // Redirect to Dashboard with sync flag
+        return NextResponse.redirect(new URL('/dashboard?shopify=connected&sync_start=true', req.url))
 
     } catch (error: any) {
         console.error('[Shopify Callback] Fatal Error:', error)

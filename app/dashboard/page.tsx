@@ -199,7 +199,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
                         {/* Scan Trigger Button - Aligned to right/top on desktop */}
                         <div className="shrink-0">
-                            <DeepScanTrigger />
+                            <DeepScanTrigger autoTrigger={(await searchParams)['sync_start'] === 'true'} />
                         </div>
                     </div>
 
