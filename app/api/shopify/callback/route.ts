@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import shopify from '@/lib/shopify'
 import { createClient } from '@/utils/supabase/server'
+import { ShopifyHistoryScanner } from '@/lib/sync/shopify-history'
 
 export const dynamic = 'force-dynamic';
+// Increase timeout for Vercel Pro (max 60s on Pro, 10s on Hobby)
+export const maxDuration = 60;
 
 export async function GET(req: NextRequest) {
     const url = new URL(req.url)
     const shop = url.searchParams.get('shop')
 
     try {
+        console.log('[Shopify Callback] Starting for shop:', shop)
+
         const callbackResponse = await shopify.auth.callback({
             rawRequest: req,
         })
@@ -19,69 +24,65 @@ export async function GET(req: NextRequest) {
             throw new Error("Session creation failed")
         }
 
+        console.log('[Shopify Callback] Session obtained for:', session.shop)
+
         // Supabase Connection
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()
 
-        // Not: Callback sırasında kullanıcı session'ı olmayabilir (Shopify iframe içinde veya redirect ile geldiğinde).
-        // Bu yüzden genellikle OAuth başlarken state parametresi ile user_id taşınır veya cookie kullanılır.
-        // Ancak MVP için şimdilik kullanıcının tarayıcı cookie'sinin korunduğunu varsayıyoruz.
-
         if (!user) {
-            // Eğer user yoksa, bu bir sorun olabilir.
-            // Alternatif: Shopify session'ından shop'u bulup, geçici olarak kaydetmek
-            // Ama biz 'integrations' tablosuna user_id ile yazıyoruz.
-            console.warn("User not found in callback. Ensure SameSite cookies are handled.")
-            // return NextResponse.json({ error: "User not authenticated." }, { status: 401 })
+            console.error('[Shopify Callback] No authenticated user found!')
+            return NextResponse.redirect(new URL('/login?error=shopify_auth_failed', req.url))
         }
 
-        // Save to Database (User ID varsa)
-        if (user) {
-            const { error } = await supabase.from('integrations').upsert({
-                user_id: user.id,
-                platform: 'shopify',
-                shop_domain: session.shop,
-                access_token: session.accessToken,
-                status: 'active',
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'user_id, platform, shop_domain' })
+        console.log('[Shopify Callback] User found:', user.id)
 
-            if (error) {
-                console.error("Supabase Save Error:", error)
-            }
+        // Save to Database
+        const { error: dbError } = await supabase.from('integrations').upsert({
+            user_id: user.id,
+            platform: 'shopify',
+            shop_domain: session.shop,
+            access_token: session.accessToken,
+            status: 'active',
+            updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id, platform, shop_domain' })
+
+        if (dbError) {
+            console.error('[Shopify Callback] DB Save Error:', dbError)
+        } else {
+            console.log('[Shopify Callback] Integration saved successfully')
         }
 
-        // Webhook Registration
-        await shopify.webhooks.register({
-            session,
-        })
-
-        // TRIGGER BACKGROUND SYNC (Fire and Forget)
-        // In a serverless environment (Vercel), correct way is to use `waitUntil` or a queue.
-        // For MVP on standard Node/VPS, not awaiting works but is risky if process dies.
-        // We will just call the internal library function if possible, but we don't have direct access here easily without importing logic.
-        // Plan: Let's import the library function if we can, or just let the Onboarding page trigger it via client-side fetch if preferred.
-        // But the request said "Trigger sync in background".
-        // Let's assume we can import `scanPastShopifyData` from `lib/sync/shopify-history`.
-
-        // Ensure user is defined before using it
-        if (user) {
-            import('@/lib/sync/shopify-history').then(({ ShopifyHistoryScanner }) => {
-                // Trigger full scan for last 60 days
-                const startDate = new Date()
-                startDate.setDate(startDate.getDate() - 60)
-                if (session.accessToken) {
-                    ShopifyHistoryScanner.scanPastShopifyData(user.id, session.shop, session.accessToken, 60)
-                        .catch(e => console.error("Background Sync Error:", e))
-                }
-            }).catch(e => console.error("Import Error:", e))
+        // Webhook Registration (optional, can fail silently)
+        try {
+            await shopify.webhooks.register({ session })
+            console.log('[Shopify Callback] Webhooks registered')
+        } catch (webhookError) {
+            console.warn('[Shopify Callback] Webhook registration failed:', webhookError)
         }
 
-        // Redirect to Cinematic Scanning Page
-        return NextResponse.redirect(new URL('/onboarding/scanning', req.url))
+        // SYNC DATA SYNCHRONOUSLY (Vercel serverless kills async jobs after response)
+        // This must complete before we redirect
+        console.log('[Shopify Callback] Starting history sync...')
+        try {
+            const syncedCount = await ShopifyHistoryScanner.scanPastShopifyData(
+                user.id,
+                session.shop,
+                session.accessToken,
+                60 // Last 60 days
+            )
+            console.log('[Shopify Callback] Sync completed. Orders synced:', syncedCount)
+        } catch (syncError) {
+            console.error('[Shopify Callback] Sync Error:', syncError)
+            // Don't fail the whole callback, just log and continue
+        }
+
+        // Redirect to Dashboard (scanning page was removed)
+        return NextResponse.redirect(new URL('/dashboard?shopify=connected', req.url))
 
     } catch (error: any) {
-        console.error("Shopify Callback Error:", error)
-        return NextResponse.json({ error: error.toString() }, { status: 500 })
+        console.error('[Shopify Callback] Fatal Error:', error)
+        return NextResponse.redirect(new URL('/dashboard/settings?error=shopify_failed', req.url))
     }
 }
+
