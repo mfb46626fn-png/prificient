@@ -48,16 +48,10 @@ export default function ConnectShopifyPage() {
                 cleanUrl += '.myshopify.com'
             }
 
-            // 2. Auth Başlat (API Route'a yönlendir)
-            const response = await fetch(`/api/shopify/auth?shop=${cleanUrl}`)
-            const data = await response.json()
-
-            if (data.url) {
-                window.location.href = data.url
-            } else {
-                alert('Bağlantı hatası: ' + (data.error || 'Bilinmeyen hata'))
-                setLoading(false)
-            }
+            // 2. Auth Başlat - Redirect kullan (CORS için window.location.href ile)
+            // Fetch kullanmak yerine doğrudan yönlendirme yapılmalı
+            // Aksi halde fetch redirect'i takip eder ve CORS hatası alınır
+            window.location.href = `/api/shopify/auth?shop=${encodeURIComponent(cleanUrl)}`
 
         } catch (error) {
             console.error(error)
