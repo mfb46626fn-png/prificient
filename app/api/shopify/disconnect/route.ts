@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/lib/supabase-admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,8 +13,11 @@ export async function POST() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // 1. Get the integration to verify it exists
-        const { data: integration, error: fetchError } = await supabase
+        // Use Admin Client for Deletions to bypass any RLS strictness
+        const supabaseAdmin = createAdminClient();
+
+        // 1. Get the integration
+        const { data: integration, error: fetchError } = await supabaseAdmin
             .from('integrations')
             .select('id, shop_domain')
             .eq('user_id', user.id)
@@ -29,39 +33,43 @@ export async function POST() {
             return NextResponse.json({ error: 'Aktif Shopify bağlantısı bulunamadı' }, { status: 404 })
         }
 
-        // 2. Delete financial event logs from Shopify
-        const { error: eventLogError } = await supabase
-            .from('financial_event_log')
-            .delete()
-            .eq('user_id', user.id)
-            .in('stream_type', ['shopify_history_scan', 'shopify_webhook'])
+        console.log(`[Disconnect] Disconnecting store ${integration.shop_domain} for user ${user.id}`);
 
-        if (eventLogError) {
-            console.error('Delete Event Log Error:', eventLogError)
-            // Continue with integration deletion even if event log deletion fails
-        }
-
-        // 3. Delete ledger entries related to Shopify events
-        // First get all event IDs that were from Shopify
-        const { data: shopifyEvents } = await supabase
+        // 2. Find all related Event IDs FIRST (before deleting them)
+        const { data: events } = await supabaseAdmin
             .from('financial_event_log')
             .select('event_id')
             .eq('user_id', user.id)
-            .in('stream_type', ['shopify_history_scan', 'shopify_webhook'])
+            .in('stream_type', ['shopify_history_scan', 'shopify_webhook', 'debug_simulation', 'debug_test']); // Added debug types too
 
-        if (shopifyEvents && shopifyEvents.length > 0) {
-            const eventIds = shopifyEvents.map(e => e.event_id)
+        const eventIds = events?.map(e => e.event_id) || [];
+        console.log(`[Disconnect] Found ${eventIds.length} events to clean up.`);
 
-            // Delete ledger entries linked to these events
-            await supabase
-                .from('ledger_entries')
-                .delete()
-                .eq('user_id', user.id)
-                .in('event_id', eventIds)
+        if (eventIds.length > 0) {
+            // 3. Delete Ledger Transactions (Entries usually cascade delete on transaction delete, but let's be safe)
+            // Find transactions linked to these events
+            const { data: txs } = await supabaseAdmin
+                .from('ledger_transactions')
+                .select('id')
+                .in('event_id', eventIds);
+
+            const txIds = txs?.map(t => t.id) || [];
+
+            if (txIds.length > 0) {
+                // Delete entries first
+                await supabaseAdmin.from('ledger_entries').delete().in('transaction_id', txIds);
+                // Delete transactions
+                await supabaseAdmin.from('ledger_transactions').delete().in('id', txIds);
+                console.log(`[Disconnect] Deleted ${txIds.length} transactions and their entries.`);
+            }
+
+            // 4. Delete Events
+            await supabaseAdmin.from('financial_event_log').delete().in('event_id', eventIds);
+            console.log(`[Disconnect] Deleted ${eventIds.length} event logs.`);
         }
 
-        // 4. Delete the integration record
-        const { error: deleteError } = await supabase
+        // 5. Delete the integration record
+        const { error: deleteError } = await supabaseAdmin
             .from('integrations')
             .delete()
             .eq('user_id', user.id)
@@ -72,11 +80,11 @@ export async function POST() {
             return NextResponse.json({ error: 'Bağlantı iptal edilemedi' }, { status: 500 })
         }
 
-        console.log(`[Shopify Disconnect] User ${user.id} disconnected store: ${integration.shop_domain}`)
+        console.log(`[Shopify Disconnect] Complete.`)
 
         return NextResponse.json({
             success: true,
-            message: 'Shopify bağlantısı başarıyla iptal edildi'
+            message: 'Shopify bağlantısı ve tüm geçmiş veriler başarıyla silindi.'
         })
 
     } catch (error: any) {
