@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { ShopifyHistoryScanner } from '@/lib/sync/shopify-history';
 import shopify from '@/lib/shopify';
+import { Session } from '@shopify/shopify-api';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // Vercel Pro max
@@ -52,13 +53,19 @@ export async function POST(req: NextRequest) {
             user.id,
             integration.shop_domain,
             integration.access_token,
-            90 // Last 90 days
+            7 // Reduced to 7 days for stability
         );
 
         // Fetch & Update Currency (Async)
         try {
-            const session = { shop: integration.shop_domain, accessToken: integration.access_token };
-            const client = new shopify.clients.Rest({ session: session as any });
+            const session = new Session({
+                id: `offline_${integration.shop_domain}`,
+                shop: integration.shop_domain,
+                state: 'state',
+                isOnline: false,
+                accessToken: integration.access_token
+            });
+            const client = new shopify.clients.Rest({ session });
             const shopInfo: any = await client.get({ path: 'shop' });
             const currency = shopInfo.body?.shop?.currency;
 

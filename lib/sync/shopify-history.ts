@@ -1,20 +1,24 @@
 import shopify from '@/lib/shopify';
 import { LedgerService } from '@/lib/ledger';
 import { createAdminClient } from '@/lib/supabase-admin';
+import { Session } from '@shopify/shopify-api';
 
 export const ShopifyHistoryScanner = {
-    async scanPastShopifyData(userId: string, shopDomain: string, accessToken: string, daysToScan = 90) {
+    async scanPastShopifyData(userId: string, shopDomain: string, accessToken: string, daysToScan = 7) { // Reduced to 7 days for stability
         console.log(`[HistoryScan] === STARTING SYNC ===`);
         console.log(`[HistoryScan] User: ${userId}`);
         console.log(`[HistoryScan] Shop: ${shopDomain}`);
         console.log(`[HistoryScan] Days to scan: ${daysToScan}`);
 
-        const session = {
+        const session = new Session({
+            id: `offline_${shopDomain}`,
             shop: shopDomain,
-            accessToken: accessToken,
-        };
+            state: 'state',
+            isOnline: false,
+            accessToken: accessToken
+        });
 
-        const client = new shopify.clients.Rest({ session: session as any });
+        const client = new shopify.clients.Rest({ session });
         const supabase = createAdminClient();
 
         // 1. Fetch Product Costs (Global Map: VariantID -> Cost)
