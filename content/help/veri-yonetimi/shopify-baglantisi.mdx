@@ -1,0 +1,137 @@
+---
+title: "Shopify Mağazası Nasıl Bağlanır?"
+description: "Shopify mağazanızı Prificient'a bağlama adımları."
+lastUpdated: "28 Ocak 2026"
+order: 1
+---
+
+<div className="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-r-2xl mb-8">
+  <div className="flex items-start gap-3">
+    <span className="text-2xl">🔗</span>
+    <div>
+      <h4 className="font-bold text-blue-900 m-0">Gerekli Adım</h4>
+      <p className="text-blue-700 m-0 mt-1">Prificient'ın tüm özelliklerini kullanabilmek için <strong>Shopify mağazanızı bağlamanız</strong> gerekmektedir.</p>
+    </div>
+  </div>
+</div>
+
+---
+
+## 📍 Adım Adım Bağlantı
+
+### 1. Entegrasyon Sayfasına Gidin
+
+<div className="bg-gray-50 p-5 rounded-2xl my-6">
+  <p className="m-0 text-gray-700">Sol menüden <strong>Entegrasyonlar</strong> sekmesine tıklayın veya doğrudan <code className="bg-white px-2 py-1 rounded border">/connect/shopify</code> adresine gidin.</p>
+</div>
+
+### 2. Mağaza URL'nizi Girin
+
+<div className="bg-white p-6 rounded-2xl border border-gray-200 my-6">
+  <p className="text-sm text-gray-600 m-0 mb-3">Mağaza URL'nizi şu formatlardan birinde girin:</p>
+  <div className="space-y-2">
+    <div className="bg-gray-100 p-3 rounded-xl font-mono text-sm">magazam.myshopify.com</div>
+    <div className="text-center text-gray-400 text-xs">veya sadece</div>
+    <div className="bg-gray-100 p-3 rounded-xl font-mono text-sm">magazam</div>
+  </div>
+  <p className="text-xs text-gray-500 m-0 mt-3">💡 Sistem <code>.myshopify.com</code> uzantısını otomatik ekler.</p>
+</div>
+
+### 3. Shopify'a Bağlan
+
+<div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-5 rounded-2xl text-center my-6">
+  <p className="m-0 font-bold">"Shopify'a Bağlan" butonuna tıklayın</p>
+  <p className="m-0 text-emerald-100 text-sm mt-1">Shopify'ın OAuth sayfasına yönlendirileceksiniz</p>
+</div>
+
+### 4. İzinleri Onaylayın
+
+<div className="overflow-x-auto my-6">
+  <table className="w-full text-sm">
+    <thead className="bg-gray-900 text-white">
+      <tr>
+        <th className="p-4 text-left rounded-tl-xl">İzin</th>
+        <th className="p-4 text-left rounded-tr-xl">Açıklama</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr className="border-b border-gray-100">
+        <td className="p-4"><code className="bg-blue-100 text-blue-800 px-2 py-1 rounded">read_orders</code></td>
+        <td className="p-4 text-gray-600">Sipariş verilerini okuma</td>
+      </tr>
+      <tr className="border-b border-gray-100">
+        <td className="p-4"><code className="bg-blue-100 text-blue-800 px-2 py-1 rounded">read_products</code></td>
+        <td className="p-4 text-gray-600">Ürün bilgilerini okuma</td>
+      </tr>
+      <tr>
+        <td className="p-4"><code className="bg-blue-100 text-blue-800 px-2 py-1 rounded">read_analytics</code></td>
+        <td className="p-4 text-gray-600">Analitik verilerini okuma</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div className="bg-gray-50 p-5 rounded-2xl">
+  <p className="m-0 text-gray-700 text-sm"><strong>"Install app"</strong> veya <strong>"Uygulamayı Yükle"</strong> butonuna tıklayın.</p>
+</div>
+
+### 5. Senkronizasyonu Bekleyin
+
+<div className="grid md:grid-cols-3 gap-4 my-6">
+  <div className="bg-emerald-50 p-4 rounded-xl text-center border border-emerald-100">
+    <span className="text-2xl">📦</span>
+    <p className="text-xs font-medium text-emerald-800 mt-2 m-0">Son 60 gün siparişler çekilir</p>
+  </div>
+  <div className="bg-emerald-50 p-4 rounded-xl text-center border border-emerald-100">
+    <span className="text-2xl">📊</span>
+    <p className="text-xs font-medium text-emerald-800 mt-2 m-0">Veriler dashboard'a yansır</p>
+  </div>
+  <div className="bg-emerald-50 p-4 rounded-xl text-center border border-emerald-100">
+    <span className="text-2xl">✅</span>
+    <p className="text-xs font-medium text-emerald-800 mt-2 m-0">"Bağlantı Aktif" görünür</p>
+  </div>
+</div>
+
+---
+
+## 📌 Bağlantı Durumları
+
+<div className="grid grid-cols-2 gap-4 my-6">
+  <div className="flex items-center gap-3 bg-emerald-50 p-4 rounded-xl">
+    <span className="w-3 h-3 bg-emerald-500 rounded-full"></span>
+    <span className="text-sm font-medium text-emerald-800">Bağlantı Aktif - Her şey çalışıyor</span>
+  </div>
+  <div className="flex items-center gap-3 bg-red-50 p-4 rounded-xl">
+    <span className="w-3 h-3 bg-red-500 rounded-full"></span>
+    <span className="text-sm font-medium text-red-800">Bağlantı Yok - Henüz bağlanmamış</span>
+  </div>
+</div>
+
+---
+
+## ⚙️ Bağlantıyı Kaldırma
+
+<div className="space-y-3 my-6">
+  <div className="flex items-start gap-4 bg-white p-4 rounded-xl border border-gray-100">
+    <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold">1</div>
+    <p className="m-0 text-sm"><code>/connect/shopify</code> sayfasına gidin</p>
+  </div>
+  <div className="flex items-start gap-4 bg-white p-4 rounded-xl border border-gray-100">
+    <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold">2</div>
+    <p className="m-0 text-sm"><strong>"Ayarları Yönet"</strong> butonuna tıklayın</p>
+  </div>
+  <div className="flex items-start gap-4 bg-white p-4 rounded-xl border border-gray-100">
+    <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold">3</div>
+    <p className="m-0 text-sm"><strong>"Bağlantıyı İptal Et"</strong> seçin</p>
+  </div>
+</div>
+
+<div className="bg-rose-50 border border-rose-200 p-5 rounded-2xl">
+  <div className="flex items-start gap-3">
+    <span className="text-xl">⚠️</span>
+    <div>
+      <h4 className="font-bold text-rose-900 m-0 text-sm">Dikkat</h4>
+      <p className="text-rose-700 text-sm m-0 mt-1">Bağlantı iptal edildiğinde tüm senkronize edilmiş verileriniz <strong>silinir</strong>.</p>
+    </div>
+  </div>
+</div>

@@ -1,86 +1,173 @@
-'use client'
-
 import LandingHeader from '@/components/LandingHeader'
 import LandingFooter from '@/components/LandingFooter'
-import { HELP_CATEGORIES } from '../../../lib/help-content'
-import { ArrowLeft, ChevronRight, Clock, ThumbsUp, ThumbsDown } from 'lucide-react'
+import { getHelpCategories, getHelpArticle, getHelpArticles, extractHeadings } from '@/lib/mdx'
+import { MDXRemote } from 'next-mdx-remote/rsc'
+import { Calendar, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
-import { notFound, useParams } from 'next/navigation'
-import { useState } from 'react'
+import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 
-export default function ArticlePage() {
-  const params = useParams()
-  const [feedback, setFeedback] = useState<'yes' | 'no' | null>(null)
+interface Props {
+    params: Promise<{ category: string; slug: string }>
+}
 
-  const category = HELP_CATEGORIES.find(c => c.id === params.category)
-  const article = category?.articles.find(a => a.slug === params.slug)
+export async function generateStaticParams() {
+    const categories = getHelpCategories()
+    const params: { category: string; slug: string }[] = []
 
-  if (!category || !article) return notFound()
+    for (const cat of categories) {
+        for (const article of cat.articles) {
+            params.push({ category: cat.id, slug: article.slug })
+        }
+    }
 
-  return (
-    <div className="min-h-screen bg-white font-sans text-gray-900">
-      <LandingHeader />
+    return params
+}
 
-      <main className="py-24 lg:py-32">
-        <div className="container mx-auto px-6 max-w-3xl">
-            
-            {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-xs font-bold text-gray-400 mb-8 overflow-x-auto whitespace-nowrap">
-                <Link href="/help" className="hover:text-black">Yardım Merkezi</Link>
-                <ChevronRight size={12}/>
-                <Link href={`/help/${category.id}`} className="hover:text-black">{category.title}</Link>
-                <ChevronRight size={12}/>
-                <span className="text-black truncate">{article.title}</span>
-            </div>
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { category, slug } = await params
+    const article = getHelpArticle(category, slug)
+    const categories = getHelpCategories()
+    const cat = categories.find(c => c.id === category)
 
-            <Link href={`/help/${category.id}`} className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-black mb-8 transition-colors">
-                <ArrowLeft size={16}/> {category.title}
-            </Link>
+    if (!article) {
+        return { title: 'Makale Bulunamadı' }
+    }
 
-            <article>
-                <h1 className="text-3xl md:text-4xl font-black mb-6 leading-tight">{article.title}</h1>
-                
-                <div className="flex items-center gap-2 text-xs font-bold text-gray-400 mb-10 pb-10 border-b border-gray-100">
-                    <Clock size={14}/>
-                    Son güncelleme: {article.lastUpdated}
-                </div>
+    return {
+        title: `${article.frontmatter.title} | ${cat?.title || 'Yardım'} | Prificient`,
+        description: article.frontmatter.description,
+    }
+}
 
-                {/* İçerik Alanı (HTML Render) */}
-                <div 
-                    className="prose prose-lg prose-blue max-w-none prose-headings:font-black prose-p:text-gray-600 prose-p:font-medium prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-li:text-gray-600"
-                    dangerouslySetInnerHTML={{ __html: article.content }}
-                />
-            </article>
+// JSON-LD TechArticle Schema
+function TechArticleSchema({ article, category, slug }: {
+    article: NonNullable<ReturnType<typeof getHelpArticle>>,
+    category: string,
+    slug: string
+}) {
+    const schema = {
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: article.frontmatter.title,
+        description: article.frontmatter.description,
+        dateModified: article.frontmatter.lastUpdated,
+        publisher: {
+            '@type': 'Organization',
+            name: 'Prificient',
+            url: 'https://prificient.com',
+        },
+        mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': `https://prificient.com/help/${category}/${slug}`,
+        }
+    }
 
-            {/* Geri Bildirim */}
-            <div className="mt-16 pt-10 border-t border-gray-100">
-                <div className="bg-gray-50 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div>
-                        <h4 className="font-bold text-gray-900 mb-1">Bu makale yardımcı oldu mu?</h4>
-                        <p className="text-xs text-gray-500 font-medium">Geri bildiriminiz içeriğimizi iyileştirmemize yardımcı olur.</p>
+    return (
+        <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+    )
+}
+
+export default async function HelpArticlePage({ params }: Props) {
+    const { category, slug } = await params
+    const article = getHelpArticle(category, slug)
+    const categories = getHelpCategories()
+    const cat = categories.find(c => c.id === category)
+    const articles = getHelpArticles(category)
+
+    if (!article || !cat) {
+        notFound()
+    }
+
+    return (
+        <div className="min-h-screen bg-white font-sans text-gray-900">
+            <TechArticleSchema article={article} category={category} slug={slug} />
+            <LandingHeader />
+
+            <main className="py-16 lg:py-24">
+                <div className="container mx-auto px-6">
+
+                    {/* Breadcrumb */}
+                    <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
+                        <Link href="/help" className="hover:text-gray-900 transition-colors">
+                            Yardım Merkezi
+                        </Link>
+                        <ChevronRight size={14} />
+                        <Link href={`/help/${category}`} className="hover:text-gray-900 transition-colors">
+                            {cat.title}
+                        </Link>
+                        <ChevronRight size={14} />
+                        <span className="text-gray-900 font-medium">{article.frontmatter.title}</span>
+                    </nav>
+
+                    <div className="flex flex-col lg:flex-row gap-12">
+
+                        {/* Sidebar - Table of Contents */}
+                        <aside className="lg:w-64 shrink-0">
+                            <div className="lg:sticky lg:top-24">
+                                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Bu Kategoride</h3>
+                                <nav className="space-y-2">
+                                    {articles.map((art) => (
+                                        <Link
+                                            key={art.slug}
+                                            href={`/help/${category}/${art.slug}`}
+                                            className={`block text-sm font-medium py-2 px-3 rounded-lg transition-colors ${art.slug === slug
+                                                ? 'bg-blue-50 text-blue-600'
+                                                : 'text-gray-600 hover:bg-gray-50'
+                                                }`}
+                                        >
+                                            {art.frontmatter.title}
+                                        </Link>
+                                    ))}
+                                </nav>
+                            </div>
+                        </aside>
+
+                        {/* Content */}
+                        <article className="flex-1 max-w-3xl">
+
+                            {/* Header */}
+                            <header className="mb-8">
+                                <h1 className="text-2xl md:text-3xl font-black mb-4">
+                                    {article.frontmatter.title}
+                                </h1>
+                                <p className="text-gray-500 font-medium mb-4">
+                                    {article.frontmatter.description}
+                                </p>
+                                <div className="flex items-center gap-2 text-xs text-gray-400">
+                                    <Calendar size={14} />
+                                    Son güncelleme: {article.frontmatter.lastUpdated}
+                                </div>
+                            </header>
+
+                            {/* Article Content */}
+                            <div className="prose prose-lg prose-headings:font-bold prose-h2:mt-10 prose-h2:mb-4 prose-h3:mt-6 prose-p:leading-relaxed prose-a:text-blue-600 prose-ul:my-4 prose-li:my-1 prose-blockquote:border-l-blue-500 prose-blockquote:bg-blue-50 prose-blockquote:py-3 prose-blockquote:px-5 prose-blockquote:rounded-r-xl prose-blockquote:not-italic max-w-none">
+                                <MDXRemote source={article.content} />
+                            </div>
+
+                            {/* Helpful? */}
+                            <div className="mt-12 pt-8 border-t border-gray-100">
+                                <p className="text-gray-500 text-sm mb-4">Bu makale yardımcı oldu mu?</p>
+                                <div className="flex gap-3">
+                                    <button className="px-4 py-2 text-sm font-bold bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                        👍 Evet
+                                    </button>
+                                    <button className="px-4 py-2 text-sm font-bold bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                        👎 Hayır
+                                    </button>
+                                </div>
+                            </div>
+
+                        </article>
+
                     </div>
-                    
-                    {!feedback ? (
-                        <div className="flex gap-3">
-                            <button onClick={() => setFeedback('yes')} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:border-emerald-500 hover:text-emerald-600 transition-all">
-                                <ThumbsUp size={16}/> Evet
-                            </button>
-                            <button onClick={() => setFeedback('no')} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:border-rose-500 hover:text-rose-600 transition-all">
-                                <ThumbsDown size={16}/> Hayır
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="text-sm font-bold text-blue-600 animate-in fade-in">
-                            Teşekkürler! Geri bildiriminiz alındı.
-                        </div>
-                    )}
                 </div>
-            </div>
+            </main>
 
+            <LandingFooter />
         </div>
-      </main>
-
-      <LandingFooter />
-    </div>
-  )
+    )
 }

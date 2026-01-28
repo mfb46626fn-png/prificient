@@ -1,97 +1,191 @@
-'use client'
-
 import LandingHeader from '@/components/LandingHeader'
 import LandingFooter from '@/components/LandingFooter'
-import { BLOG_POSTS } from '../../lib/blog-content'
-import { ArrowLeft, Calendar, Clock, Share2, Linkedin, Twitter, Facebook } from 'lucide-react'
+import { getPostBySlug, getPostSlugs, extractHeadings } from '@/lib/mdx'
+import { MDXRemote } from 'next-mdx-remote/rsc'
+import { Calendar, Clock, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { notFound, useParams } from 'next/navigation'
+import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 
-export default function BlogPostPage() {
-  const params = useParams()
-  
-  const post = BLOG_POSTS.find(p => p.slug === params.slug)
+interface Props {
+    params: Promise<{ slug: string }>
+}
 
-  if (!post) return notFound()
+export async function generateStaticParams() {
+    const slugs = getPostSlugs('blog')
+    return slugs.map((slug) => ({ slug }))
+}
 
-  return (
-    <div className="min-h-screen bg-white font-sans text-gray-900 selection:bg-blue-100 selection:text-blue-900">
-      <LandingHeader />
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { slug } = await params
+    const post = getPostBySlug(slug)
 
-      <main>
-        {/* HEADER SECTION (YENİLENDİ: Clean & Soft Glow) */}
-        <section className="relative pt-32 pb-16 lg:pt-40 lg:pb-20 overflow-hidden">
-            
-            {/* Arkaplan Glow Efekti (Çok hafif) */}
-            <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-gradient-to-b ${post.gradientFrom} to-transparent opacity-10 blur-[100px] -z-10`}></div>
+    if (!post) {
+        return { title: 'Yazı Bulunamadı' }
+    }
 
-            <div className="container mx-auto px-6 max-w-3xl relative z-10 text-center">
-                
-                {/* Geri Dön & Kategori */}
-                <div className="flex justify-center items-center gap-4 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <Link href="/blog" className="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-black transition-colors bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-200 hover:border-gray-300">
-                        <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform"/> Blog'a Dön
+    return {
+        title: `${post.frontmatter.title} | Prificient Blog`,
+        description: post.frontmatter.excerpt,
+        authors: [{ name: post.frontmatter.author }],
+        openGraph: {
+            title: post.frontmatter.title,
+            description: post.frontmatter.excerpt,
+            type: 'article',
+            publishedTime: post.frontmatter.date,
+            authors: [post.frontmatter.author],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: post.frontmatter.title,
+            description: post.frontmatter.excerpt,
+        }
+    }
+}
+
+// JSON-LD Article Schema
+function ArticleSchema({ post, slug }: { post: NonNullable<ReturnType<typeof getPostBySlug>>, slug: string }) {
+    const schema = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: post.frontmatter.title,
+        description: post.frontmatter.excerpt,
+        author: {
+            '@type': 'Person',
+            name: post.frontmatter.author,
+        },
+        datePublished: post.frontmatter.date,
+        publisher: {
+            '@type': 'Organization',
+            name: 'Prificient',
+            url: 'https://prificient.com',
+        },
+        mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': `https://prificient.com/blog/${slug}`,
+        }
+    }
+
+    return (
+        <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+    )
+}
+
+export default async function BlogPostPage({ params }: Props) {
+    const { slug } = await params
+    const post = getPostBySlug(slug)
+
+    if (!post) {
+        notFound()
+    }
+
+    const headings = extractHeadings(post.content)
+
+    return (
+        <div className="min-h-screen bg-white font-sans text-gray-900">
+            <ArticleSchema post={post} slug={slug} />
+            <LandingHeader />
+
+            <main className="py-16 lg:py-24">
+                <div className="container mx-auto px-6">
+
+                    {/* Back Link */}
+                    <Link
+                        href="/blog"
+                        className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors mb-8"
+                    >
+                        <ArrowLeft size={16} /> Tüm Yazılar
                     </Link>
-                    <span className={`px-3 py-2 rounded-full text-xs font-bold uppercase tracking-wider ${post.accentColor}`}>
-                        {post.category}
-                    </span>
-                </div>
-                
-                {/* Başlık */}
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-8 tracking-tight text-gray-900 leading-[1.1] text-balance animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
-                    {post.title}
-                </h1>
 
-                {/* Yazar & Meta */}
-                <div className="flex flex-wrap items-center justify-center gap-6 text-sm font-medium text-gray-600 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-                    <div className="flex items-center gap-3 bg-white p-2 pr-4 rounded-full shadow-sm border border-gray-100">
-                        <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-bold text-xs">
-                            {post.author[0]}
+                    {/* Article Container */}
+                    <article className="max-w-3xl mx-auto">
+
+                        {/* Header */}
+                        <header className="mb-12">
+                            <div className="flex items-center gap-3 mb-6">
+                                <span className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold uppercase rounded-lg">
+                                    {post.frontmatter.category}
+                                </span>
+                                <span className="flex items-center gap-1.5 text-xs text-gray-400">
+                                    <Clock size={14} /> {post.readingTime}
+                                </span>
+                            </div>
+
+                            <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight mb-6 leading-tight">
+                                {post.frontmatter.title}
+                            </h1>
+
+                            <p className="text-xl text-gray-500 font-medium leading-relaxed mb-8">
+                                {post.frontmatter.excerpt}
+                            </p>
+
+                            {/* Author & Date */}
+                            <div className="flex items-center justify-between py-6 border-y border-gray-100">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold">
+                                        {post.frontmatter.author?.[0] || 'P'}
+                                    </div>
+                                    <div>
+                                        <p className="font-bold">{post.frontmatter.author}</p>
+                                        <p className="text-sm text-gray-500">{post.frontmatter.role}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-gray-400">
+                                    <Calendar size={16} />
+                                    {post.frontmatter.date}
+                                </div>
+                            </div>
+                        </header>
+
+                        {/* Table of Contents (for longer articles) */}
+                        {headings.length > 3 && (
+                            <nav className="mb-12 p-6 bg-gray-50 rounded-2xl border border-gray-100">
+                                <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">İçindekiler</h2>
+                                <ul className="space-y-2">
+                                    {headings.filter(h => h.level === 2).map((heading, idx) => (
+                                        <li key={idx}>
+                                            <a
+                                                href={`#${heading.id}`}
+                                                className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
+                                            >
+                                                {heading.text}
+                                            </a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </nav>
+                        )}
+
+                        {/* Content */}
+                        <div className="prose prose-lg prose-headings:font-black prose-h2:mt-12 prose-h2:mb-6 prose-h3:mt-8 prose-p:leading-relaxed prose-a:text-blue-600 prose-blockquote:border-l-blue-500 prose-blockquote:bg-blue-50 prose-blockquote:not-italic prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-xl prose-table:text-sm max-w-none">
+                            <MDXRemote source={post.content} />
                         </div>
-                        <div className="text-left">
-                            <p className="font-bold text-black leading-none">{post.author}</p>
-                            <p className="text-[10px] text-gray-400 leading-none mt-1">{post.role}</p>
+
+                        {/* Footer CTA */}
+                        <div className="mt-16 p-8 bg-gray-900 rounded-[2rem] text-center">
+                            <h3 className="text-2xl font-black text-white mb-3">
+                                Net Kârınızı Görün
+                            </h3>
+                            <p className="text-gray-400 mb-6">
+                                ROAS yanılsamasından kurtulun. Gerçek kârlılığınızı keşfedin.
+                            </p>
+                            <Link
+                                href="/signup"
+                                className="inline-flex items-center gap-2 bg-white text-black px-6 py-3 rounded-xl font-bold hover:bg-gray-100 transition-colors"
+                            >
+                                Ücretsiz Başla
+                            </Link>
                         </div>
-                    </div>
-                    <div className="flex items-center gap-4 text-gray-500">
-                        <span className="flex items-center gap-1.5"><Calendar size={16}/> {post.date}</span>
-                        <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                        <span className="flex items-center gap-1.5"><Clock size={16}/> {post.readTime}</span>
-                    </div>
+
+                    </article>
+
                 </div>
-            </div>
-        </section>
+            </main>
 
-        {/* İÇERİK ALANI */}
-        <section className="container mx-auto px-6 max-w-3xl pb-24">
-            <article className="prose prose-lg prose-gray max-w-none 
-                prose-headings:font-black prose-headings:tracking-tight prose-headings:text-gray-900 
-                prose-p:text-gray-600 prose-p:font-medium prose-p:leading-relaxed 
-                prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline 
-                prose-li:text-gray-600 prose-li:font-medium
-                prose-strong:font-black prose-strong:text-gray-900
-                prose-lead:text-xl prose-lead:text-gray-800 prose-lead:font-medium prose-lead:leading-relaxed
-                prose-img:rounded-[2rem] prose-img:shadow-xl prose-img:border prose-img:border-gray-100
-                first-letter:text-5xl first-letter:font-black first-letter:text-black first-letter:mr-3 first-letter:float-left">
-                
-                <div dangerouslySetInnerHTML={{ __html: post.content }} />
-            
-            </article>
-
-            {/* SHARE FOOTER */}
-            <div className="mt-16 pt-10 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
-                <p className="font-bold text-gray-900">Bu yazıyı paylaş:</p>
-                <div className="flex gap-3">
-                    <button className="p-3 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"><Twitter size={20}/></button>
-                    <button className="p-3 rounded-full bg-blue-50 text-blue-800 hover:bg-blue-100 transition-colors"><Linkedin size={20}/></button>
-                    <button className="p-3 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"><Facebook size={20}/></button>
-                    <button className="p-3 rounded-full bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors"><Share2 size={20}/></button>
-                </div>
-            </div>
-        </section>
-      </main>
-
-      <LandingFooter />
-    </div>
-  )
+            <LandingFooter />
+        </div>
+    )
 }
