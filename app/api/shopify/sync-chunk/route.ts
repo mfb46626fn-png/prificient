@@ -9,21 +9,11 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // Vercel Pro limit
 
 /**
- * Chunked Shopify Sync - Progressive Architecture
+ * Chunked Shopify Sync - Progressive Architecture (Optimized)
  * 
- * Syncs orders in small date range chunks (15 days each) to avoid timeout.
+ * Syncs orders in small date range chunks (5 days each) to avoid timeout.
+ * Uses batch deduplication for efficiency.
  * Returns next chunk info so frontend can continue the loop.
- * 
- * Request body:
- * - startDate?: ISO string (if omitted, starts from 90 days ago)
- * - endDate?: ISO string (if omitted, syncs to today)
- * - pageInfo?: string (for paginating within a chunk)
- * 
- * Response:
- * - complete: boolean (all done?)
- * - syncedOrders: number (this chunk)
- * - nextChunk?: { startDate, endDate } (if more chunks remain)
- * - nextPageInfo?: string (if pagination within chunk continues)
  */
 export async function POST(req: NextRequest) {
     const startTime = Date.now();
@@ -57,8 +47,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'No active Shopify integration' }, { status: 404 });
         }
 
-        // Calculate date ranges - 15 day chunks
-        const CHUNK_DAYS = 15;
+        // Calculate date ranges - 5 day chunks (ultra-safe for API limits)
+        const CHUNK_DAYS = 5;
         const now = new Date();
 
         // Default: 90 days ago to today
@@ -82,14 +72,14 @@ export async function POST(req: NextRequest) {
 
         const client = new shopify.clients.Rest({ session });
 
-        // Fetch orders for this chunk
+        // Fetch orders for this chunk (reduce limit to 100 for safety)
         const queryParams = pageInfo
-            ? { limit: 250, page_info: pageInfo }
+            ? { limit: 100, page_info: pageInfo }
             : {
                 status: 'any',
                 created_at_min: chunkStart.toISOString(),
                 created_at_max: chunkEnd.toISOString(),
-                limit: 250
+                limit: 100
             };
 
         const response: any = await client.get({
@@ -102,20 +92,41 @@ export async function POST(req: NextRequest) {
 
         console.log(`[ChunkedSync] Received ${orders.length} orders`);
 
+        // --- BATCH DEDUPLICATION ---
+        // Get all existing order IDs in one query (much faster)
+        const orderIds = orders.map((o: any) => o.id);
+        let existingOrderIds = new Set<number>();
+
+        if (orderIds.length > 0) {
+            // Query existing orders using JSONB contains for each ID
+            // Since Supabase doesn't support JSONB `ANY` easily, we'll do a workaround
+            // by checking external_id field if exists, or fallback to simple approach
+            const { data: existingEvents } = await supabaseAdmin
+                .from('financial_event_log')
+                .select('payload')
+                .eq('user_id', user.id)
+                .eq('event_type', 'OrderCreated')
+                .gte('event_time', chunkStart.toISOString())
+                .lte('event_time', chunkEnd.toISOString());
+
+            if (existingEvents) {
+                existingEvents.forEach((e: any) => {
+                    if (e.payload?.id) {
+                        existingOrderIds.add(e.payload.id);
+                    }
+                });
+            }
+        }
+
+        console.log(`[ChunkedSync] Found ${existingOrderIds.size} existing orders in DB`);
+
         let processed = 0;
         let skipped = 0;
 
         for (const order of orders) {
             try {
-                // Deduplication
-                const { count } = await supabaseAdmin
-                    .from('financial_event_log')
-                    .select('event_id', { count: 'exact', head: true })
-                    .eq('user_id', user.id)
-                    .eq('event_type', 'OrderCreated')
-                    .contains('payload', { id: order.id });
-
-                if (count && count > 0) {
+                // Fast deduplication check using Set
+                if (existingOrderIds.has(order.id)) {
                     skipped++;
                     continue;
                 }
@@ -152,8 +163,7 @@ export async function POST(req: NextRequest) {
 
         // Determine if we need another chunk
         if (chunkStart > rangeStart) {
-            // More chunks needed - go back another 15 days
-            const nextChunkEnd = new Date(chunkStart.getTime() - 1); // Avoid overlap
+            const nextChunkEnd = new Date(chunkStart.getTime() - 1);
             return NextResponse.json({
                 complete: false,
                 syncedOrders: processed,
@@ -167,8 +177,7 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        // All done!
-        // Also fetch currency
+        // All done - fetch currency
         try {
             const shopInfo: any = await client.get({ path: 'shop' });
             const currency = shopInfo.body?.shop?.currency;
