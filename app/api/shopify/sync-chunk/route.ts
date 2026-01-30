@@ -112,7 +112,8 @@ export async function POST(req: NextRequest) {
                 'shopify_history_scan',
                 'OrderCreated',
                 order,
-                supabaseAdmin
+                supabaseAdmin,
+                true  // skipProcessing - fast sync, batch process later
             );
             processed++;
         }

@@ -58,7 +58,8 @@ export class LedgerService {
         }
     }
     // 2. Olay Kaydedici (Immutable Event Log)
-    static async recordEvent(user_id: string, stream_type: string, event_type: string, payload: any, supabaseClient?: any) {
+    // skipProcessing=true for fast sync (batch process later)
+    static async recordEvent(user_id: string, stream_type: string, event_type: string, payload: any, supabaseClient?: any, skipProcessing = false) {
         const supabase = supabaseClient || createClient()
 
         const { data, error } = await supabase.from('financial_event_log').insert({
@@ -71,9 +72,10 @@ export class LedgerService {
         if (error) throw new Error(`Event Log Error: ${error.message}`)
         if (!data) throw new Error("Event ID not returned")
 
-        // Auto-process for immediate consistency (Optional: could be async worker)
-        // We pass the same client to keep context (e.g. Admin rights)
-        await this.processEvent(data.event_id, user_id, event_type, payload, supabase)
+        // Skip heavy processing during sync if requested
+        if (!skipProcessing) {
+            await this.processEvent(data.event_id, user_id, event_type, payload, supabase)
+        }
 
         return data.event_id
     }

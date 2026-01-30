@@ -86,12 +86,34 @@ export default function DeepScanTrigger({ autoTrigger }: { autoTrigger?: boolean
 
             addLog(`Toplam: ${totalSynced} yeni, ${totalSkipped} mevcut sipariş`)
 
-            // Finalization steps
-            addLog("Finansal hareketler işleniyor...")
-            await new Promise(r => setTimeout(r, 600))
+            // Batch process events into ledger (if any new orders)
+            if (totalSynced > 0) {
+                addLog("Finansal hareketler işleniyor...")
+                let batchComplete = false
+                let batchCount = 0
+                let totalProcessed = 0
+
+                while (!batchComplete && batchCount < 20) {
+                    batchCount++
+                    const processRes = await fetch('/api/shopify/batch-process', { method: 'POST' })
+
+                    if (!processRes.ok) {
+                        addLog("İşleme hatası - daha sonra tekrar deneyin")
+                        break
+                    }
+
+                    const processResult = await processRes.json()
+                    totalProcessed += processResult.processed || 0
+                    batchComplete = !processResult.hasMore
+
+                    if (processResult.processed > 0) {
+                        addLog(`${totalProcessed} işlem muhasebeleştirildi`)
+                    }
+                }
+            }
 
             addLog("Kâr/Zarar tabloları güncelleniyor...")
-            await new Promise(r => setTimeout(r, 400))
+            await new Promise(r => setTimeout(r, 300))
 
             addLog("TÜM SİSTEMLER GÜNCEL.")
             await new Promise(r => setTimeout(r, 500))
