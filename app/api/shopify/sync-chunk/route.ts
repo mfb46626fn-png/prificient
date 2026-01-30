@@ -9,35 +9,33 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // Vercel Pro limit
 
 /**
- * Chunked Shopify Sync - Progressive Architecture (Optimized)
- * 
- * Syncs orders in small date range chunks (5 days each) to avoid timeout.
- * Uses batch deduplication for efficiency.
- * Returns next chunk info so frontend can continue the loop.
+ * Ultra-optimized Chunked Shopify Sync
+ * - 1-day chunks
+ * - Parallel auth + DB operations
+ * - Minimal logging
  */
 export async function POST(req: NextRequest) {
     const startTime = Date.now();
 
     try {
-        console.log('[ChunkedSync] === STARTING CHUNK ===');
+        // Parallel: Auth + Body parsing
+        const [supabaseUser, bodyResult] = await Promise.all([
+            createClient(),
+            req.json().catch(() => ({}))
+        ]);
 
-        // Auth check
-        const supabaseUser = await createClient();
         const { data: { user } } = await supabaseUser.auth.getUser();
-
         if (!user) {
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
-        // Get request body
-        const body = await req.json().catch(() => ({}));
-        const { startDate, endDate, pageInfo } = body;
+        const { startDate, endDate, pageInfo } = bodyResult;
 
-        // Get Shopify integration
+        // Get integration
         const supabaseAdmin = createAdminClient();
         const { data: integration } = await supabaseAdmin
             .from('integrations')
-            .select('*')
+            .select('shop_domain, access_token')
             .eq('user_id', user.id)
             .eq('platform', 'shopify')
             .eq('status', 'active')
@@ -47,19 +45,13 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'No active Shopify integration' }, { status: 404 });
         }
 
-        // Calculate date ranges - 3 day chunks (ultra-safe for API limits)
-        const CHUNK_DAYS = 3;
+        // 1-day chunks for maximum safety
+        const CHUNK_DAYS = 1;
         const now = new Date();
-
-        // Default: 90 days ago to today
         const rangeStart = startDate ? new Date(startDate) : new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
         const rangeEnd = endDate ? new Date(endDate) : now;
-
-        // Current chunk boundaries
         const chunkEnd = rangeEnd;
         const chunkStart = new Date(Math.max(chunkEnd.getTime() - CHUNK_DAYS * 24 * 60 * 60 * 1000, rangeStart.getTime()));
-
-        console.log(`[ChunkedSync] Chunk range: ${chunkStart.toISOString()} to ${chunkEnd.toISOString()}`);
 
         // Create Shopify session
         const session = new Session({
@@ -72,14 +64,14 @@ export async function POST(req: NextRequest) {
 
         const client = new shopify.clients.Rest({ session });
 
-        // Fetch orders for this chunk (reduce limit to 100 for safety)
+        // Fetch orders - smaller limit
         const queryParams = pageInfo
-            ? { limit: 100, page_info: pageInfo }
+            ? { limit: 50, page_info: pageInfo }
             : {
                 status: 'any',
                 created_at_min: chunkStart.toISOString(),
                 created_at_max: chunkEnd.toISOString(),
-                limit: 100
+                limit: 50
             };
 
         const response: any = await client.get({
@@ -90,17 +82,9 @@ export async function POST(req: NextRequest) {
         const orders = response.body?.orders || [];
         const nextPageInfo = response.pageInfo?.nextPage?.query?.page_info;
 
-        console.log(`[ChunkedSync] Received ${orders.length} orders`);
-
-        // --- BATCH DEDUPLICATION ---
-        // Get all existing order IDs in one query (much faster)
-        const orderIds = orders.map((o: any) => o.id);
+        // Batch deduplication
         let existingOrderIds = new Set<number>();
-
-        if (orderIds.length > 0) {
-            // Query existing orders using JSONB contains for each ID
-            // Since Supabase doesn't support JSONB `ANY` easily, we'll do a workaround
-            // by checking external_id field if exists, or fallback to simple approach
+        if (orders.length > 0) {
             const { data: existingEvents } = await supabaseAdmin
                 .from('financial_event_log')
                 .select('payload')
@@ -109,47 +93,33 @@ export async function POST(req: NextRequest) {
                 .gte('event_time', chunkStart.toISOString())
                 .lte('event_time', chunkEnd.toISOString());
 
-            if (existingEvents) {
-                existingEvents.forEach((e: any) => {
-                    if (e.payload?.id) {
-                        existingOrderIds.add(e.payload.id);
-                    }
-                });
-            }
+            existingEvents?.forEach((e: any) => {
+                if (e.payload?.id) existingOrderIds.add(e.payload.id);
+            });
         }
-
-        console.log(`[ChunkedSync] Found ${existingOrderIds.size} existing orders in DB`);
 
         let processed = 0;
         let skipped = 0;
 
         for (const order of orders) {
-            try {
-                // Fast deduplication check using Set
-                if (existingOrderIds.has(order.id)) {
-                    skipped++;
-                    continue;
-                }
-
-                // Record to ledger
-                await LedgerService.recordEvent(
-                    user.id,
-                    'shopify_history_scan',
-                    'OrderCreated',
-                    order,
-                    supabaseAdmin
-                );
-
-                processed++;
-            } catch (e: any) {
-                console.error(`[ChunkedSync] Order ${order.id} error:`, e.message);
+            if (existingOrderIds.has(order.id)) {
+                skipped++;
+                continue;
             }
+
+            await LedgerService.recordEvent(
+                user.id,
+                'shopify_history_scan',
+                'OrderCreated',
+                order,
+                supabaseAdmin
+            );
+            processed++;
         }
 
         const duration = Date.now() - startTime;
-        console.log(`[ChunkedSync] Processed: ${processed}, Skipped: ${skipped}, Duration: ${duration}ms`);
 
-        // Determine if we need more pagination within this chunk
+        // More pagination within chunk?
         if (nextPageInfo) {
             return NextResponse.json({
                 complete: false,
@@ -161,7 +131,7 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        // Determine if we need another chunk
+        // More chunks needed?
         if (chunkStart > rangeStart) {
             const nextChunkEnd = new Date(chunkStart.getTime() - 1);
             return NextResponse.json({
@@ -177,16 +147,14 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        // All done - fetch currency
+        // All done - update currency
         try {
             const shopInfo: any = await client.get({ path: 'shop' });
             const currency = shopInfo.body?.shop?.currency;
             if (currency) {
                 await supabaseAdmin.from('store_settings').update({ currency }).eq('user_id', user.id);
             }
-        } catch (e) {
-            console.error('[ChunkedSync] Currency update warning:', e);
-        }
+        } catch { }
 
         return NextResponse.json({
             complete: true,
@@ -196,10 +164,9 @@ export async function POST(req: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('[ChunkedSync] FATAL ERROR:', error);
+        console.error('[ChunkedSync] Error:', error.message);
         return NextResponse.json({
-            error: error.message,
-            stack: error.stack
+            error: error.message
         }, { status: 500 });
     }
 }
