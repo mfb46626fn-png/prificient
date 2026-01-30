@@ -59,18 +59,40 @@ export class LedgerService {
     }
     // 2. Olay Kaydedici (Immutable Event Log)
     // skipProcessing=true for fast sync (batch process later)
+    // 2. Olay Kaydedici (Immutable Event Log)
+    // skipProcessing=true for fast sync (batch process later)
     static async recordEvent(user_id: string, stream_type: string, event_type: string, payload: any, supabaseClient?: any, skipProcessing = false) {
         const supabase = supabaseClient || createClient()
+
+        // Deterministic Source ID extraction
+        let source_id = null;
+        if (payload.id) source_id = String(payload.id);
+        else if (payload.order_id) source_id = String(payload.order_id);
+
+        // If we can't identify it, let it pass (or generate a hash?)
+        // For OrderCreated, payload.id is mandatory.
 
         const { data, error } = await supabase.from('financial_event_log').insert({
             user_id,
             stream_type,
             event_type,
-            payload
-        }).select('event_id').single()
+            payload,
+            source_id // NEW: Helper field for uniqueness
+        })
+            .select('event_id')
+            .maybeSingle()
 
-        if (error) throw new Error(`Event Log Error: ${error.message}`)
-        if (!data) throw new Error("Event ID not returned")
+        // Handle Duplicates gracefully (Idempotency)
+        if (error) {
+            // Postgres error code for Unique Violation is 23505
+            if (error.code === '23505' || error.message.includes('unique')) {
+                console.log(`[Ledger] Skipped duplicate event: ${event_type} #${source_id}`);
+                return null; // Silent skip
+            }
+            throw new Error(`Event Log Error: ${error.message}`)
+        }
+
+        if (!data) return null; // Should not happen usually
 
         // Skip heavy processing during sync if requested
         if (!skipProcessing) {
