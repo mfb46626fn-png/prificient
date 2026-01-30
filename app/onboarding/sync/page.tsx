@@ -62,7 +62,7 @@ export default function SyncPage() {
             let hasMore = true;
 
             while (hasMore) {
-                const batchRes = await fetch('/api/sync/batch', {
+                const batchRes: Response = await fetch('/api/sync/batch', {
                     method: 'POST',
                     body: JSON.stringify({ cursor }),
                     headers: { 'Content-Type': 'application/json' }

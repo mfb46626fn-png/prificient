@@ -161,10 +161,19 @@ export async function POST(req: NextRequest) {
 
         // 4. Extract Next Cursor
         let nextCursor = null;
-        if (linkHeader && linkHeader.includes('rel="next"')) {
-            // Basic regex to extract page_info
-            const match = linkHeader.match(/page_info=([^>&]+)/);
-            if (match) nextCursor = match[1];
+        if (linkHeader) {
+            // Shopify Link Header Format: <url>; rel="next", <url>; rel="previous"
+            // We need to parse this properly.
+            const links = linkHeader.split(',');
+            for (const link of links) {
+                if (link.includes('rel="next"')) {
+                    const match = link.match(/page_info=([^>&]+)/);
+                    if (match) {
+                        nextCursor = match[1];
+                        break;
+                    }
+                }
+            }
         }
 
         // 5. Update Progress in DB
@@ -172,8 +181,6 @@ export async function POST(req: NextRequest) {
             .from('integrations')
             .update({
                 last_synced_cursor: nextCursor,
-                // We could update progress here if passed from frontend, 
-                // but let's keep it simple.
                 updated_at: new Date().toISOString()
             })
             .eq('user_id', user.id)
