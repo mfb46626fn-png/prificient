@@ -26,39 +26,84 @@ export default function DeepScanTrigger({ autoTrigger }: { autoTrigger?: boolean
         try {
             addLog("Veri kaynaklarına bağlanılıyor... (Shopify)")
 
-            // 1. Call Sync API
-            const response = await fetch('/api/debug/trigger-sync', { method: 'POST' })
+            // Progressive Chunked Sync - each chunk is 15 days
+            let totalSynced = 0
+            let totalSkipped = 0
+            let isComplete = false
+            let nextChunk: { startDate: string; endDate: string } | undefined = undefined
+            let nextPageInfo: string | undefined = undefined
+            let chunkCount = 0
 
-            if (!response.ok) {
-                const err = await response.json()
-                throw new Error(err.error || 'Sync failed')
+            while (!isComplete) {
+                chunkCount++
+
+                // Build request body
+                const body: any = {}
+                if (nextChunk) {
+                    body.startDate = nextChunk.startDate
+                    body.endDate = nextChunk.endDate
+                }
+                if (nextPageInfo) {
+                    body.pageInfo = nextPageInfo
+                }
+
+                addLog(`Veri paketi #${chunkCount} çekiliyor...`)
+
+                const response = await fetch('/api/shopify/sync-chunk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                })
+
+                if (!response.ok) {
+                    const err = await response.json()
+                    throw new Error(err.error || 'Sync failed')
+                }
+
+                const result = await response.json()
+
+                totalSynced += result.syncedOrders || 0
+                totalSkipped += result.skippedOrders || 0
+                isComplete = result.complete
+                nextChunk = result.nextChunk
+                nextPageInfo = result.nextPageInfo
+
+                // Show progress
+                if (result.currentChunk) {
+                    const startDate = new Date(result.currentChunk.startDate).toLocaleDateString('tr-TR')
+                    const endDate = new Date(result.currentChunk.endDate).toLocaleDateString('tr-TR')
+                    addLog(`${startDate} - ${endDate} aralığı tarandı`)
+                }
+
+                addLog(`+${result.syncedOrders || 0} yeni sipariş | ${totalSynced} toplam`)
+
+                // Safety limit
+                if (chunkCount > 20) {
+                    addLog("Maksimum chunk sayısına ulaşıldı.")
+                    break
+                }
             }
 
-            const result = await response.json()
-            addLog(`Veri çekildi: ${result.syncedOrders || 0} yeni sipariş`)
+            addLog(`Toplam: ${totalSynced} yeni, ${totalSkipped} mevcut sipariş`)
 
-            // 2. Simulation / Analysis Filler Steps (to look cool and give user feedback while processing)
+            // Finalization steps
             addLog("Finansal hareketler işleniyor...")
-            await new Promise(r => setTimeout(r, 1000))
+            await new Promise(r => setTimeout(r, 600))
 
             addLog("Kâr/Zarar tabloları güncelleniyor...")
-            await new Promise(r => setTimeout(r, 800))
-
-            addLog("Risk analizi tamamlandı.")
-            await new Promise(r => setTimeout(r, 500))
+            await new Promise(r => setTimeout(r, 400))
 
             addLog("TÜM SİSTEMLER GÜNCEL.")
             await new Promise(r => setTimeout(r, 500))
 
             // Refresh Data
             router.refresh()
-            router.replace('/dashboard') // remove sync_start param
+            router.replace('/dashboard')
 
         } catch (error: any) {
             console.error('Scan Error:', error)
             addLog(`HATA: ${error.message || 'Bağlantı hatası'}`)
             addLog("Lütfen daha sonra tekrar deneyin.")
-            // Keep error visible for a moment
             await new Promise(r => setTimeout(r, 3000))
         } finally {
             setIsScanning(false)
