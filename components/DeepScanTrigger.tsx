@@ -32,6 +32,7 @@ export default function DeepScanTrigger({ autoTrigger }: { autoTrigger?: boolean
             let isComplete = false
             let nextChunk: { startDate: string; endDate: string } | undefined = undefined
             let nextPageInfo: string | undefined = undefined
+            let currentChunk: { startDate: string; endDate: string } | undefined = undefined
             let chunkCount = 0
 
             while (!isComplete) {
@@ -39,10 +40,15 @@ export default function DeepScanTrigger({ autoTrigger }: { autoTrigger?: boolean
 
                 // Build request body
                 const body: any = {}
+
                 if (nextChunk) {
                     body.startDate = nextChunk.startDate
                     body.endDate = nextChunk.endDate
+                } else if (currentChunk) {
+                    body.startDate = currentChunk.startDate
+                    body.endDate = currentChunk.endDate
                 }
+
                 if (nextPageInfo) {
                     body.pageInfo = nextPageInfo
                 }
@@ -67,6 +73,10 @@ export default function DeepScanTrigger({ autoTrigger }: { autoTrigger?: boolean
                 isComplete = result.complete
                 nextChunk = result.nextChunk
                 nextPageInfo = result.nextPageInfo
+
+                if (result.currentChunk) {
+                    currentChunk = result.currentChunk
+                }
 
                 // Show progress
                 if (result.currentChunk) {

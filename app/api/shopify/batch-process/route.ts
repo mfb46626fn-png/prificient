@@ -27,28 +27,34 @@ export async function POST(req: NextRequest) {
 
         // Find unprocessed events (no ledger_transaction linked)
         // We check if event has been processed by looking for linked transactions
-        const { data: unprocessedEvents, error } = await supabaseAdmin
+        // 1. Fetch recent events
+        const { data: recentEvents, error } = await supabaseAdmin
             .from('financial_event_log')
-            .select(`
-                event_id,
-                event_type,
-                payload,
-                ledger_transactions(id)
-            `)
+            .select('*')
             .eq('user_id', user.id)
-            .is('ledger_transactions', null)
-            .order('event_time', { ascending: true })
-            .limit(50);
+            .order('event_time', { ascending: true }) // Oldest first
+            .limit(100);
 
         if (error) {
             console.error('[BatchProcess] Error fetching events:', error);
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        // Filter only truly unprocessed (no linked transactions)
-        const toProcess = (unprocessedEvents || []).filter((e: any) =>
-            !e.ledger_transactions || e.ledger_transactions.length === 0
-        );
+        if (!recentEvents || recentEvents.length === 0) {
+            return NextResponse.json({ processed: 0, hasMore: false, durationMs: Date.now() - startTime });
+        }
+
+        // 2. Check which ones are already processed
+        const eventIds = recentEvents.map(e => e.event_id);
+        const { data: processedTransactions } = await supabaseAdmin
+            .from('ledger_transactions')
+            .select('event_id')
+            .in('event_id', eventIds);
+
+        const processedEventIds = new Set((processedTransactions || []).map((t: any) => t.event_id));
+
+        // 3. Filter
+        const toProcess = recentEvents.filter(e => !processedEventIds.has(e.event_id)).slice(0, 50);
 
         let processed = 0;
         let errors = 0;
