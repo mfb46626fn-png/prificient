@@ -39,7 +39,10 @@ export default function SyncPage() {
             // Step 1: Init
             addLog('Shopify bağlantısı kontrol ediliyor...');
             const initRes = await fetch('/api/sync/init', { method: 'POST' });
-            if (!initRes.ok) throw new Error('Başlatma hatası');
+            if (!initRes.ok) {
+                const errData = await initRes.json();
+                throw new Error(errData.error || 'Başlatma hatası');
+            }
 
             const initData: InitResponse = await initRes.json();
             const total = initData.totalOrders || 0;

@@ -18,10 +18,14 @@ export async function POST(req: NextRequest) {
             .select('access_token, shop_name')
             .eq('user_id', user.id)
             .eq('platform', 'shopify')
-            .single();
+            .maybeSingle();
 
-        if (!integration || !integration.access_token) {
-            return NextResponse.json({ error: 'Shopify not connected' }, { status: 400 });
+        if (!integration) {
+            return NextResponse.json({ error: 'Integration record not found in DB' }, { status: 400 });
+        }
+
+        if (!integration.access_token) {
+            return NextResponse.json({ error: 'Shopify Access Token missing' }, { status: 400 });
         }
 
         // 2. Init Shopify Client & Fetch Count
