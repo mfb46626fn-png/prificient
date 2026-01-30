@@ -19,7 +19,7 @@ interface BatchResponse {
 export default function SyncPage() {
     const router = useRouter();
     const [progress, setProgress] = useState(0);
-    const [status, setStatus] = useState<'optimizing' | 'syncing' | 'finishing' | 'completed'>('optimizing');
+    const [status, setStatus] = useState<'optimizing' | 'syncing' | 'finishing' | 'completed' | 'failed_auth'>('optimizing');
     const [logs, setLogs] = useState<string[]>(['Sistem başlatılıyor...']);
     const [stats, setStats] = useState({ processed: 0, total: 0 });
     const isRunning = useRef(false);
@@ -41,7 +41,16 @@ export default function SyncPage() {
             const initRes = await fetch('/api/sync/init', { method: 'POST' });
             if (!initRes.ok) {
                 const errData = await initRes.json();
-                throw new Error(errData.error || 'Başlatma hatası');
+                const errMsg = errData.error || 'Başlatma hatası';
+
+                if (errMsg.includes('Integration record not found') || errMsg.includes('Shopify not connected') || errMsg.includes('Integration record not found in DB')) {
+                    setStatus('failed_auth');
+                    addLog('⚠️ Shopify bağlantısı bulunamadı.');
+                    addLog('Lütfen tekrar bağlantı kurun.');
+                    return;
+                }
+
+                throw new Error(errMsg);
             }
 
             const initData: InitResponse = await initRes.json();
@@ -100,8 +109,15 @@ export default function SyncPage() {
 
         } catch (error: any) {
             console.error(error);
-            addLog(`HATA: ${error.message || 'Bir sorun oluştu'}`);
-            // Retry logic could be added here
+            const msg = error.message || 'Bir sorun oluştu';
+            addLog(`HATA: ${msg}`);
+
+            if (msg.includes('Integration record') || msg.includes('not connected')) {
+                setStatus('failed_auth');
+                addLog('⚠️ Shopify bağlantısı kopmuş veya kurulmamış.');
+                addLog('Yönlendiriliyorsunuz...');
+                setTimeout(() => router.push('/connect/shopify'), 3000);
+            }
         }
     };
 
@@ -121,31 +137,49 @@ export default function SyncPage() {
                 </div>
 
                 {/* Progress Ring */}
-                <div className="relative flex items-center justify-center py-8">
-                    {/* Background Circle */}
-                    <div className="w-48 h-48 rounded-full border-4 border-zinc-800 absolute"></div>
+                {status !== 'failed_auth' && (
+                    <div className="relative flex items-center justify-center py-8">
+                        {/* Background Circle */}
+                        <div className="w-48 h-48 rounded-full border-4 border-zinc-800 absolute"></div>
 
-                    {/* Spinner/Active Circle */}
-                    <svg className="w-48 h-48 -rotate-90 transform" viewBox="0 0 100 100">
-                        <circle
-                            cx="50"
-                            cy="50"
-                            r="46"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="8"
-                            className="text-purple-600 transition-all duration-500 ease-out"
-                            strokeDasharray={`${progress * 2.89} 289`} // 2 * PI * 46 ~= 289
-                            strokeLinecap="round"
-                        />
-                    </svg>
+                        {/* Spinner/Active Circle */}
+                        <svg className="w-48 h-48 -rotate-90 transform" viewBox="0 0 100 100">
+                            <circle
+                                cx="50"
+                                cy="50"
+                                r="46"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="8"
+                                className="text-purple-600 transition-all duration-500 ease-out"
+                                strokeDasharray={`${progress * 2.89} 289`} // 2 * PI * 46 ~= 289
+                                strokeLinecap="round"
+                            />
+                        </svg>
 
-                    {/* Percentage Text */}
-                    <div className="absolute flex flex-col items-center">
-                        <span className="text-4xl font-mono font-bold">{progress}%</span>
-                        <span className="text-xs text-zinc-500 uppercase tracking-widest">{status}</span>
+                        {/* Percentage Text */}
+                        <div className="absolute flex flex-col items-center">
+                            <span className="text-4xl font-mono font-bold">{progress}%</span>
+                            <span className="text-xs text-zinc-500 uppercase tracking-widest">{status}</span>
+                        </div>
                     </div>
-                </div>
+                )}
+
+                {/* Error State UI */}
+                {status === 'failed_auth' && (
+                    <div className="text-center space-y-4 animate-in fade-in duration-500 py-8">
+                        <div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/20">
+                            <p className="font-bold">Bağlantı Hatası</p>
+                            <p className="text-sm opacity-80">Shopify entegrasyonu veritabanında bulunamadı.</p>
+                        </div>
+                        <button
+                            onClick={() => router.push('/connect/shopify')}
+                            className="bg-white text-black px-6 py-3 rounded-full font-bold hover:scale-105 transition-transform w-full"
+                        >
+                            Shopify'ı Tekrar Bağla
+                        </button>
+                    </div>
+                )}
 
                 {/* Log Terminal */}
                 <div className="bg-zinc-900/50 rounded-lg border border-zinc-800 p-4 font-mono text-xs h-40 overflow-hidden relative">
@@ -158,7 +192,7 @@ export default function SyncPage() {
                         {logs.map((log, i) => (
                             <div key={i} className={`flex items-start gap-2 ${i === 0 ? 'text-green-400' : 'text-zinc-500'}`}>
                                 <Terminal className="w-3 h-3 mt-0.5 shrink-0" />
-                                <span>{log}</span>
+                                <span className={log.includes('HATA') ? 'text-red-400' : ''}>{log}</span>
                             </div>
                         ))}
                     </div>
