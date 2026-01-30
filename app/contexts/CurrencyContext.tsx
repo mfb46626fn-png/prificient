@@ -41,7 +41,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     const fetchUserPreference = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { data } = await supabase.from('user_settings').select('currency').eq('user_id', user.id).single()
+        const { data } = await supabase.from('store_settings').select('currency').eq('user_id', user.id).single()
         if (data?.currency) applyCurrency(data.currency)
       }
     }
@@ -61,16 +61,16 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     const rate = rates[currency] || 1
     const converted = amount * rate
     // Virgülden sonra maks 2 hane, binlik ayırıcı ile formatla
-    return converted.toLocaleString('tr-TR', { 
-      minimumFractionDigits: 0, 
-      maximumFractionDigits: 2 
+    return converted.toLocaleString('tr-TR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
     })
   }
 
   const updateCurrency = async (newCurrency: string) => {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-      await supabase.from('user_settings').upsert({ user_id: user.id, currency: newCurrency })
+      await supabase.from('store_settings').upsert({ user_id: user.id, currency: newCurrency })
       applyCurrency(newCurrency)
     }
   }

@@ -38,7 +38,6 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // 1. Admin Kontrolü (Hızlı Check)
-  // 1. Admin Kontrolü (Hızlı Check)
   const email = (user?.email || '').toLowerCase().trim();
   const isExplicitAdmin = ['can@prificient.com', 'info@prificient.com', 'mcanakarofficial@gmail.com'].includes(email);
 
@@ -100,8 +99,6 @@ export async function updateSession(request: NextRequest) {
       .maybeSingle()
 
     // Eğer abonelik kaydı yoksa (yeni üyeyse) veya süresi bitmişse...
-    // Not: Yeni üye kaydolduğunda subscription tetiklenmeli yoksa buraya takılır.
-    // Şimdilik subscription varsa kontrol edelim, yoksa trial varsayalım (veya logic'e göre değişir).
     if (
       subscription && (
         subscription.status === 'expired' ||
@@ -123,18 +120,22 @@ export async function updateSession(request: NextRequest) {
         .from('integrations')
         .select('sync_status')
         .eq('user_id', user.id)
+        .eq('platform', 'shopify') // Only check Shopify integration
         .maybeSingle()
 
-      const syncStatus = integration?.sync_status || 'pending'
+      // Eğer entegrasyon varsa, sync durumunu kontrol et
+      if (integration) {
+        const syncStatus = integration.sync_status || 'pending'
 
-      // 1. Sync bitmediyse -> Zorla /onboarding/sync'e gönder
-      if (syncStatus !== 'completed' && !request.nextUrl.pathname.startsWith('/onboarding/sync')) {
-        return NextResponse.redirect(new URL('/onboarding/sync', request.url))
-      }
+        // 1. Sync bitmediyse -> Zorla /onboarding/sync'e gönder
+        if (syncStatus !== 'completed' && !request.nextUrl.pathname.startsWith('/onboarding/sync')) {
+          return NextResponse.redirect(new URL('/onboarding/sync', request.url))
+        }
 
-      // 2. Sync bittiyse -> /onboarding/sync'e girmesine izin verme (Dashboard'a at)
-      if (syncStatus === 'completed' && request.nextUrl.pathname.startsWith('/onboarding/sync')) {
-        return NextResponse.redirect(new URL('/dashboard', request.url))
+        // 2. Sync bittiyse -> /onboarding/sync'e girmesine izin verme (Dashboard'a at)
+        if (syncStatus === 'completed' && request.nextUrl.pathname.startsWith('/onboarding/sync')) {
+          return NextResponse.redirect(new URL('/dashboard', request.url))
+        }
       }
     }
   }
