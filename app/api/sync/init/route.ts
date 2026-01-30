@@ -3,51 +3,57 @@ import { createClient } from '@/utils/supabase/server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { shopifyClient } from '@/lib/shopify';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
     try {
+        // 1. Auth Check (Standard Client)
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
 
-        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
 
+        // 2. Fetch Integration (Admin Client to bypass RLS)
         const supabaseAdmin = createAdminClient();
-
-        // 1. Get Shopify Access Token
-        const { data: integration } = await supabaseAdmin
+        const { data: integration, error: dbError } = await supabaseAdmin
             .from('integrations')
-            .select('access_token, shop_name')
+            .select('*')
             .eq('user_id', user.id)
             .eq('platform', 'shopify')
             .maybeSingle();
 
+        if (dbError) {
+            console.error('DB Error:', dbError);
+            throw new Error(dbError.message);
+        }
+
         if (!integration) {
-            return NextResponse.json({ error: 'Integration record not found in DB' }, { status: 400 });
+            return NextResponse.json({ error: 'Integration record not found in DB - Please reconnect Shopify' }, { status: 400 });
         }
 
-        if (!integration.access_token) {
-            return NextResponse.json({ error: 'Shopify Access Token missing' }, { status: 400 });
+        const { access_token, shop_domain } = integration;
+
+        if (!access_token || !shop_domain) {
+            return NextResponse.json({ error: 'Shopify credentials missing' }, { status: 400 });
         }
 
-        // 2. Init Shopify Client & Fetch Count
-        const client = shopifyClient(integration.shop_name, integration.access_token);
-        const count = await client.get({ path: 'orders/count', query: { status: 'any' } });
+        // 3. Fetch Order Count from Shopify
+        const client = shopifyClient(shop_domain, access_token);
+        const countRes: any = await client.get({ path: 'orders/count', query: { status: 'any' } });
+        const totalOrders = countRes.body?.count || 0;
 
-        const totalOrders = count.body.count;
-
-        // 3. Update DB state
-        const { error } = await supabaseAdmin
+        // 4. Update Integration State (Admin Client)
+        await supabaseAdmin
             .from('integrations')
             .update({
                 sync_status: 'syncing',
-                sync_progress: 0,
                 total_orders_to_sync: totalOrders,
-                last_synced_cursor: null, // Reset cursor for fresh sync
-                updated_at: new Date().toISOString()
+                sync_progress: 0,
+                last_synced_cursor: null
             })
-            .eq('user_id', user.id)
-            .eq('platform', 'shopify');
-
-        if (error) throw error;
+            .eq('id', integration.id);
 
         return NextResponse.json({
             success: true,
@@ -56,7 +62,7 @@ export async function POST(req: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('[Sync Init] Error:', error);
+        console.error('Sync Init Error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

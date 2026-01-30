@@ -3,6 +3,8 @@ import { createClient } from '@/utils/supabase/server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { EmailService } from '@/lib/email-service';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
     try {
         const supabase = await createClient();
@@ -12,7 +14,7 @@ export async function POST(req: NextRequest) {
 
         const supabaseAdmin = createAdminClient();
 
-        // 1. Update Integration Status
+        // 1. Update Integration Status (Admin Client)
         const { error } = await supabaseAdmin
             .from('integrations')
             .update({
@@ -27,7 +29,9 @@ export async function POST(req: NextRequest) {
 
         // 2. Trigger System Ready Email (Phase 6)
         try {
-            await EmailService.sendSystemReady(user.email!);
+            if (user.email) {
+                await EmailService.sendSystemReady(user.email);
+            }
         } catch (emailError) {
             console.error('Failed to send Ready Email:', emailError);
         }

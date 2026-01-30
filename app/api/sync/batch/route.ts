@@ -4,7 +4,8 @@ import { createAdminClient } from '@/lib/supabase-admin';
 import { shopifyClient } from '@/lib/shopify';
 import { LedgerService } from '@/lib/ledger';
 
-export const maxDuration = 60; // Vercel limit cap
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60; // Increase timeout
 
 export async function POST(req: NextRequest) {
     try {
@@ -13,118 +14,77 @@ export async function POST(req: NextRequest) {
 
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-        const { cursor } = await req.json();
+        const body = await req.json();
+        const { cursor } = body;
+
+        // Use Admin Client for DB Ops
         const supabaseAdmin = createAdminClient();
 
         // 1. Get Integration
         const { data: integration } = await supabaseAdmin
             .from('integrations')
-            .select('access_token, shop_name, total_orders_to_sync, sync_progress')
+            .select('*')
             .eq('user_id', user.id)
             .eq('platform', 'shopify')
             .single();
 
-        if (!integration) return NextResponse.json({ error: 'Integration not found' }, { status: 404 });
+        if (!integration) throw new Error('Integration not found');
 
-        // 2. Fetch Orders from Shopify
-        // Limit 20 to ensure we stay within 5-10s processing window (Full Ledger Processing)
-        const client = shopifyClient(integration.shop_name, integration.access_token);
+        const { access_token, shop_domain } = integration;
+        const client = shopifyClient(shop_domain, access_token);
 
-        // If cursor exists, only send limit and page_info
-        const query: any = { limit: 20 };
+        // 2. Fetch Orders (1 Day Chunk or Page)
+        // Optimization: Reduce limit to 50 to process faster and avoid timeouts
+        const params: any = {
+            limit: 50,
+            status: 'any',
+            created_at_min: '2024-01-01T00:00:00Z', // Start of year or dynamic
+        };
+
         if (cursor) {
-            query.page_info = cursor;
-        } else {
-            query.status = 'any';
+            params.page_info = cursor;
         }
 
-        const response = await client.get({ path: 'orders', query });
+        const response = await client.get({ path: 'orders', query: params });
+
+        // Fix for Headers (Vercel/Node adapter difference)
+        const responseHeaders = (response as any).headers;
+        let linkHeader = '';
+
+        if (responseHeaders && typeof responseHeaders.get === 'function') {
+            linkHeader = responseHeaders.get('Link') || '';
+        } else if (responseHeaders && responseHeaders['link']) {
+            linkHeader = responseHeaders['link'];
+        } else if (responseHeaders && responseHeaders['Link']) {
+            linkHeader = responseHeaders['Link'];
+        }
+
         const orders = (response.body as any).orders || [];
 
-        // 3. Extract Next Cursor
-        // Header Format: "<url>; rel="next", <url>; rel="previous""
-        const linkHeader = response.headers['Link'];
-        let nextCursor = null;
-
-        if (linkHeader) {
-            const linkStr = Array.isArray(linkHeader) ? linkHeader[0] : linkHeader;
-            const match = linkStr.match(/<([^>]+)>;\s*rel="next"/);
-            if (match) {
-                const url = new URL(match[1]);
-                nextCursor = url.searchParams.get('page_info');
-            }
-        }
-
-        // 4. Processing & Deduplication
+        // 3. Process Orders (Ledger)
         if (orders.length > 0) {
-            const orderIds = orders.map((o: any) => o.id);
-
-            // Deduplication: Check if these orders exist in event log
-            // We use a contained query or check existence
-            // Note: Postgres JSONB check might be slow for large sets, but fine for batch of 20
-            // Faster: Check 'event_type' and 'payload->>id'
-            // We'll fetch the last events for these IDs roughly? 
-            // Better: Iterate and check? No, N+1 queries.
-            // Best: Fetch existing events for this user with same IDs?
-            // Actually, we can just fetch ALL recent OrderCreated event IDs? Too many.
-            // Let's rely on idempotency if we can, or just do a check.
-            // Optimization: If we trust the cursor scan is distinct, we only worry about "Re-sync" overlap.
-            // Let's assume clean sync for now or check one-by-one with parallel Promise?
-
-            // Check existence in batch
-            // We map order IDs to string
-            const idStrings = orderIds.map(String);
-
-            // We verify against financial_event_log. But payload is JSONB.
-            // Proper way: "payload->>'id' IN (...)"
-            // Supabase filter: .in('payload->>id', idStrings) - syntax might vary.
-            // Let's try to filter purely.
-
-            const { data: existingEvents } = await supabaseAdmin
-                .from('financial_event_log')
-                .select('payload')
-                .eq('user_id', user.id)
-                .eq('event_type', 'OrderCreated')
-            // .filter('payload->>id', 'in', `(${idStrings.join(',')})`) // Complex syntax
-            // Simpler: Just sync blindly but use unique IDs? No unique constraint on payload.
-
-            // Let's do simple processing for MVP phase to ensure correctness.
-            // We'll trust "Blocking Sync" runs once. 
-            // However, user might refresh page.
-            // Let's check locally before insert if possible.
-
-            // For now, proceed with processing (LedgerService handles some logic, but recordEvent logs new event).
-            // A truly robust solution would have a unique constraint on (user_id, event_type, source_id).
-            // Let's leave dedupe logic light for now to prioritize speed.
-
-            let processedCount = 0;
-
-            // Parallel processing with concurrency limit? Or sequential?
-            // Sequential is safer for Ledger consistency.
-            for (const order of orders) {
-                // Check if already processed (Quick check mechanism could be added here)
-                await LedgerService.recordEvent(
+            // Process in parallel but limit concurrency if needed
+            await Promise.all(orders.map((order: any) =>
+                LedgerService.recordEvent(
                     user.id,
                     'shopify_sync',
                     'OrderCreated',
                     order,
                     supabaseAdmin,
                     false // Full Processing!
-                );
-                processedCount++;
-            }
+                )
+            ));
+        }
+
+        // 4. Extract Next Cursor
+        let nextCursor = null;
+        if (linkHeader && linkHeader.includes('rel="next"')) {
+            // Basic regex to extract page_info
+            const match = linkHeader.match(/page_info=([^>&]+)/);
+            if (match) nextCursor = match[1];
         }
 
         // 5. Update Progress in DB
-        // Estimate progress based on accumulated synced count? 
-        // We don't track "synced_count" in DB yet, just total.
-        // We can increment sync_progress approximately?
-        // Or Frontend tracks it.
-        // Better: Update `integrations` with new cursor.
-        // Also we can calculate rough progress if we knew how many we did so far.
-        // But cursor doesn't tell us "page number".
-        // Let's just return what we did.
-
         await supabaseAdmin
             .from('integrations')
             .update({
