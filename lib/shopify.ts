@@ -25,3 +25,15 @@ const shopify = shopifyApi({
 })
 
 export default shopify
+
+export function shopifyClient(shop: string, accessToken: string) {
+    return new shopify.clients.Rest({
+        session: {
+            shop,
+            accessToken,
+            isOnline: false,
+            id: '',
+            state: '',
+        } as any
+    })
+}

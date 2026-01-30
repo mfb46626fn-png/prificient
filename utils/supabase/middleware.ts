@@ -115,6 +115,28 @@ export async function updateSession(request: NextRequest) {
     if (!user.user_metadata?.is_onboarding_completed && !request.nextUrl.pathname.startsWith('/onboarding') && !request.nextUrl.pathname.startsWith('/api')) {
       return NextResponse.redirect(new URL('/onboarding', request.url))
     }
+
+    // D. SYNC KONTROLÜ (Blocking Sync)
+    // API, Auth ve Static dosyalar hariç kontrol et
+    if (!request.nextUrl.pathname.startsWith('/api') && !request.nextUrl.pathname.startsWith('/auth')) {
+      const { data: integration } = await supabase
+        .from('integrations')
+        .select('sync_status')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      const syncStatus = integration?.sync_status || 'pending'
+
+      // 1. Sync bitmediyse -> Zorla /onboarding/sync'e gönder
+      if (syncStatus !== 'completed' && !request.nextUrl.pathname.startsWith('/onboarding/sync')) {
+        return NextResponse.redirect(new URL('/onboarding/sync', request.url))
+      }
+
+      // 2. Sync bittiyse -> /onboarding/sync'e girmesine izin verme (Dashboard'a at)
+      if (syncStatus === 'completed' && request.nextUrl.pathname.startsWith('/onboarding/sync')) {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+      }
+    }
   }
 
   return response
