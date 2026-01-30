@@ -63,6 +63,11 @@ export async function POST(req: NextRequest) {
 
         const orders = (response.body as any).orders || [];
 
+        // Calculate Stats for Verification (Declared here for scope access)
+        let batchRevenue = 0;
+        let batchCurrency = 'TRY';
+        const productCounts: Record<string, number> = {};
+
         // 3. ENRICH WITH COSTS (Critical Fix for Profit Calculation)
         // We need to fetch Inventory Item Costs for these orders.
         // Flow: Order -> Variant -> InventoryItem -> Cost
@@ -129,10 +134,6 @@ export async function POST(req: NextRequest) {
             }
 
             // Calculate Stats for Verification
-            let batchRevenue = 0;
-            let batchCurrency = 'TRY';
-            const productCounts: Record<string, number> = {};
-
             if (orders.length > 0) {
                 orders.forEach((o: any) => {
                     batchRevenue += parseFloat(o.total_price);
