@@ -41,7 +41,8 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     const fetchUserPreference = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { data } = await supabase.from('store_settings').select('currency').eq('user_id', user.id).single()
+        // Use maybeSingle to avoid 406/JSON error if no row exists yet
+        const { data } = await supabase.from('store_settings').select('currency').eq('user_id', user.id).maybeSingle()
         if (data?.currency) applyCurrency(data.currency)
       }
     }

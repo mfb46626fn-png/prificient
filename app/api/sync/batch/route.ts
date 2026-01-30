@@ -146,8 +146,8 @@ export async function POST(req: NextRequest) {
                 });
             }
 
-            // Process in parallel but limit concurrency if needed
-            await Promise.all(orders.map((order: any) =>
+            // Process in parallel with error isolation
+            const results = await Promise.allSettled(orders.map((order: any) =>
                 LedgerService.recordEvent(
                     user.id,
                     'shopify_sync',
@@ -157,6 +157,13 @@ export async function POST(req: NextRequest) {
                     false // Full Processing!
                 )
             ));
+
+            // Log failures for debugging
+            const failed = results.filter(r => r.status === 'rejected');
+            if (failed.length > 0) {
+                console.error(`[Sync Batch] ${failed.length}/${orders.length} orders failed to process.`);
+                failed.forEach((f: any) => console.error('[Sync Error Details]:', f.reason));
+            }
         }
 
         // 4. Extract Next Cursor
