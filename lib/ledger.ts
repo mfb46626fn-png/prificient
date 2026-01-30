@@ -87,6 +87,15 @@ export class LedgerService {
         // Hesap planının var olduğundan emin ol
         await this.initializeAccounts(user_id, supabase) // Reuse client!
 
+        // Determine Transaction Date (Critical for Historical Sync)
+        // Default to NOW() if valid date not found
+        let transactionDate = new Date();
+        if (payload.created_at) {
+            transactionDate = new Date(payload.created_at);
+        } else if (payload.processed_at) {
+            transactionDate = new Date(payload.processed_at);
+        }
+
         switch (event_type) {
             case 'OrderCreated':
                 // Örnek: payload = { total_price: "120.00", subtotal_price: "100.00", total_tax: "20.00", id: 12345 }
@@ -109,7 +118,8 @@ export class LedgerService {
                         { account_code: '200', direction: 'CREDIT', amount: tax }
                     ],
                     event_id,
-                    supabase // Pass client!
+                    supabase, // Pass client!
+                    transactionDate // Pass Date
                 )
 
                 // 2. Maliyet Kaydı (COGS)
@@ -131,7 +141,8 @@ export class LedgerService {
                             { account_code: '153', direction: 'CREDIT', amount: totalCost } // Ticari Mallar (Stoktan Çıkış)
                         ],
                         event_id,
-                        supabase
+                        supabase,
+                        transactionDate // Pass Date
                     )
                 }
 
@@ -142,34 +153,28 @@ export class LedgerService {
                 const expenseAmount = Number(payload.amount);
                 if (expenseAmount <= 0) return;
 
+                // Override date if provided in payload specifically for ads
+                if (payload.date) transactionDate = new Date(payload.date);
+
                 await this.postTransaction(
                     user_id,
                     `${payload.provider === 'meta' ? 'Meta Ads' : 'Ads'} Harcaması: ${payload.campaign_name}`,
                     [
                         // Borç: Pazarlama Giderleri (760) -> Gider Artışı
                         { account_code: '760', direction: 'DEBIT', amount: expenseAmount },
-
-                        // Alacak: Satıcılar/Meta (320) -> Borç Artışı (Kredi Kartı borcu gibi düşünülebilir)
-                        // Şimdilik 100 Kasa'dan çıkmış gibi değil, bir yükümlülük (ödenecek) olarak kaydedelim.
-                        // Ya da direkt Kasa/Banka (100) düşelim eğer otomatik ödeme ise.
-                        // Güvenli yol 320 (Satıcılar) veya 300 (Banka Kredileri).
-                        // Ancak kullanıcı "Harcama yaptım" dediğinde genellikle karttan çekilmiştir.
-                        // MVP için varsayılan olarak 329 (Diğer Ticari Borçlar) veya 320 kullanalım.
-                        // Ancak DEFAULT_ACCOUNTS içinde 320 yok. 100 (Kasa/Banka) kullanalım (Nakit/Kart Çıkışı).
+                        // Alacak: 100 Kasa/Banka
                         { account_code: '100', direction: 'CREDIT', amount: expenseAmount }
                     ],
                     event_id,
-                    supabase // Pass client!
+                    supabase, // Pass client!
+                    transactionDate
                 )
                 break;
 
             case 'RefundCreated':
-                // payload is the Refund object from Shopify
-                // It has 'refund_line_items' and 'transactions'
-                // We need to calculate Total Refunded Amount and Tax Refunded.
+                // ... Refund Logic ...
+                // Use transactionDate derived from processed_at usually
 
-                // 1. Calculate Amounts
-                // transactions contain the actual money movement.
                 const refundTransactions = payload.transactions || []
                 let totalRefund = 0
                 for (const tx of refundTransactions) {
@@ -180,11 +185,6 @@ export class LedgerService {
                 }
 
                 if (totalRefund === 0) return // No money moved
-
-                // Calculate Tax Refunded from refund_line_items ?
-                // Shopify refund_line_items has 'total_tax' (but it's per line item tax line).
-                // Also 'total_tax_set' property on the refund object root? usually not.
-                // We iterate refund_line_items to sum tax and net sales.
 
                 let refundTax = 0
                 let refundNet = 0
@@ -200,7 +200,6 @@ export class LedgerService {
                     refundTax += rTax
 
                     // Debit Returns (610) - Revenue Contra
-                    // We store metadata here for Toxic Product analysis
                     refundEntries.push({
                         account_code: '610',
                         direction: 'DEBIT',
@@ -215,16 +214,10 @@ export class LedgerService {
                     })
                 }
 
-                // Adjustments? (Shipping refund?)
-                // If totalRefund > (refundNet + refundTax), the difference is usually Shipping Refund.
                 const mappedRefund = refundNet + refundTax
                 const diff = totalRefund - mappedRefund
 
                 if (diff > 0.05) {
-                    // This is likely Shipping Refund. 
-                    // We should Debit Shipping Revenue (600) or Returns (610)?
-                    // If we put it to 610, it increases Return stats.
-                    // Let's put it to 610 but metadata type 'shipping_refund'
                     refundEntries.push({
                         account_code: '610',
                         direction: 'DEBIT',
@@ -233,7 +226,6 @@ export class LedgerService {
                     })
                 }
 
-                // Debit Tax (200) - Reduce Liability
                 if (refundTax > 0) {
                     refundEntries.push({
                         account_code: '200',
@@ -242,7 +234,6 @@ export class LedgerService {
                     })
                 }
 
-                // Credit Bank (100) - Reduce Asset
                 refundEntries.push({
                     account_code: '100',
                     direction: 'CREDIT',
@@ -254,7 +245,8 @@ export class LedgerService {
                     `İade #${payload.order_id} (Ref: ${payload.id})`,
                     refundEntries,
                     event_id,
-                    supabase // Pass client!
+                    supabase, // Pass client!
+                    transactionDate
                 )
                 break;
                 console.warn(`Unknown Event Type: ${event_type}`)
@@ -267,7 +259,8 @@ export class LedgerService {
         description: string,
         entries: LedgerEntryInput[],
         event_id?: string,
-        supabaseClient?: any
+        supabaseClient?: any,
+        transactionDate?: Date
     ) {
         const supabase = supabaseClient || createClient()
 
@@ -305,7 +298,8 @@ export class LedgerService {
         const { data: trx, error: trxError } = await supabase.from('ledger_transactions').insert({
             user_id,
             description,
-            event_id
+            event_id,
+            transaction_date: transactionDate ? transactionDate.toISOString() : new Date().toISOString()
         }).select('id').single()
 
         if (trxError) throw new Error(trxError.message)

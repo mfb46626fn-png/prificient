@@ -61,8 +61,71 @@ export async function POST(req: NextRequest) {
 
         const orders = (response.body as any).orders || [];
 
-        // 3. Process Orders (Ledger)
+        // 3. ENRICH WITH COSTS (Critical Fix for Profit Calculation)
+        // We need to fetch Inventory Item Costs for these orders.
+        // Flow: Order -> Variant -> InventoryItem -> Cost
+
         if (orders.length > 0) {
+            try {
+                // A. Collect all Variant IDs from all orders
+                const variantIds = new Set<string>();
+                orders.forEach((o: any) => {
+                    o.line_items?.forEach((li: any) => {
+                        if (li.variant_id) variantIds.add(String(li.variant_id));
+                    });
+                });
+
+                if (variantIds.size > 0) {
+                    const idsArr = Array.from(variantIds);
+
+                    // B. Fetch Variants (in chunks of 250 if needed, but 50 orders unlikely to exceed)
+                    // limit=250 is max
+                    // If > 250, we should loop, but for 50 orders (avg 5 items) = 250 items max usually fine.
+                    // If truncated, costs will be 0 for some. MVP acceptable.
+                    const varRes = await client.get({
+                        path: 'variants',
+                        query: { ids: idsArr.slice(0, 250).join(','), limit: 250 }
+                    });
+
+                    const variants = (varRes.body as any).variants || [];
+
+                    // C. Collect Inventory Item IDs
+                    const invItemIds = variants.map((v: any) => v.inventory_item_id).filter(Boolean);
+
+                    if (invItemIds.length > 0) {
+                        // D. Fetch Inventory Items (Cost)
+                        const invRes = await client.get({
+                            path: 'inventory_items',
+                            query: { ids: invItemIds.slice(0, 250).join(','), limit: 250 }
+                        });
+
+                        const inventoryItems = (invRes.body as any).inventory_items || [];
+
+                        // E. Create Cost Map
+                        const costMap = new Map<number, number>(); // VariantId -> Cost
+
+                        variants.forEach((v: any) => {
+                            const inv = inventoryItems.find((i: any) => i.id === v.inventory_item_id);
+                            if (inv) {
+                                costMap.set(v.id, parseFloat(inv.cost || '0'));
+                            }
+                        });
+
+                        // F. Inject Cost into Order Line Items
+                        orders.forEach((o: any) => {
+                            o.line_items?.forEach((li: any) => {
+                                if (li.variant_id) {
+                                    li.__cost = costMap.get(li.variant_id) || 0;
+                                }
+                            });
+                        });
+                    }
+                }
+            } catch (costError) {
+                console.warn('Failed to enrich costs in batch:', costError);
+                // Continue without costs (Profit = Revenue, better than crash)
+            }
+
             // Process in parallel but limit concurrency if needed
             await Promise.all(orders.map((order: any) =>
                 LedgerService.recordEvent(
