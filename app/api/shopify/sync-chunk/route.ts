@@ -47,8 +47,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'No active Shopify integration' }, { status: 404 });
         }
 
-        // Calculate date ranges - 5 day chunks (ultra-safe for API limits)
-        const CHUNK_DAYS = 5;
+        // Calculate date ranges - 3 day chunks (ultra-safe for API limits)
+        const CHUNK_DAYS = 3;
         const now = new Date();
 
         // Default: 90 days ago to today
