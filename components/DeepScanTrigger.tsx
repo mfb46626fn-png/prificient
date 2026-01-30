@@ -108,7 +108,12 @@ export default function DeepScanTrigger({ autoTrigger }: { autoTrigger?: boolean
                     const processRes = await fetch('/api/shopify/batch-process', { method: 'POST' })
 
                     if (!processRes.ok) {
-                        addLog("İşleme hatası - daha sonra tekrar deneyin")
+                        try {
+                            const errData = await processRes.json()
+                            addLog(`İşleme hatası: ${errData.error || 'Bilinmeyen hata'}`)
+                        } catch {
+                            addLog("İşleme hatası - detay alınamadı")
+                        }
                         break
                     }
 

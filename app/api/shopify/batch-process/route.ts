@@ -27,34 +27,23 @@ export async function POST(req: NextRequest) {
 
         // Find unprocessed events (no ledger_transaction linked)
         // We check if event has been processed by looking for linked transactions
-        // 1. Fetch recent events
-        const { data: recentEvents, error } = await supabaseAdmin
+        // 1. Fetch unprocessed events using Left Join and Filter
+        // We limit to 20 to ensure 60s timeout is firmly respected
+        const { data: unprocessedEvents, error } = await supabaseAdmin
             .from('financial_event_log')
-            .select('*')
+            .select('event_id, event_type, payload, ledger_transactions(id)')
             .eq('user_id', user.id)
-            .order('event_time', { ascending: true }) // Oldest first
-            .limit(100);
+            .is('ledger_transactions', null) // Filter where NO transaction exists
+            .order('event_time', { ascending: true })
+            .limit(20);
 
         if (error) {
-            console.error('[BatchProcess] Error fetching events:', error);
-            return NextResponse.json({ error: error.message }, { status: 500 });
+            console.error('[BatchProcess] DB Error:', JSON.stringify(error));
+            return NextResponse.json({ error: error.message, details: error }, { status: 500 });
         }
 
-        if (!recentEvents || recentEvents.length === 0) {
-            return NextResponse.json({ processed: 0, hasMore: false, durationMs: Date.now() - startTime });
-        }
+        const toProcess = unprocessedEvents || [];
 
-        // 2. Check which ones are already processed
-        const eventIds = recentEvents.map(e => e.event_id);
-        const { data: processedTransactions } = await supabaseAdmin
-            .from('ledger_transactions')
-            .select('event_id')
-            .in('event_id', eventIds);
-
-        const processedEventIds = new Set((processedTransactions || []).map((t: any) => t.event_id));
-
-        // 3. Filter
-        const toProcess = recentEvents.filter(e => !processedEventIds.has(e.event_id)).slice(0, 50);
 
         let processed = 0;
         let errors = 0;
