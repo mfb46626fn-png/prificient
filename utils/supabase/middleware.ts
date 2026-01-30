@@ -128,7 +128,11 @@ export async function updateSession(request: NextRequest) {
         const syncStatus = integration.sync_status || 'pending'
 
         // 1. Sync bitmediyse -> Zorla /onboarding/sync'e gönder
-        if (syncStatus !== 'completed' && !request.nextUrl.pathname.startsWith('/onboarding/sync')) {
+        // ANCAK: Kullanıcı entegrasyonu düzeltmek için /connect sayfasına gitmek isterse izin ver!
+        // VE: /onboarding/diagnosis gibi alt sayfalara erişimi engelleme
+        if (syncStatus !== 'completed' &&
+          !request.nextUrl.pathname.startsWith('/onboarding/sync') &&
+          !request.nextUrl.pathname.startsWith('/connect')) {
           return NextResponse.redirect(new URL('/onboarding/sync', request.url))
         }
 
