@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
+  // Force Deploy: Timestamp 2026-01-30 22:05
   let response = NextResponse.next({
     request: {
       headers: request.headers,
