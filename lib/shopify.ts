@@ -1,4 +1,4 @@
-import '@shopify/shopify-api/adapters/web-api'
+import '@shopify/shopify-api/adapters/node'
 import { shopifyApi, ApiVersion } from '@shopify/shopify-api'
 
 if (!process.env.SHOPIFY_API_KEY || !process.env.SHOPIFY_API_SECRET || !process.env.HOST) {
