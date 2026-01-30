@@ -35,10 +35,12 @@ export async function POST(req: NextRequest) {
 
         // 2. Fetch Orders (1 Day Chunk or Page)
         // Optimization: Reduce limit to 50 to process faster and avoid timeouts
+        // 2. Fetch Orders (1 Day Chunk or Page)
+        // Optimization: Reduce limit to 50 to process faster and avoid timeouts
         const params: any = {
             limit: 50,
             status: 'any',
-            created_at_min: '2024-01-01T00:00:00Z', // Start of year or dynamic
+            created_at_min: '2023-01-01T00:00:00Z', // Widen range to capture 2023+
         };
 
         if (cursor) {
@@ -126,6 +128,23 @@ export async function POST(req: NextRequest) {
                 // Continue without costs (Profit = Revenue, better than crash)
             }
 
+            // Calculate Stats for Verification
+            let batchRevenue = 0;
+            let batchCurrency = 'TRY';
+            const productCounts: Record<string, number> = {};
+
+            if (orders.length > 0) {
+                orders.forEach((o: any) => {
+                    batchRevenue += parseFloat(o.total_price);
+                    batchCurrency = o.currency; // Assume consistent currency or take last
+
+                    o.line_items?.forEach((li: any) => {
+                        const name = li.title;
+                        productCounts[name] = (productCounts[name] || 0) + li.quantity;
+                    });
+                });
+            }
+
             // Process in parallel but limit concurrency if needed
             await Promise.all(orders.map((order: any) =>
                 LedgerService.recordEvent(
@@ -161,7 +180,12 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({
             processed: orders.length,
-            next_cursor: nextCursor
+            next_cursor: nextCursor,
+            stats: {
+                revenue: batchRevenue,
+                currency: batchCurrency,
+                products: productCounts
+            }
         });
 
     } catch (error: any) {
