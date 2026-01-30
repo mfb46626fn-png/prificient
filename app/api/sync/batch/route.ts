@@ -43,11 +43,12 @@ export async function POST(req: NextRequest) {
 
         // 3. Extract Next Cursor
         // Header Format: "<url>; rel="next", <url>; rel="previous""
-        const linkHeader = response.headers.get('Link');
+        const linkHeader = response.headers['Link'];
         let nextCursor = null;
 
         if (linkHeader) {
-            const match = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
+            const linkStr = Array.isArray(linkHeader) ? linkHeader[0] : linkHeader;
+            const match = linkStr.match(/<([^>]+)>;\s*rel="next"/);
             if (match) {
                 const url = new URL(match[1]);
                 nextCursor = url.searchParams.get('page_info');
