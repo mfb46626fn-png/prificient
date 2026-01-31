@@ -495,11 +495,11 @@ export class LedgerService {
     static async getDailyAutopsy(user_id: string, date: Date) {
         const supabase = createClient()
 
-        // Start and End of the given date
-        const start = new Date(date)
-        start.setHours(0, 0, 0, 0)
-        const end = new Date(date)
-        end.setHours(23, 59, 59, 999)
+        // Start and End of the given date (UTC Friendly)
+        const start = new Date(date);
+        start.setUTCHours(0, 0, 0, 0);
+        const end = new Date(date);
+        end.setUTCHours(23, 59, 59, 999);
 
         // Fetch Accounts to Map Codes
         const { data: accounts } = await supabase.from('ledger_accounts')
