@@ -106,16 +106,28 @@ export class LedgerService {
     static async processEvent(event_id: string, user_id: string, event_type: string, payload: any, supabaseClient?: any) {
         const supabase = supabaseClient || createClient()
 
+        // 0. Payload Normalization (Defensive)
+        if (typeof payload === 'string') {
+            try { payload = JSON.parse(payload) } catch (e) { console.error('Payload parse failed', e) }
+        }
+
         // Hesap planının var olduğundan emin ol
         await this.initializeAccounts(user_id, supabase) // Reuse client!
 
         // Determine Transaction Date (Critical for Historical Sync)
-        // Default to NOW() if valid date not found
+        // Default to NOW() ONLY if absolutely no date found.
         let transactionDate = new Date();
-        if (payload.created_at) {
-            transactionDate = new Date(payload.created_at);
-        } else if (payload.processed_at) {
-            transactionDate = new Date(payload.processed_at);
+        const dateStr = payload.created_at || payload.processed_at || payload.date; // payload.date for Ads
+
+        if (dateStr) {
+            const d = new Date(dateStr);
+            if (!isNaN(d.getTime())) {
+                transactionDate = d;
+            } else {
+                console.warn('[Ledger] Invalid Date String:', dateStr);
+            }
+        } else {
+            console.warn('[Ledger] No Date Field found in payload, using NOW(). Payload keys:', Object.keys(payload));
         }
 
         switch (event_type) {

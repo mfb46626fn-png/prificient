@@ -150,6 +150,7 @@ export async function POST(req: NextRequest) {
             } catch (costError) {
                 console.warn('Failed to enrich costs in batch:', costError);
                 // Continue without costs (Profit = Revenue, better than crash)
+                console.warn('Cost fetch failed:', costError)
             }
 
             // Calculate Stats for Verification
@@ -161,6 +162,11 @@ export async function POST(req: NextRequest) {
                     o.line_items?.forEach((li: any) => {
                         const name = li.title;
                         productCounts[name] = (productCounts[name] || 0) + li.quantity;
+
+                        // DEBUG: Tag cost status
+                        if (li.__cost === undefined) li.__cost_status = 'missing';
+                        else if (li.__cost === 0) li.__cost_status = 'zero';
+                        else li.__cost_status = 'ok';
                     });
                 });
             }
