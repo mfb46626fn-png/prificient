@@ -23,7 +23,5 @@ export async function GET(req: NextRequest) {
         callbackPath: '/api/shopify/callback',
         isOnline: false, // Offline token for background jobs
         rawRequest: req,
-        // @ts-ignore - Force scopes in the URL generation
-        scope: ['read_products', 'read_orders', 'read_inventory', 'read_all_orders'].join(',')
     })
 }
