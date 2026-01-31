@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
             scope: session.scope, // Save granted scopes to verify!
             status: 'active',
             updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id, platform, shop_domain' })
+        }, { onConflict: 'user_id, platform' })
 
         if (dbError) {
             console.error('[Shopify Callback] DB Save Error:', dbError)
@@ -60,11 +60,7 @@ export async function GET(req: NextRequest) {
             console.log('[Shopify Callback] Integration saved successfully')
         }
 
-        if (dbError) {
-            console.error('[Shopify Callback] DB Save Error:', dbError)
-        } else {
-            console.log('[Shopify Callback] Integration saved successfully')
-        }
+
 
         // Fetch Shop Currency & Update Settings
         try {
