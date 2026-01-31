@@ -43,16 +43,15 @@ export async function GET(req: NextRequest) {
         const supabaseAdmin = await createAdminClient()
 
         // Save to Database
+        // Fixed: No duplicate access_token, removed scope for now, used correct conflict target
         const { error: dbError } = await supabaseAdmin.from('integrations').upsert({
             user_id: user.id,
             platform: 'shopify',
             shop_domain: session.shop,
             access_token: session.accessToken,
-            access_token: session.accessToken,
-            // scope: session.scope, // REMOVED to prevent "Column not found" error until migration runs
             status: 'active',
             updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id, platform, shop_domain' })
+        }, { onConflict: 'user_id, platform' })
 
         if (dbError) {
             console.error('[Shopify Callback] DB Save Error:', dbError)
@@ -60,8 +59,6 @@ export async function GET(req: NextRequest) {
         } else {
             console.log('[Shopify Callback] Integration saved successfully')
         }
-
-
 
         // Fetch Shop Currency & Update Settings
         try {
@@ -115,4 +112,3 @@ export async function GET(req: NextRequest) {
         return NextResponse.redirect(new URL('/dashboard/settings?error=shopify_failed', req.url))
     }
 }
-
