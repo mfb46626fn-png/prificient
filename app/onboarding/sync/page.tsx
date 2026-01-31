@@ -100,8 +100,6 @@ export default function SyncPage() {
 
                 // Update UI State
                 const safeTotal = total > 0 ? total : 1;
-                // Update UI State
-                const safeTotal = total > 0 ? total : 1;
                 const percent = Math.min(Math.round((processedCount / safeTotal) * 100), 99);
 
                 setProgress(percent);
