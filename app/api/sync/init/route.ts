@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
         }
 
         // 3. Fetch Order Count from Shopify
+        const client = shopifyClient(shop_domain, access_token);
         const countRes: any = await client.get({ path: 'orders/count', query: { status: 'any' } });
         const totalOrders = countRes.body?.count || 0;
 
