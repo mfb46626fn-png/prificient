@@ -110,10 +110,7 @@ export const ProductAnalysis = {
 
     async getProductsByProfitability(userId: string, limit: number = 5) {
         // Last 30 days window for "Current" polarity
-        // FIX: Allow future dates (User is in 2026)
         const endDate = new Date()
-        endDate.setFullYear(endDate.getFullYear() + 5) // Future safe
-
         const startDate = new Date()
         startDate.setDate(startDate.getDate() - 30)
 

@@ -40,9 +40,18 @@ export async function POST(req: NextRequest) {
         }
 
         // 3. Fetch Order Count from Shopify
-        const client = shopifyClient(shop_domain, access_token);
         const countRes: any = await client.get({ path: 'orders/count', query: { status: 'any' } });
         const totalOrders = countRes.body?.count || 0;
+
+        // 3.5. HARD RESET DATA (Critical for re-syncing corrections)
+        // Since we are starting a full sync, we must clear old faulty data for this user.
+        // Order: Check dependencies (Entries -> Transactions -> Event Log)
+
+        // Note: Supabase RLS policies usually handle user_id isolation, but for Admin Client we must be explicit.
+        await supabaseAdmin.from('ledger_entries').delete().eq('user_id', user.id);
+        await supabaseAdmin.from('ledger_transactions').delete().eq('user_id', user.id);
+        await supabaseAdmin.from('financial_event_log').delete().eq('user_id', user.id);
+
 
         // 4. Update Integration State (Admin Client)
         await supabaseAdmin
