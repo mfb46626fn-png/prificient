@@ -46,7 +46,7 @@ async function getFinancialData(user: any, supabase: any, startDate: Date, endDa
     const trendMap: Record<string, { revenue: number, profit: number }> = {}
 
     // Init Trend Map (fill empty days)
-    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    for (let d = new Date(startDate); d <= endDate; d.setUTCDate(d.getUTCDate() + 1)) {
         const key = d.toISOString().split('T')[0]
         trendMap[key] = { revenue: 0, profit: 0 }
     }
