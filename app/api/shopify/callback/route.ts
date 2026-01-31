@@ -48,10 +48,11 @@ export async function GET(req: NextRequest) {
             platform: 'shopify',
             shop_domain: session.shop,
             access_token: session.accessToken,
-            scope: session.scope, // Save granted scopes to verify!
+            access_token: session.accessToken,
+            // scope: session.scope, // REMOVED to prevent "Column not found" error until migration runs
             status: 'active',
             updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id, platform' })
+        }, { onConflict: 'user_id, platform, shop_domain' })
 
         if (dbError) {
             console.error('[Shopify Callback] DB Save Error:', dbError)
