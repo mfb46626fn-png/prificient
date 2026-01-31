@@ -198,7 +198,8 @@ export async function POST(req: NextRequest) {
             }
 
             // DEBUG LOGGING FOR COSTS
-            console.log(`[Sync Batch Debug] Processed ${orders.length} orders. Found ${variantIds.size} variants. Cost Map Size: ${costMap.size}.`);
+            console.log(`[Sync Batch Debug] Processed ${orders.length} orders.`);
+
             // Check first order for cost injection presence
             if (orders.length > 0 && orders[0].line_items?.length > 0) {
                 const firstItem = orders[0].line_items[0];
