@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import shopify from '@/lib/shopify'
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { ShopifyHistoryScanner } from '@/lib/sync/shopify-history'
 
 export const dynamic = 'force-dynamic';
@@ -37,8 +38,12 @@ export async function GET(req: NextRequest) {
 
         console.log('[Shopify Callback] User found:', user.id)
 
+        // Use Admin Client to ensure we can write to integrations table regardless of RLS
+        // (sometimes RLS policies for 'upsert' can be tricky with composite keys)
+        const supabaseAdmin = await createAdminClient()
+
         // Save to Database
-        const { error: dbError } = await supabase.from('integrations').upsert({
+        const { error: dbError } = await supabaseAdmin.from('integrations').upsert({
             user_id: user.id,
             platform: 'shopify',
             shop_domain: session.shop,
@@ -47,6 +52,13 @@ export async function GET(req: NextRequest) {
             status: 'active',
             updated_at: new Date().toISOString()
         }, { onConflict: 'user_id, platform, shop_domain' })
+
+        if (dbError) {
+            console.error('[Shopify Callback] DB Save Error:', dbError)
+            return NextResponse.redirect(new URL('/dashboard?error=db_save_failed', req.url))
+        } else {
+            console.log('[Shopify Callback] Integration saved successfully')
+        }
 
         if (dbError) {
             console.error('[Shopify Callback] DB Save Error:', dbError)
