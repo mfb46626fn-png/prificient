@@ -110,23 +110,28 @@ export const ProductAnalysis = {
 
     async getProductsByProfitability(userId: string, limit: number = 5) {
         // Last 30 days window for "Current" polarity
-        const endDate = new Date()
-        const startDate = new Date()
-        startDate.setDate(startDate.getDate() - 30)
+    async getProductsByProfitability(userId: string, limit: number = 5) {
+            // Last 30 days window for "Current" polarity
+            // FIX: Allow future dates (User is in 2026)
+            const endDate = new Date()
+            endDate.setFullYear(endDate.getFullYear() + 5) // Future safe
 
-        const allProducts = await this.analyzeProductProfitability(userId, startDate, endDate)
+            const startDate = new Date()
+            startDate.setDate(startDate.getDate() - 30)
 
-        // Heroes: Highest Profit
-        const heroes = [...allProducts]
-            .sort((a, b) => b.profit - a.profit)
-            .slice(0, limit)
+            const allProducts = await this.analyzeProductProfitability(userId, startDate, endDate)
 
-        // Villains: Lowest Profit (Negative)
-        const villains = [...allProducts]
-            .filter(p => p.profit < 0 || p.return_rate > 15)
-            .sort((a, b) => a.profit - b.profit) // Lowest first (most negative)
-            .slice(0, limit)
+            // Heroes: Highest Profit
+            const heroes = [...allProducts]
+                .sort((a, b) => b.profit - a.profit)
+                .slice(0, limit)
 
-        return { heroes, villains }
-    }
-};
+            // Villains: Lowest Profit (Negative)
+            const villains = [...allProducts]
+                .filter(p => p.profit < 0 || p.return_rate > 15)
+                .sort((a, b) => a.profit - b.profit) // Lowest first (most negative)
+                .slice(0, limit)
+
+            return { heroes, villains }
+        }
+    };

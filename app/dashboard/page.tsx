@@ -137,9 +137,32 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     const syncStart = params.sync_start === 'true'
 
     // Date Logic
+    // Date Logic
     const range = (params.range as string) || '30d'
-    const now = new Date()
-    const startDate = new Date()
+    // CRITICAL FIX: User's system is in 2026. Server is 2025.
+    // referencing NOW() filters out 2026 data.
+    // We extend 'now' to future to include these "Time Travel" orders.
+    const now = new Date();
+    now.setFullYear(now.getFullYear() + 5); // Allow up to 5 years in future
+
+    // Start date logic needs to be relative to THIS 'now' (2026ish) if we strictly follow ranges,
+    // OR we just want to ensure we capture the data.
+    // If we use real server NOW, we miss the data window.
+    // Let's rely on the "Latest Transaction" conceptually, but for MVP:
+    const startDate = new Date(); // Reset to real now first
+    // Actually, if we want to show "Last 30 Days" relative to the LATEST DATA...
+    // That's complex. For now, let's just ensure we DON'T CAP the end date.
+
+    // Let's make startDate relative to the Future Now? 
+    // No, if user is in 2026, we want 2026-30days.
+    // Let's assume 'now' is the anchor.
+    const anchorDate = new Date();
+    // Check if we have data in future? 
+    // Safer: Anchor to 2026 if user suggests it, or just use huge bounds.
+
+    // SIMPLIFICATION:
+    // If range=30d, we want [Today-30, Future].
+    startDate.setDate(startDate.getDate() - 30);
 
     if (range === '7d') startDate.setDate(now.getDate() - 7)
     else if (range === '30d') startDate.setDate(now.getDate() - 30)
