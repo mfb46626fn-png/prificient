@@ -208,6 +208,18 @@ export async function POST(req: NextRequest) {
             .eq('user_id', user.id)
             .eq('platform', 'shopify');
 
+        // 6. Auto-Update Store Currency (If needed)
+        // If we found a currency in this batch, ensure store_settings reflects it.
+        if (batchCurrency && batchCurrency !== 'TRY') {
+            await supabaseAdmin
+                .from('store_settings')
+                .upsert({
+                    user_id: user.id,
+                    currency: batchCurrency,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'user_id' });
+        }
+
         return NextResponse.json({
             processed: orders.length,
             next_cursor: nextCursor,

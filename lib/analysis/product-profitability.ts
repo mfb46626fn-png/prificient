@@ -27,12 +27,12 @@ export const ProductAnalysis = {
                 amount,
                 metadata,
                 ledger_accounts!inner(code),
-                ledger_transactions!inner(created_at)
+                ledger_transactions!inner(transaction_date)
             `)
             .eq('user_id', userId)
             .in('ledger_accounts.code', ['600', '610', '621'])
-            .gte('ledger_transactions.created_at', startDate.toISOString())
-            .lte('ledger_transactions.created_at', endDate.toISOString());
+            .gte('transaction.transaction_date', startDate.toISOString())
+            .lte('transaction.transaction_date', endDate.toISOString());
 
         if (error) throw error;
 

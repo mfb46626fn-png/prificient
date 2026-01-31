@@ -128,17 +128,66 @@ export class LedgerService {
                 // Eğer tutar 0 ise kayda gerek yok (veya 0 TL'lik fiş kesilebilir)
                 if (total === 0) return
 
+                // 1. Prepare Entries
+                const entries: LedgerEntryInput[] = []
+
+                // A. Kasa/Banka (Borç) - Total Tutar
+                entries.push({ account_code: '100', direction: 'DEBIT', amount: total })
+
+                // B. KDV (Alacak) - Toplam Vergi
+                if (tax > 0) {
+                    entries.push({ account_code: '200', direction: 'CREDIT', amount: tax })
+                }
+
+                // C. Satışlar (Alacak) - Granular Line Items for Product Analysis
+                // We split the revenue per line item to enable "Product Profitability" calculation
+                if (payload.line_items && Array.isArray(payload.line_items)) {
+                    payload.line_items.forEach((item: any) => {
+                        // Calculate item revenue share
+                        // Item Price * Qty - (Discount per item if any)
+                        // Simple approach: Price * Qty
+                        const itemRevenue = parseFloat(item.price) * (item.quantity || 1)
+                        // Note: Discount logic might be complex, MVP uses price * qty. 
+                        // If subtotal mismatch, we add a rounding correction entry later.
+
+                        // Metadata is CRITICAL for ProductAnalysis
+                        entries.push({
+                            account_code: '600',
+                            direction: 'CREDIT',
+                            amount: itemRevenue,
+                            metadata: {
+                                variant_id: String(item.variant_id),
+                                product_id: String(item.product_id),
+                                sku: item.sku,
+                                title: item.title,
+                                qty: item.quantity
+                            }
+                        })
+                    })
+
+                    // Correction for rounding diff between sum(items) and subtotal_price
+                    // (Discounts often apply to subtotal, affecting revenue)
+                    const calculatedRevenue = payload.line_items.reduce((sum: number, item: any) => sum + (parseFloat(item.price) * (item.quantity || 1)), 0)
+                    const diff = revenue - calculatedRevenue
+
+                    if (Math.abs(diff) > 0.01) {
+                        // Add correction entry (often discount)
+                        entries.push({
+                            account_code: '600',
+                            direction: diff > 0 ? 'CREDIT' : 'DEBIT', // Adjust revenue
+                            amount: Math.abs(diff),
+                            metadata: { type: 'rounding_or_discount_correction' }
+                        })
+                    }
+                } else {
+                    // Fallback if no line items
+                    entries.push({ account_code: '600', direction: 'CREDIT', amount: revenue })
+                }
+
                 await this.postTransaction(
                     user_id,
                     `Sipariş #${payload.id || payload.order_number}`,
-                    [
-                        // Borç: Kasa/Banka (Varlık artışı) -> 120 TL
-                        { account_code: '100', direction: 'DEBIT', amount: total },
-                        // Alacak: Satışlar (Gelir) -> 100 TL
-                        { account_code: '600', direction: 'CREDIT', amount: revenue },
-                        // Alacak: KDV/Vergiler (Yükümlülük) -> 20 TL (User Requested Account 200)
-                        { account_code: '200', direction: 'CREDIT', amount: tax }
-                    ],
+                    entries,
                     event_id,
                     supabase, // Pass client!
                     transactionDate // Pass Date
@@ -155,17 +204,46 @@ export class LedgerService {
                 }
 
                 if (totalCost > 0) {
-                    await this.postTransaction(
-                        user_id,
-                        `Maliyet Fişi: Sipariş #${payload.order_number}`,
-                        [
-                            { account_code: '621', direction: 'DEBIT', amount: totalCost }, // Satılan Malın Maliyeti
-                            { account_code: '153', direction: 'CREDIT', amount: totalCost } // Ticari Mallar (Stoktan Çıkış)
-                        ],
-                        event_id,
-                        supabase,
-                        transactionDate // Pass Date
-                    )
+                    const costEntries: LedgerEntryInput[] = []
+
+                    // Granular Cost Entries
+                    payload.line_items.forEach((item: any) => {
+                        const unitCost = Number(item.__cost || item.cost_per_item || 0)
+                        const lineCost = unitCost * (item.quantity || 1)
+
+                        if (lineCost > 0) {
+                            // 621 Expense - Debit
+                            costEntries.push({
+                                account_code: '621',
+                                direction: 'DEBIT',
+                                amount: lineCost,
+                                metadata: {
+                                    variant_id: String(item.variant_id),
+                                    product_id: String(item.product_id),
+                                    sku: item.sku,
+                                    title: item.title
+                                }
+                            })
+                            // 153 Inventory - Credit (Asset decrease)
+                            // We lump this or split it. Splitting is fine.
+                            costEntries.push({
+                                account_code: '153',
+                                direction: 'CREDIT',
+                                amount: lineCost
+                            })
+                        }
+                    })
+
+                    if (costEntries.length > 0) {
+                        await this.postTransaction(
+                            user_id,
+                            `Maliyet Fişi: Sipariş #${payload.order_number}`,
+                            costEntries,
+                            event_id,
+                            supabase,
+                            transactionDate
+                        )
+                    }
                 }
 
                 break
