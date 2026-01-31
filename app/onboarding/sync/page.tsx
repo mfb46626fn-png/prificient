@@ -68,7 +68,18 @@ export default function SyncPage() {
                     headers: { 'Content-Type': 'application/json' }
                 });
 
-                if (!batchRes.ok) throw new Error('Veri paketi hatası');
+                if (!batchRes.ok) {
+                    let errorMessage = 'Veri paketi hatası';
+                    try {
+                        const errorData = await batchRes.json();
+                        if (errorData.error) errorMessage = errorData.error;
+                    } catch (e) {
+                        // Fallback to text if JSON fails
+                        const text = await batchRes.text();
+                        if (text) errorMessage = text;
+                    }
+                    throw new Error(errorMessage);
+                }
 
                 const batchData = await batchRes.json();
 
