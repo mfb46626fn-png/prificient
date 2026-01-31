@@ -100,6 +100,8 @@ export default function SyncPage() {
 
                 // Update UI State
                 const safeTotal = total > 0 ? total : 1;
+                // Update UI State
+                const safeTotal = total > 0 ? total : 1;
                 const percent = Math.min(Math.round((processedCount / safeTotal) * 100), 99);
 
                 setProgress(percent);
@@ -118,6 +120,11 @@ export default function SyncPage() {
                 setTopProducts(sortedProducts);
 
                 addLog(`Paket: ${batchData.processed} sipariş (${(batchData.stats?.revenue || 0).toLocaleString()} ${currentCurrency}).`);
+
+                // CRITICAL DEBUG: Show server logs in UI
+                if (batchData.debug_logs && Array.isArray(batchData.debug_logs)) {
+                    batchData.debug_logs.forEach((l: string) => addLog(`[SRV] ${l}`));
+                }
 
                 if (!cursor || (total > 0 && processedCount >= total)) {
                     hasMore = false;

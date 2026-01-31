@@ -83,11 +83,27 @@ export async function POST(req: NextRequest) {
         let batchCurrency = 'TRY';
         const productCounts: Record<string, number> = {};
 
+        // DEBUG LOG STORAGE
+        const debugLogs: string[] = [];
+        const log = (msg: string) => {
+            console.log(msg);
+            debugLogs.push(msg); // Store for UI
+        };
+
+        log(`[Sync Batch Debug] Step 1: Fetching Orders. Cursor: ${cursor ? 'YES' : 'NO'}`);
+
         // 3. ENRICH WITH COSTS (Critical Fix for Profit Calculation)
         // We need to fetch Inventory Item Costs for these orders.
         // Flow: Order -> Variant -> InventoryItem -> Cost
 
         if (orders.length > 0) {
+            log(`[Sync Batch Debug] Found ${orders.length} orders in this batch.`);
+
+            // Date Debug (First and Last)
+            const firstDate = orders[0].created_at;
+            const lastDate = orders[orders.length - 1].created_at;
+            log(`[Sync Batch Debug] Date Range: ${firstDate} to ${lastDate}`);
+
             try {
                 // A. Collect all Variant IDs from all orders
                 const variantIds = new Set<string>();
@@ -98,6 +114,7 @@ export async function POST(req: NextRequest) {
                 });
 
                 if (variantIds.size > 0) {
+                    log(`[Sync Batch Debug] Fetching details for ${variantIds.size} variants...`);
                     const idsArr = Array.from(variantIds);
 
                     // B. Fetch Variants (in chunks of 250 if needed, but 50 orders unlikely to exceed)
@@ -110,11 +127,13 @@ export async function POST(req: NextRequest) {
                     });
 
                     const variants = (varRes.body as any).variants || [];
+                    log(`[Sync Batch Debug] Fetched ${variants.length} variants.`);
 
                     // C. Collect Inventory Item IDs
                     const invItemIds = variants.map((v: any) => v.inventory_item_id).filter(Boolean);
 
                     if (invItemIds.length > 0) {
+                        log(`[Sync Batch Debug] Fetching ${invItemIds.length} inventory items (costs)...`);
                         // D. Fetch Inventory Items (Cost)
                         const invRes = await client.get({
                             path: 'inventory_items',
@@ -122,6 +141,7 @@ export async function POST(req: NextRequest) {
                         });
 
                         const inventoryItems = (invRes.body as any).inventory_items || [];
+                        log(`[Sync Batch Debug] Fetched ${inventoryItems.length} inventory items.`);
 
                         // E. Create Cost Map (Force String Keys for Safety)
                         const costMap = new Map<string, number>();
@@ -140,6 +160,8 @@ export async function POST(req: NextRequest) {
                             }
                         });
 
+                        log(`[Sync Batch Debug] Cost Map Size: ${costMap.size}`);
+
                         // F. Inject Cost into Order Line Items
                         orders.forEach((o: any) => {
                             const items = o.line_items || o.lineItems;
@@ -154,8 +176,13 @@ export async function POST(req: NextRequest) {
                         });
                     }
                 }
-            } catch (costError) {
+            } catch (costError: any) {
                 console.warn('Failed to enrich costs in batch:', costError);
+                log(`[Sync Batch Debug] COST ERROR: ${costError.message}`);
+                // Check specifically for 403
+                if (JSON.stringify(costError).includes('scope') || costError.message.includes('permission')) {
+                    log(`[Sync Batch Debug] FATAL PERMISSION ERROR: Missing read_inventory scope.`);
+                }
                 // Continue without costs (Profit = Revenue, better than crash)
             }
 
@@ -179,6 +206,9 @@ export async function POST(req: NextRequest) {
                 const dateStr = order.created_at || order.createdAt || order.processed_at || new Date().toISOString();
                 const explicitDate = new Date(dateStr);
 
+                // Debug random samples
+                if (Math.random() > 0.9) log(`[Sync Batch Debug] Processing Order Date: ${dateStr}`);
+
                 return LedgerService.recordEvent(
                     user.id,
                     'shopify_sync',
@@ -193,17 +223,17 @@ export async function POST(req: NextRequest) {
             // Log failures for debugging
             const failed = results.filter(r => r.status === 'rejected');
             if (failed.length > 0) {
-                console.error(`[Sync Batch] ${failed.length}/${orders.length} orders failed to process.`);
-                failed.forEach((f: any) => console.error('[Sync Error Details]:', f.reason));
+                log(`[Sync Batch] ${failed.length}/${orders.length} orders failed to process.`);
+                failed.forEach((f: any) => log(`[Sync Error Details]: ${f.reason}`));
             }
 
             // DEBUG LOGGING FOR COSTS
-            console.log(`[Sync Batch Debug] Processed ${orders.length} orders.`);
+            log(`[Sync Batch Debug] Processed ${orders.length} orders.`);
 
             // Check first order for cost injection presence
             if (orders.length > 0 && orders[0].line_items?.length > 0) {
                 const firstItem = orders[0].line_items[0];
-                console.log(`[Sync Batch Debug] Sample Item Cost: ${firstItem.__cost} (Variant: ${firstItem.variant_id})`);
+                log(`[Sync Batch Debug] Sample Item Cost: ${firstItem.__cost} (Variant: ${firstItem.variant_id})`);
             }
         }
 
@@ -249,6 +279,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
             processed: orders.length,
             next_cursor: nextCursor,
+            debug_logs: debugLogs, // RETURN LOGS TO UI
             stats: {
                 revenue: batchRevenue,
                 currency: batchCurrency,
@@ -258,6 +289,6 @@ export async function POST(req: NextRequest) {
 
     } catch (error: any) {
         console.error('[Sync Batch] Error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: error.message, debug_logs: [error.message] }, { status: 500 });
     }
 }
