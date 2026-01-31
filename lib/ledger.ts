@@ -61,7 +61,7 @@ export class LedgerService {
     // skipProcessing=true for fast sync (batch process later)
     // 2. Olay Kaydedici (Immutable Event Log)
     // skipProcessing=true for fast sync (batch process later)
-    static async recordEvent(user_id: string, stream_type: string, event_type: string, payload: any, supabaseClient?: any, skipProcessing = false) {
+    static async recordEvent(user_id: string, stream_type: string, event_type: string, payload: any, supabaseClient?: any, skipProcessing = false, transactionDateOverride?: Date) {
         const supabase = supabaseClient || createClient()
 
         // Deterministic Source ID extraction
@@ -96,14 +96,14 @@ export class LedgerService {
 
         // Skip heavy processing during sync if requested
         if (!skipProcessing) {
-            await this.processEvent(data.event_id, user_id, event_type, payload, supabase)
+            await this.processEvent(data.event_id, user_id, event_type, payload, supabase, transactionDateOverride)
         }
 
         return data.event_id
     }
 
     // 3. Muhasebeleştirici (Event -> Ledger)
-    static async processEvent(event_id: string, user_id: string, event_type: string, payload: any, supabaseClient?: any) {
+    static async processEvent(event_id: string, user_id: string, event_type: string, payload: any, supabaseClient?: any, transactionDateOverride?: Date) {
         const supabase = supabaseClient || createClient()
 
         // Hesap planının var olduğundan emin ol
@@ -111,17 +111,18 @@ export class LedgerService {
 
         // Determine Transaction Date (Critical for Historical Sync)
         // Default to NOW() IF AND ONLY IF we cannot find a valid date.
-        // We check snake_case (API default) and camelCase (Lib potential)
-        let transactionDate = new Date();
-        const p = payload as any;
+        // Priority: Override -> created_at (snake) -> createdAt (camel) -> processed_at
+        let transactionDate = transactionDateOverride || new Date();
 
-        const dateStr = p.created_at || p.createdAt || p.processed_at || p.processedAt;
+        if (!transactionDateOverride) {
+            const p = payload as any;
+            const dateStr = p.created_at || p.createdAt || p.processed_at || p.processedAt;
 
-        if (dateStr) {
-            transactionDate = new Date(dateStr);
-        } else {
-            // Fallback warning
-            console.warn(`[Ledger] Warning: No date found for event ${event_type}, source_id: ${p.id || 'unknown'}. Using NOW(). Keys: ${Object.keys(p).join(',')}`);
+            if (dateStr) {
+                transactionDate = new Date(dateStr);
+            } else {
+                console.warn(`[Ledger] Warning: No date found for event ${event_type} and no override provided. Using NOW().`);
+            }
         }
 
         switch (event_type) {

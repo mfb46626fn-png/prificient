@@ -173,22 +173,36 @@ export async function POST(req: NextRequest) {
             }
 
             // Process in parallel with error isolation
-            const results = await Promise.allSettled(orders.map((order: any) =>
-                LedgerService.recordEvent(
+            const results = await Promise.allSettled(orders.map((order: any) => {
+                // EXPLICIT DATE EXTRACTION
+                // We extract the date here where we have the raw object to be 100% sure.
+                const dateStr = order.created_at || order.createdAt || order.processed_at || new Date().toISOString();
+                const explicitDate = new Date(dateStr);
+
+                return LedgerService.recordEvent(
                     user.id,
                     'shopify_sync',
                     'OrderCreated',
                     order,
                     supabaseAdmin,
-                    false // Full Processing!
+                    false, // Full Processing!
+                    explicitDate // PASS EXPLICIT DATE
                 )
-            ));
+            }));
 
             // Log failures for debugging
             const failed = results.filter(r => r.status === 'rejected');
             if (failed.length > 0) {
                 console.error(`[Sync Batch] ${failed.length}/${orders.length} orders failed to process.`);
                 failed.forEach((f: any) => console.error('[Sync Error Details]:', f.reason));
+            }
+
+            // DEBUG LOGGING FOR COSTS
+            console.log(`[Sync Batch Debug] Processed ${orders.length} orders. Found ${variantIds.size} variants. Cost Map Size: ${costMap.size}.`);
+            // Check first order for cost injection presence
+            if (orders.length > 0 && orders[0].line_items?.length > 0) {
+                const firstItem = orders[0].line_items[0];
+                console.log(`[Sync Batch Debug] Sample Item Cost: ${firstItem.__cost} (Variant: ${firstItem.variant_id})`);
             }
         }
 
