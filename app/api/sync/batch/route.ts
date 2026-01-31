@@ -127,20 +127,27 @@ export async function POST(req: NextRequest) {
                         const costMap = new Map<string, number>();
 
                         variants.forEach((v: any) => {
-                            // Ensure valid mapping
-                            const invId = String(v.inventory_item_id);
-                            const inv = inventoryItems.find((i: any) => String(i.id) === invId);
-                            if (inv) {
-                                costMap.set(String(v.id), parseFloat(inv.cost || '0'));
+                            // Support camelCase or snake_case
+                            const invIdRaw = v.inventory_item_id || v.inventoryItemId;
+                            const variantIdRaw = v.id;
+
+                            if (invIdRaw) {
+                                const invId = String(invIdRaw);
+                                const inv = inventoryItems.find((i: any) => String(i.id) === invId);
+                                if (inv) {
+                                    costMap.set(String(variantIdRaw), parseFloat(inv.cost || '0'));
+                                }
                             }
                         });
 
                         // F. Inject Cost into Order Line Items
                         orders.forEach((o: any) => {
-                            o.line_items?.forEach((li: any) => {
-                                if (li.variant_id) {
+                            const items = o.line_items || o.lineItems;
+                            items?.forEach((li: any) => {
+                                const vid = li.variant_id || li.variantId;
+                                if (vid) {
                                     // Robust Lookup
-                                    const c = costMap.get(String(li.variant_id));
+                                    const c = costMap.get(String(vid));
                                     li.__cost = c !== undefined ? c : 0;
                                 }
                             });
@@ -150,7 +157,6 @@ export async function POST(req: NextRequest) {
             } catch (costError) {
                 console.warn('Failed to enrich costs in batch:', costError);
                 // Continue without costs (Profit = Revenue, better than crash)
-                console.warn('Cost fetch failed:', costError)
             }
 
             // Calculate Stats for Verification
@@ -162,11 +168,6 @@ export async function POST(req: NextRequest) {
                     o.line_items?.forEach((li: any) => {
                         const name = li.title;
                         productCounts[name] = (productCounts[name] || 0) + li.quantity;
-
-                        // DEBUG: Tag cost status
-                        if (li.__cost === undefined) li.__cost_status = 'missing';
-                        else if (li.__cost === 0) li.__cost_status = 'zero';
-                        else li.__cost_status = 'ok';
                     });
                 });
             }

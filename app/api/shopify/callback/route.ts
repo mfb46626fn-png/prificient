@@ -43,7 +43,6 @@ export async function GET(req: NextRequest) {
             platform: 'shopify',
             shop_domain: session.shop,
             access_token: session.accessToken,
-            scope: session.scope, // Save granted scopes to verify!
             status: 'active',
             updated_at: new Date().toISOString()
         }, { onConflict: 'user_id, platform, shop_domain' })
