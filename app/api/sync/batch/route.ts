@@ -203,7 +203,13 @@ export async function POST(req: NextRequest) {
             const results = await Promise.allSettled(orders.map((order: any) => {
                 // EXPLICIT DATE EXTRACTION
                 // We extract the date here where we have the raw object to be 100% sure.
-                const dateStr = order.created_at || order.createdAt || order.processed_at || new Date().toISOString();
+                const dateStr = order.created_at || order.createdAt || order.processed_at;
+
+                // CRASH TEST DEBUGGING: If no date, THROW error with keys to see what's wrong on UI.
+                if (!dateStr) {
+                    throw new Error(`MISSING DATE for Order ${order.id}. Keys: ${Object.keys(order).join(', ')}`);
+                }
+
                 const explicitDate = new Date(dateStr);
 
                 // Debug random samples
