@@ -68,6 +68,14 @@ export async function POST(req: NextRequest) {
             linkHeader = responseHeaders['Link'];
         }
 
+        // Fix: Node http headers can be array, ensure string
+        if (Array.isArray(linkHeader)) {
+            linkHeader = linkHeader.join(', ');
+        }
+
+        // Ensure it's a string before proceeding
+        linkHeader = String(linkHeader || '');
+
         const orders = (response.body as any).orders || [];
 
         // Calculate Stats for Verification (Declared here for scope access)
