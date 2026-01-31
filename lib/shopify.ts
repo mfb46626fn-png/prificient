@@ -17,7 +17,7 @@ const hostScheme = url.protocol.replace(':', '') as 'http' | 'https' // "http" o
 const shopify = shopifyApi({
     apiKey,
     apiSecretKey,
-    scopes: ['read_products', 'read_orders', 'read_analytics'],
+    scopes: ['read_products', 'read_orders', 'read_all_orders', 'read_analytics', 'read_inventory', 'read_merchant_managed_fulfillment_orders'],
     hostName,
     hostScheme, // Explicitly set scheme based on HOST variable
     apiVersion: ApiVersion.October24,
