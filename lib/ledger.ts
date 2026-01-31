@@ -438,11 +438,11 @@ export class LedgerService {
                 amount,
                 direction,
                 account_id,
-                transaction:ledger_transactions!inner(created_at)
+                transaction:ledger_transactions!inner(transaction_date)
             `)
             .eq('user_id', user_id)
-            .gte('transaction.created_at', start_date.toISOString())
-            .lte('transaction.created_at', end_date.toISOString())
+            .gte('transaction.transaction_date', start_date.toISOString())
+            .lte('transaction.transaction_date', end_date.toISOString())
 
         if (!entries) return { revenue: 0, expense: 0, netProfit: 0, adSpend: 0, roi: 0 }
 
@@ -507,11 +507,11 @@ export class LedgerService {
                 amount,
                 direction,
                 account_id,
-                transaction:ledger_transactions!inner(created_at)
+                transaction:ledger_transactions!inner(transaction_date)
             `)
             .eq('user_id', user_id)
-            .gte('transaction.created_at', start.toISOString())
-            .lte('transaction.created_at', end.toISOString())
+            .gte('transaction.transaction_date', start.toISOString())
+            .lte('transaction.transaction_date', end.toISOString())
 
         let grossRevenue = 0
         let returns = 0

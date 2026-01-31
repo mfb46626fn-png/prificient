@@ -27,7 +27,7 @@ export const ProductAnalysis = {
                 amount,
                 metadata,
                 ledger_accounts!inner(code),
-                ledger_transactions!inner(transaction_date)
+                transaction:ledger_transactions!inner(transaction_date)
             `)
             .eq('user_id', userId)
             .in('ledger_accounts.code', ['600', '610', '621'])
