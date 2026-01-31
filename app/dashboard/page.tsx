@@ -239,9 +239,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                         <div className="xl:col-span-2">
                             <ProfitabilityPolarity heroes={polarity.heroes} villains={polarity.villains} />
                         </div>
-                        <div className="xl:col-span-1 grid grid-cols-1 gap-8">
+                        <div className="xl:col-span-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-4">
                             <DailyAutopsy data={autopsy} />
-                            <GhostExpenseCard amount={diagnosis.financials.fees} />
+                            <div className="h-full">
+                                <GhostExpenseCard amount={diagnosis.financials.fees} />
+                            </div>
                         </div>
                     </div>
                 </div>

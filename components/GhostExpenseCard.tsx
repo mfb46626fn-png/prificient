@@ -24,7 +24,7 @@ export default function GhostExpenseCard({ amount }: GhostExpenseCardProps) {
     const infraEstimate = amount * 0.25
 
     return (
-        <div className="bg-gray-900 text-gray-400 rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 relative overflow-hidden flex flex-col justify-between gap-4 h-full border border-gray-800 hover:border-gray-700 transition-colors">
+        <div className="bg-gray-900 text-gray-400 rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 relative overflow-hidden flex flex-col justify-between gap-4 border border-gray-800 hover:border-gray-700 transition-colors">
 
             <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                 <TrendingDown size={80} />

@@ -123,13 +123,15 @@ export async function POST(req: NextRequest) {
 
                         const inventoryItems = (invRes.body as any).inventory_items || [];
 
-                        // E. Create Cost Map
-                        const costMap = new Map<number, number>(); // VariantId -> Cost
+                        // E. Create Cost Map (Force String Keys for Safety)
+                        const costMap = new Map<string, number>();
 
                         variants.forEach((v: any) => {
-                            const inv = inventoryItems.find((i: any) => i.id === v.inventory_item_id);
+                            // Ensure valid mapping
+                            const invId = String(v.inventory_item_id);
+                            const inv = inventoryItems.find((i: any) => String(i.id) === invId);
                             if (inv) {
-                                costMap.set(v.id, parseFloat(inv.cost || '0'));
+                                costMap.set(String(v.id), parseFloat(inv.cost || '0'));
                             }
                         });
 
@@ -137,7 +139,9 @@ export async function POST(req: NextRequest) {
                         orders.forEach((o: any) => {
                             o.line_items?.forEach((li: any) => {
                                 if (li.variant_id) {
-                                    li.__cost = costMap.get(li.variant_id) || 0;
+                                    // Robust Lookup
+                                    const c = costMap.get(String(li.variant_id));
+                                    li.__cost = c !== undefined ? c : 0;
                                 }
                             });
                         });
