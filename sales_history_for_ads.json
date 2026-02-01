@@ -1,0 +1,3222 @@
+[
+  {
+    "date": "2025-10-08",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6576930685112,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-07-18",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6576931504312,
+    "revenue": 219.98
+  },
+  {
+    "date": "2025-10-27",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6576931602616,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-11-06",
+    "product_name": "Baseball Cap",
+    "product_group": "Group B",
+    "order_id": 6576932782264,
+    "revenue": 29.99
+  },
+  {
+    "date": "2025-10-06",
+    "product_name": "Running Shorts",
+    "product_group": "Group B",
+    "order_id": 6576932880568,
+    "revenue": 69.98
+  },
+  {
+    "date": "2025-03-02",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6576934060216,
+    "revenue": 7.99
+  },
+  {
+    "date": "2025-06-04",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6576934092984,
+    "revenue": 109.99
+  },
+  {
+    "date": "2025-05-29",
+    "product_name": "Last Season Dress",
+    "product_group": "Group D",
+    "order_id": 6576934191288,
+    "revenue": 49.98
+  },
+  {
+    "date": "2025-07-11",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6576935403704,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-07-09",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6576935502008,
+    "revenue": 15.98
+  },
+  {
+    "date": "2025-02-02",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6576936452280,
+    "revenue": 199.98
+  },
+  {
+    "date": "2025-09-22",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6576936550584,
+    "revenue": 199.98
+  },
+  {
+    "date": "2026-01-20",
+    "product_name": "Basic Phone Case",
+    "product_group": "Group C",
+    "order_id": 6576937435320,
+    "revenue": 25.98
+  },
+  {
+    "date": "2026-01-28",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6576937500856,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-11-25",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6576938942648,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-10-17",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6576940089528,
+    "revenue": 7.99
+  },
+  {
+    "date": "2025-10-05",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6576940155064,
+    "revenue": 109.99
+  },
+  {
+    "date": "2025-02-13",
+    "product_name": "Last Season Dress",
+    "product_group": "Group D",
+    "order_id": 6576941629624,
+    "revenue": 49.98
+  },
+  {
+    "date": "2025-12-03",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6576941793464,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-04-18",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6576941859000,
+    "revenue": 99.98
+  },
+  {
+    "date": "2025-08-28",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6576943366328,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-05-25",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6576943464632,
+    "revenue": 199.98
+  },
+  {
+    "date": "2025-03-18",
+    "product_name": "Classic T-Shirt",
+    "product_group": "Group B",
+    "order_id": 6576944742584,
+    "revenue": 99.98
+  },
+  {
+    "date": "2025-09-24",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6576944775352,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-07-24",
+    "product_name": "Basic Socks 3-Pack",
+    "product_group": "Group C",
+    "order_id": 6576944873656,
+    "revenue": 19.99
+  },
+  {
+    "date": "2025-06-26",
+    "product_name": "Clearance Jacket",
+    "product_group": "Group D",
+    "order_id": 6576946380984,
+    "revenue": 59.98
+  },
+  {
+    "date": "2025-02-05",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6576946479288,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-05-23",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6576947429560,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-06-06",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6576947527864,
+    "revenue": 39.99
+  },
+  {
+    "date": "2025-10-29",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6576948904120,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-05-22",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6576949002424,
+    "revenue": 109.99
+  },
+  {
+    "date": "2026-01-25",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6576950182072,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-10-06",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6576950247608,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-04-13",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6576951394488,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-03-18",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6576951460024,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-05-22",
+    "product_name": "Polo Shirt",
+    "product_group": "Group B",
+    "order_id": 6576952606904,
+    "revenue": 99.98
+  },
+  {
+    "date": "2025-01-31",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6576952705208,
+    "revenue": 109.99
+  },
+  {
+    "date": "2025-10-22",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6576953688248,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-05-10",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6576953753784,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-09-13",
+    "product_name": "Baseball Cap",
+    "product_group": "Group B",
+    "order_id": 6576954998968,
+    "revenue": 59.98
+  },
+  {
+    "date": "2025-06-27",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6576955130040,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-12-06",
+    "product_name": "Simple Keychain",
+    "product_group": "Group C",
+    "order_id": 6576955195576,
+    "revenue": 19.98
+  },
+  {
+    "date": "2025-08-10",
+    "product_name": "Canvas Tote Bag",
+    "product_group": "Group B",
+    "order_id": 6576956440760,
+    "revenue": 39.99
+  },
+  {
+    "date": "2025-11-30",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6576957653176,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-06-09",
+    "product_name": "Overstock Pants",
+    "product_group": "Group D",
+    "order_id": 6576958898360,
+    "revenue": 19.99
+  },
+  {
+    "date": "2025-08-26",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6576958963896,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-08-09",
+    "product_name": "Sport Sneakers",
+    "product_group": "Group B",
+    "order_id": 6576960143544,
+    "revenue": 109.98
+  },
+  {
+    "date": "2025-07-06",
+    "product_name": "Canvas Tote Bag",
+    "product_group": "Group B",
+    "order_id": 6576960209080,
+    "revenue": 39.99
+  },
+  {
+    "date": "2025-05-23",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6576961650872,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-10-25",
+    "product_name": "Plain Beanie",
+    "product_group": "Group C",
+    "order_id": 6576961749176,
+    "revenue": 29.98
+  },
+  {
+    "date": "2025-08-29",
+    "product_name": "Canvas Tote Bag",
+    "product_group": "Group B",
+    "order_id": 6576962764984,
+    "revenue": 79.98
+  },
+  {
+    "date": "2026-01-09",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6576962830520,
+    "revenue": 199.98
+  },
+  {
+    "date": "2025-10-27",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6576964436152,
+    "revenue": 99.98
+  },
+  {
+    "date": "2025-10-11",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6576964567224,
+    "revenue": 159.98
+  },
+  {
+    "date": "2026-01-04",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6576965583032,
+    "revenue": 99.99
+  },
+  {
+    "date": "2025-08-12",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6576965681336,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-10-22",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6576966729912,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-04-20",
+    "product_name": "Basic Phone Case",
+    "product_group": "Group C",
+    "order_id": 6576966828216,
+    "revenue": 25.98
+  },
+  {
+    "date": "2025-11-20",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6576967909560,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-05-15",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6576967975096,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-04-04",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6576969318584,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-07-15",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6576969416888,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-05-23",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6576970596536,
+    "revenue": 239.98
+  },
+  {
+    "date": "2026-01-11",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6576970662072,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-07-11",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6576970727608,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-10-07",
+    "product_name": "Last Season Dress",
+    "product_group": "Group D",
+    "order_id": 6576971907256,
+    "revenue": 24.99
+  },
+  {
+    "date": "2025-06-28",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6576972005560,
+    "revenue": 219.98
+  },
+  {
+    "date": "2025-12-21",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6576973349048,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-04-12",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6576973480120,
+    "revenue": 199.98
+  },
+  {
+    "date": "2025-11-30",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6576974692536,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-05-03",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6576974758072,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-08-20",
+    "product_name": "Clearance Jacket",
+    "product_group": "Group D",
+    "order_id": 6576975904952,
+    "revenue": 29.99
+  },
+  {
+    "date": "2026-01-18",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6576976003256,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-05-21",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6576977281208,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-11-05",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6576977412280,
+    "revenue": 219.98
+  },
+  {
+    "date": "2025-10-05",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6576978165944,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-06-26",
+    "product_name": "Canvas Tote Bag",
+    "product_group": "Group B",
+    "order_id": 6576978198712,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-07-16",
+    "product_name": "Casual Jeans",
+    "product_group": "Group B",
+    "order_id": 6576978264248,
+    "revenue": 59.99
+  },
+  {
+    "date": "2025-10-10",
+    "product_name": "Basic Phone Case",
+    "product_group": "Group C",
+    "order_id": 6576979214520,
+    "revenue": 25.98
+  },
+  {
+    "date": "2025-12-04",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6576979312824,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-04-29",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6576979378360,
+    "revenue": 99.98
+  },
+  {
+    "date": "2025-12-03",
+    "product_name": "Clearance Jacket",
+    "product_group": "Group D",
+    "order_id": 6576979443896,
+    "revenue": 29.99
+  },
+  {
+    "date": "2025-04-04",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6576980328632,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-03-21",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6576980361400,
+    "revenue": 199.98
+  },
+  {
+    "date": "2025-06-29",
+    "product_name": "Polo Shirt",
+    "product_group": "Group B",
+    "order_id": 6576980394168,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-11-26",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6576980426936,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-09-30",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6576981672120,
+    "revenue": 7.99
+  },
+  {
+    "date": "2025-05-26",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6576981737656,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-09-11",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6576981770424,
+    "revenue": 159.98
+  },
+  {
+    "date": "2026-01-15",
+    "product_name": "Sport Sneakers",
+    "product_group": "Group B",
+    "order_id": 6576981835960,
+    "revenue": 109.98
+  },
+  {
+    "date": "2025-07-10",
+    "product_name": "Plain Beanie",
+    "product_group": "Group C",
+    "order_id": 6576982786232,
+    "revenue": 14.99
+  },
+  {
+    "date": "2025-07-09",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6576982819000,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-10-03",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6576982851768,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-06-28",
+    "product_name": "Basic Socks 3-Pack",
+    "product_group": "Group C",
+    "order_id": 6576982917304,
+    "revenue": 19.99
+  },
+  {
+    "date": "2025-02-10",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6576984031416,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-08-02",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6576984129720,
+    "revenue": 89.99
+  },
+  {
+    "date": "2026-01-11",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6576984162488,
+    "revenue": 15.98
+  },
+  {
+    "date": "2025-07-14",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6576984293560,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-04-03",
+    "product_name": "Cotton Hoodie",
+    "product_group": "Group B",
+    "order_id": 6576985178296,
+    "revenue": 44.99
+  },
+  {
+    "date": "2025-11-19",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6576985211064,
+    "revenue": 99.99
+  },
+  {
+    "date": "2025-03-13",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6576985243832,
+    "revenue": 219.98
+  },
+  {
+    "date": "2025-03-10",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6576985276600,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-05-31",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6576986521784,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-03-27",
+    "product_name": "Cotton Hoodie",
+    "product_group": "Group B",
+    "order_id": 6576986554552,
+    "revenue": 89.98
+  },
+  {
+    "date": "2025-11-25",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6576986587320,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-11-04",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6576986620088,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-09-13",
+    "product_name": "Cotton Hoodie",
+    "product_group": "Group B",
+    "order_id": 6576987668664,
+    "revenue": 89.98
+  },
+  {
+    "date": "2025-07-22",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6576987766968,
+    "revenue": 109.99
+  },
+  {
+    "date": "2025-11-21",
+    "product_name": "Polo Shirt",
+    "product_group": "Group B",
+    "order_id": 6576987799736,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-04-24",
+    "product_name": "Basic Socks 3-Pack",
+    "product_group": "Group C",
+    "order_id": 6576987832504,
+    "revenue": 39.98
+  },
+  {
+    "date": "2025-03-18",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6576988979384,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-12-14",
+    "product_name": "Canvas Tote Bag",
+    "product_group": "Group B",
+    "order_id": 6576989077688,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-06-14",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6576989110456,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-02-20",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6576989208760,
+    "revenue": 219.98
+  },
+  {
+    "date": "2025-10-26",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6576990421176,
+    "revenue": 199.98
+  },
+  {
+    "date": "2025-04-17",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6576990486712,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-12-18",
+    "product_name": "Polo Shirt",
+    "product_group": "Group B",
+    "order_id": 6576990552248,
+    "revenue": 99.98
+  },
+  {
+    "date": "2025-11-27",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6576990617784,
+    "revenue": 109.99
+  },
+  {
+    "date": "2025-11-11",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6576991764664,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-09-28",
+    "product_name": "Clearance Jacket",
+    "product_group": "Group D",
+    "order_id": 6576991797432,
+    "revenue": 29.99
+  },
+  {
+    "date": "2025-08-03",
+    "product_name": "Clearance Jacket",
+    "product_group": "Group D",
+    "order_id": 6576991830200,
+    "revenue": 29.99
+  },
+  {
+    "date": "2026-01-06",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6576991862968,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-06-22",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6576993206456,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-05-21",
+    "product_name": "Canvas Tote Bag",
+    "product_group": "Group B",
+    "order_id": 6576993304760,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-04-30",
+    "product_name": "Simple Keychain",
+    "product_group": "Group C",
+    "order_id": 6576993337528,
+    "revenue": 19.98
+  },
+  {
+    "date": "2025-08-02",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6576993403064,
+    "revenue": 219.98
+  },
+  {
+    "date": "2025-12-29",
+    "product_name": "Last Season Dress",
+    "product_group": "Group D",
+    "order_id": 6576994418872,
+    "revenue": 49.98
+  },
+  {
+    "date": "2025-11-25",
+    "product_name": "Casual Jeans",
+    "product_group": "Group B",
+    "order_id": 6576994910392,
+    "revenue": 59.99
+  },
+  {
+    "date": "2025-07-29",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6576994975928,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-08-24",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6576995008696,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-05-26",
+    "product_name": "Classic T-Shirt",
+    "product_group": "Group B",
+    "order_id": 6576995893432,
+    "revenue": 99.98
+  },
+  {
+    "date": "2025-10-26",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6576995958968,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-08-03",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6576996024504,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-07-05",
+    "product_name": "Last Season Dress",
+    "product_group": "Group D",
+    "order_id": 6576996057272,
+    "revenue": 49.98
+  },
+  {
+    "date": "2025-02-18",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6576997204152,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-03-11",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6576997236920,
+    "revenue": 15.98
+  },
+  {
+    "date": "2025-08-12",
+    "product_name": "Polo Shirt",
+    "product_group": "Group B",
+    "order_id": 6576997269688,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-11-30",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6576997335224,
+    "revenue": 79.98
+  },
+  {
+    "date": "2026-01-15",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6576998219960,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-08-29",
+    "product_name": "Basic Socks 3-Pack",
+    "product_group": "Group C",
+    "order_id": 6576998252728,
+    "revenue": 19.99
+  },
+  {
+    "date": "2025-09-11",
+    "product_name": "Clearance Jacket",
+    "product_group": "Group D",
+    "order_id": 6576998351032,
+    "revenue": 29.99
+  },
+  {
+    "date": "2025-08-25",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6576998383800,
+    "revenue": 7.99
+  },
+  {
+    "date": "2025-07-11",
+    "product_name": "Overstock Pants",
+    "product_group": "Group D",
+    "order_id": 6576999628984,
+    "revenue": 39.98
+  },
+  {
+    "date": "2025-05-28",
+    "product_name": "Overstock Pants",
+    "product_group": "Group D",
+    "order_id": 6576999661752,
+    "revenue": 19.99
+  },
+  {
+    "date": "2025-05-12",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6576999694520,
+    "revenue": 109.99
+  },
+  {
+    "date": "2025-04-18",
+    "product_name": "Last Season Dress",
+    "product_group": "Group D",
+    "order_id": 6576999727288,
+    "revenue": 24.99
+  },
+  {
+    "date": "2025-03-30",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577000710328,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-07-30",
+    "product_name": "Basic Socks 3-Pack",
+    "product_group": "Group C",
+    "order_id": 6577000743096,
+    "revenue": 19.99
+  },
+  {
+    "date": "2025-02-15",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577000775864,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-11-01",
+    "product_name": "Canvas Tote Bag",
+    "product_group": "Group B",
+    "order_id": 6577000808632,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-09-17",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577001758904,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-12-23",
+    "product_name": "Last Season Dress",
+    "product_group": "Group D",
+    "order_id": 6577001824440,
+    "revenue": 49.98
+  },
+  {
+    "date": "2025-05-17",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577001922744,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-06-10",
+    "product_name": "Last Season Dress",
+    "product_group": "Group D",
+    "order_id": 6577001955512,
+    "revenue": 49.98
+  },
+  {
+    "date": "2025-09-23",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6577003135160,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-12-28",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6577003200696,
+    "revenue": 7.99
+  },
+  {
+    "date": "2025-12-16",
+    "product_name": "Clearance Jacket",
+    "product_group": "Group D",
+    "order_id": 6577003266232,
+    "revenue": 29.99
+  },
+  {
+    "date": "2025-10-15",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577003299000,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-08-23",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6577004576952,
+    "revenue": 199.98
+  },
+  {
+    "date": "2025-12-15",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577004609720,
+    "revenue": 219.98
+  },
+  {
+    "date": "2025-03-04",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6577009754296,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-03-03",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6577009787064,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-11-24",
+    "product_name": "Last Season Dress",
+    "product_group": "Group D",
+    "order_id": 6577009819832,
+    "revenue": 24.99
+  },
+  {
+    "date": "2025-08-04",
+    "product_name": "Plain Beanie",
+    "product_group": "Group C",
+    "order_id": 6577009852600,
+    "revenue": 29.98
+  },
+  {
+    "date": "2026-01-28",
+    "product_name": "Classic T-Shirt",
+    "product_group": "Group B",
+    "order_id": 6577011130552,
+    "revenue": 99.98
+  },
+  {
+    "date": "2025-05-01",
+    "product_name": "Clearance Jacket",
+    "product_group": "Group D",
+    "order_id": 6577011196088,
+    "revenue": 29.99
+  },
+  {
+    "date": "2025-05-22",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577011261624,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-11-12",
+    "product_name": "Sport Sneakers",
+    "product_group": "Group B",
+    "order_id": 6577011327160,
+    "revenue": 109.98
+  },
+  {
+    "date": "2025-05-25",
+    "product_name": "Basic Phone Case",
+    "product_group": "Group C",
+    "order_id": 6577012375736,
+    "revenue": 25.98
+  },
+  {
+    "date": "2025-11-19",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6577012408504,
+    "revenue": 15.98
+  },
+  {
+    "date": "2025-07-20",
+    "product_name": "Last Season Dress",
+    "product_group": "Group D",
+    "order_id": 6577012441272,
+    "revenue": 49.98
+  },
+  {
+    "date": "2025-06-05",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577012474040,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-06-08",
+    "product_name": "Basic Socks 3-Pack",
+    "product_group": "Group C",
+    "order_id": 6577013227704,
+    "revenue": 19.99
+  },
+  {
+    "date": "2025-03-25",
+    "product_name": "Basic Phone Case",
+    "product_group": "Group C",
+    "order_id": 6577013293240,
+    "revenue": 12.99
+  },
+  {
+    "date": "2025-06-01",
+    "product_name": "Casual Jeans",
+    "product_group": "Group B",
+    "order_id": 6577013358776,
+    "revenue": 119.98
+  },
+  {
+    "date": "2025-02-04",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6577013391544,
+    "revenue": 199.98
+  },
+  {
+    "date": "2025-09-14",
+    "product_name": "Overstock Pants",
+    "product_group": "Group D",
+    "order_id": 6577014505656,
+    "revenue": 19.99
+  },
+  {
+    "date": "2025-10-01",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6577014538424,
+    "revenue": 39.99
+  },
+  {
+    "date": "2025-04-15",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577014571192,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-02-26",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6577014636728,
+    "revenue": 7.99
+  },
+  {
+    "date": "2025-12-04",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577015718072,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-10-14",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577015750840,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-11-10",
+    "product_name": "Running Shorts",
+    "product_group": "Group B",
+    "order_id": 6577015783608,
+    "revenue": 69.98
+  },
+  {
+    "date": "2025-12-05",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577015849144,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-11-23",
+    "product_name": "Overstock Pants",
+    "product_group": "Group D",
+    "order_id": 6577016701112,
+    "revenue": 39.98
+  },
+  {
+    "date": "2025-03-08",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577016733880,
+    "revenue": 119.99
+  },
+  {
+    "date": "2026-01-29",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577016799416,
+    "revenue": 109.99
+  },
+  {
+    "date": "2025-11-29",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577016897720,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-11-25",
+    "product_name": "Clearance Jacket",
+    "product_group": "Group D",
+    "order_id": 6577017946296,
+    "revenue": 59.98
+  },
+  {
+    "date": "2025-10-19",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577017979064,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-06-16",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577018011832,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-09-21",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577018110136,
+    "revenue": 159.98
+  },
+  {
+    "date": "2026-01-13",
+    "product_name": "Basic Socks 3-Pack",
+    "product_group": "Group C",
+    "order_id": 6577019060408,
+    "revenue": 19.99
+  },
+  {
+    "date": "2025-10-24",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6577019093176,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-10-14",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577019158712,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-03-31",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577019191480,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-05-11",
+    "product_name": "Running Shorts",
+    "product_group": "Group B",
+    "order_id": 6577020076216,
+    "revenue": 69.98
+  },
+  {
+    "date": "2025-11-07",
+    "product_name": "Last Season Dress",
+    "product_group": "Group D",
+    "order_id": 6577020108984,
+    "revenue": 24.99
+  },
+  {
+    "date": "2025-08-27",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6577020174520,
+    "revenue": 99.98
+  },
+  {
+    "date": "2026-01-29",
+    "product_name": "Clearance Jacket",
+    "product_group": "Group D",
+    "order_id": 6577020240056,
+    "revenue": 29.99
+  },
+  {
+    "date": "2025-07-20",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577021386936,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-12-08",
+    "product_name": "Simple Keychain",
+    "product_group": "Group C",
+    "order_id": 6577021419704,
+    "revenue": 9.99
+  },
+  {
+    "date": "2025-11-20",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577021452472,
+    "revenue": 219.98
+  },
+  {
+    "date": "2026-01-07",
+    "product_name": "Basic Socks 3-Pack",
+    "product_group": "Group C",
+    "order_id": 6577021485240,
+    "revenue": 19.99
+  },
+  {
+    "date": "2025-06-16",
+    "product_name": "Cotton Hoodie",
+    "product_group": "Group B",
+    "order_id": 6577022599352,
+    "revenue": 44.99
+  },
+  {
+    "date": "2025-02-16",
+    "product_name": "Casual Jeans",
+    "product_group": "Group B",
+    "order_id": 6577022632120,
+    "revenue": 119.98
+  },
+  {
+    "date": "2025-09-04",
+    "product_name": "Simple Keychain",
+    "product_group": "Group C",
+    "order_id": 6577022664888,
+    "revenue": 9.99
+  },
+  {
+    "date": "2025-11-08",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577022697656,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-08-17",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577023516856,
+    "revenue": 109.99
+  },
+  {
+    "date": "2025-08-05",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577023549624,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-08-02",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577023647928,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-12-18",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577023713464,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-08-24",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6577024565432,
+    "revenue": 99.98
+  },
+  {
+    "date": "2025-10-31",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577024598200,
+    "revenue": 219.98
+  },
+  {
+    "date": "2026-01-07",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6577024696504,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-12-07",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577024762040,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-06-07",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577026007224,
+    "revenue": 219.98
+  },
+  {
+    "date": "2025-12-04",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6577026072760,
+    "revenue": 49.99
+  },
+  {
+    "date": "2026-01-15",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577026138296,
+    "revenue": 109.99
+  },
+  {
+    "date": "2025-11-01",
+    "product_name": "Cotton Hoodie",
+    "product_group": "Group B",
+    "order_id": 6577026203832,
+    "revenue": 44.99
+  },
+  {
+    "date": "2025-05-09",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6577027285176,
+    "revenue": 15.98
+  },
+  {
+    "date": "2025-06-06",
+    "product_name": "Sport Sneakers",
+    "product_group": "Group B",
+    "order_id": 6577027317944,
+    "revenue": 54.99
+  },
+  {
+    "date": "2025-11-26",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6577027383480,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-11-13",
+    "product_name": "Basic Phone Case",
+    "product_group": "Group C",
+    "order_id": 6577027416248,
+    "revenue": 25.98
+  },
+  {
+    "date": "2025-02-16",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577028694200,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-05-25",
+    "product_name": "Casual Jeans",
+    "product_group": "Group B",
+    "order_id": 6577028792504,
+    "revenue": 59.99
+  },
+  {
+    "date": "2025-07-27",
+    "product_name": "Simple Keychain",
+    "product_group": "Group C",
+    "order_id": 6577028890808,
+    "revenue": 9.99
+  },
+  {
+    "date": "2026-01-29",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577028923576,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-04-10",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6577029611704,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-08-01",
+    "product_name": "Baseball Cap",
+    "product_group": "Group B",
+    "order_id": 6577030299832,
+    "revenue": 29.99
+  },
+  {
+    "date": "2025-05-18",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577030332600,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-12-22",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6577030430904,
+    "revenue": 7.99
+  },
+  {
+    "date": "2025-12-11",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6577030463672,
+    "revenue": 99.99
+  },
+  {
+    "date": "2025-09-02",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6577031577784,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-12-29",
+    "product_name": "Classic T-Shirt",
+    "product_group": "Group B",
+    "order_id": 6577031610552,
+    "revenue": 99.98
+  },
+  {
+    "date": "2025-04-09",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577031676088,
+    "revenue": 219.98
+  },
+  {
+    "date": "2025-08-24",
+    "product_name": "Canvas Tote Bag",
+    "product_group": "Group B",
+    "order_id": 6577031774392,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-02-11",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577032888504,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-06-19",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577032954040,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-03-27",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6577033052344,
+    "revenue": 39.99
+  },
+  {
+    "date": "2025-08-03",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577033085112,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-07-16",
+    "product_name": "Last Season Dress",
+    "product_group": "Group D",
+    "order_id": 6577034395832,
+    "revenue": 49.98
+  },
+  {
+    "date": "2025-02-06",
+    "product_name": "Casual Jeans",
+    "product_group": "Group B",
+    "order_id": 6577034461368,
+    "revenue": 59.99
+  },
+  {
+    "date": "2025-11-27",
+    "product_name": "Basic Phone Case",
+    "product_group": "Group C",
+    "order_id": 6577034494136,
+    "revenue": 12.99
+  },
+  {
+    "date": "2025-05-21",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577034526904,
+    "revenue": 219.98
+  },
+  {
+    "date": "2025-04-17",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6577035313336,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-08-16",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577035346104,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-08-06",
+    "product_name": "Plain Beanie",
+    "product_group": "Group C",
+    "order_id": 6577035378872,
+    "revenue": 29.98
+  },
+  {
+    "date": "2025-12-25",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6577035411640,
+    "revenue": 99.99
+  },
+  {
+    "date": "2025-09-02",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577036427448,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-09-21",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577036492984,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-11-20",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577036525752,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-03-16",
+    "product_name": "Classic T-Shirt",
+    "product_group": "Group B",
+    "order_id": 6577036624056,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-11-02",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577037574328,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-11-12",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577037672632,
+    "revenue": 109.99
+  },
+  {
+    "date": "2025-02-18",
+    "product_name": "Last Season Dress",
+    "product_group": "Group D",
+    "order_id": 6577037738168,
+    "revenue": 49.98
+  },
+  {
+    "date": "2025-06-30",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577037770936,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-12-20",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577038655672,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-10-23",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6577038753976,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-08-25",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577038786744,
+    "revenue": 109.99
+  },
+  {
+    "date": "2025-03-20",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577038885048,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-08-20",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577040031928,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-07-30",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6577040195768,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-03-01",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577040261304,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-08-18",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6577040294072,
+    "revenue": 15.98
+  },
+  {
+    "date": "2025-04-26",
+    "product_name": "Canvas Tote Bag",
+    "product_group": "Group B",
+    "order_id": 6577041473720,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-11-27",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577041539256,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-08-06",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6577041670328,
+    "revenue": 99.99
+  },
+  {
+    "date": "2026-01-15",
+    "product_name": "Casual Jeans",
+    "product_group": "Group B",
+    "order_id": 6577041735864,
+    "revenue": 59.99
+  },
+  {
+    "date": "2025-06-17",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577043013816,
+    "revenue": 109.99
+  },
+  {
+    "date": "2025-04-26",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577043112120,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-09-22",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6577043144888,
+    "revenue": 39.99
+  },
+  {
+    "date": "2025-09-12",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577043177656,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-11-27",
+    "product_name": "Baseball Cap",
+    "product_group": "Group B",
+    "order_id": 6577044717752,
+    "revenue": 59.98
+  },
+  {
+    "date": "2025-07-10",
+    "product_name": "Clearance Jacket",
+    "product_group": "Group D",
+    "order_id": 6577044947128,
+    "revenue": 59.98
+  },
+  {
+    "date": "2025-06-11",
+    "product_name": "Baseball Cap",
+    "product_group": "Group B",
+    "order_id": 6577045012664,
+    "revenue": 29.99
+  },
+  {
+    "date": "2025-09-26",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6577045045432,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-05-11",
+    "product_name": "Clearance Jacket",
+    "product_group": "Group D",
+    "order_id": 6577046421688,
+    "revenue": 29.99
+  },
+  {
+    "date": "2025-11-08",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6577046487224,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-04-20",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6577046519992,
+    "revenue": 15.98
+  },
+  {
+    "date": "2025-03-08",
+    "product_name": "Basic Socks 3-Pack",
+    "product_group": "Group C",
+    "order_id": 6577046552760,
+    "revenue": 39.98
+  },
+  {
+    "date": "2025-03-19",
+    "product_name": "Basic Socks 3-Pack",
+    "product_group": "Group C",
+    "order_id": 6577047896248,
+    "revenue": 39.98
+  },
+  {
+    "date": "2026-01-04",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6577047929016,
+    "revenue": 99.99
+  },
+  {
+    "date": "2025-07-15",
+    "product_name": "Overstock Pants",
+    "product_group": "Group D",
+    "order_id": 6577047961784,
+    "revenue": 39.98
+  },
+  {
+    "date": "2025-12-08",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6577047994552,
+    "revenue": 15.98
+  },
+  {
+    "date": "2025-08-03",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577049272504,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-04-04",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6577049338040,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-08-29",
+    "product_name": "Clearance Jacket",
+    "product_group": "Group D",
+    "order_id": 6577049370808,
+    "revenue": 29.99
+  },
+  {
+    "date": "2025-10-03",
+    "product_name": "Polo Shirt",
+    "product_group": "Group B",
+    "order_id": 6577049436344,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-09-05",
+    "product_name": "Clearance Jacket",
+    "product_group": "Group D",
+    "order_id": 6577050452152,
+    "revenue": 59.98
+  },
+  {
+    "date": "2025-11-27",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6577050517688,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-05-14",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6577050615992,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-02-23",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577050681528,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-07-05",
+    "product_name": "Plain Beanie",
+    "product_group": "Group C",
+    "order_id": 6577051533496,
+    "revenue": 14.99
+  },
+  {
+    "date": "2025-10-13",
+    "product_name": "Last Season Dress",
+    "product_group": "Group D",
+    "order_id": 6577051566264,
+    "revenue": 24.99
+  },
+  {
+    "date": "2025-05-04",
+    "product_name": "Polo Shirt",
+    "product_group": "Group B",
+    "order_id": 6577051697336,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-04-03",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577051762872,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-07-28",
+    "product_name": "Casual Jeans",
+    "product_group": "Group B",
+    "order_id": 6577052778680,
+    "revenue": 119.98
+  },
+  {
+    "date": "2025-05-01",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577052811448,
+    "revenue": 219.98
+  },
+  {
+    "date": "2025-12-17",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577052876984,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-12-02",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577052942520,
+    "revenue": 89.99
+  },
+  {
+    "date": "2026-01-16",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577053892792,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-07-07",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577053958328,
+    "revenue": 239.98
+  },
+  {
+    "date": "2026-01-08",
+    "product_name": "Sport Sneakers",
+    "product_group": "Group B",
+    "order_id": 6577054023864,
+    "revenue": 54.99
+  },
+  {
+    "date": "2025-05-18",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577054056632,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-09-10",
+    "product_name": "Basic Phone Case",
+    "product_group": "Group C",
+    "order_id": 6577054744760,
+    "revenue": 12.99
+  },
+  {
+    "date": "2025-07-28",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6577054810296,
+    "revenue": 99.98
+  },
+  {
+    "date": "2025-07-24",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6577054941368,
+    "revenue": 199.98
+  },
+  {
+    "date": "2025-05-06",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577054974136,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-06-06",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6577056088248,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-08-18",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577056153784,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-11-24",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577056219320,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-10-28",
+    "product_name": "Simple Keychain",
+    "product_group": "Group C",
+    "order_id": 6577056284856,
+    "revenue": 19.98
+  },
+  {
+    "date": "2025-02-14",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577057235128,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-10-22",
+    "product_name": "Basic Socks 3-Pack",
+    "product_group": "Group C",
+    "order_id": 6577057267896,
+    "revenue": 39.98
+  },
+  {
+    "date": "2025-04-04",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577057300664,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-05-21",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6577057366200,
+    "revenue": 15.98
+  },
+  {
+    "date": "2025-04-02",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577058578616,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-03-16",
+    "product_name": "Cotton Hoodie",
+    "product_group": "Group B",
+    "order_id": 6577058611384,
+    "revenue": 44.99
+  },
+  {
+    "date": "2025-02-20",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577058644152,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-04-04",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577058742456,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-09-09",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6577059463352,
+    "revenue": 39.99
+  },
+  {
+    "date": "2025-08-25",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577059496120,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-10-12",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577059561656,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-06-13",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6577059659960,
+    "revenue": 39.99
+  },
+  {
+    "date": "2025-09-29",
+    "product_name": "Polo Shirt",
+    "product_group": "Group B",
+    "order_id": 6577060708536,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-12-24",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577060741304,
+    "revenue": 219.98
+  },
+  {
+    "date": "2025-04-02",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577060839608,
+    "revenue": 219.98
+  },
+  {
+    "date": "2025-04-17",
+    "product_name": "Basic Socks 3-Pack",
+    "product_group": "Group C",
+    "order_id": 6577060872376,
+    "revenue": 19.99
+  },
+  {
+    "date": "2025-07-23",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577062150328,
+    "revenue": 109.99
+  },
+  {
+    "date": "2025-07-24",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577062183096,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-06-30",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577062248632,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-07-30",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6577062281400,
+    "revenue": 99.98
+  },
+  {
+    "date": "2025-05-27",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577063493816,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-07-31",
+    "product_name": "Basic Socks 3-Pack",
+    "product_group": "Group C",
+    "order_id": 6577063592120,
+    "revenue": 39.98
+  },
+  {
+    "date": "2025-11-13",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577063624888,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-12-22",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6577063690424,
+    "revenue": 15.98
+  },
+  {
+    "date": "2025-12-16",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577064575160,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-10-05",
+    "product_name": "Overstock Pants",
+    "product_group": "Group D",
+    "order_id": 6577064607928,
+    "revenue": 39.98
+  },
+  {
+    "date": "2025-12-06",
+    "product_name": "Cotton Hoodie",
+    "product_group": "Group B",
+    "order_id": 6577064673464,
+    "revenue": 44.99
+  },
+  {
+    "date": "2025-02-05",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577064739000,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-05-12",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577065722040,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-08-06",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6577065787576,
+    "revenue": 15.98
+  },
+  {
+    "date": "2025-11-03",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577065918648,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-10-04",
+    "product_name": "Sport Sneakers",
+    "product_group": "Group B",
+    "order_id": 6577065984184,
+    "revenue": 54.99
+  },
+  {
+    "date": "2025-09-14",
+    "product_name": "Canvas Tote Bag",
+    "product_group": "Group B",
+    "order_id": 6577067262136,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-08-03",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577067294904,
+    "revenue": 109.99
+  },
+  {
+    "date": "2025-06-05",
+    "product_name": "Baseball Cap",
+    "product_group": "Group B",
+    "order_id": 6577067360440,
+    "revenue": 29.99
+  },
+  {
+    "date": "2025-09-14",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577067425976,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-10-09",
+    "product_name": "Canvas Tote Bag",
+    "product_group": "Group B",
+    "order_id": 6577068507320,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-12-23",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6577068540088,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-07-28",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577068572856,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-04-23",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6577068638392,
+    "revenue": 99.98
+  },
+  {
+    "date": "2026-01-01",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577069949112,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-09-11",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6577069981880,
+    "revenue": 39.99
+  },
+  {
+    "date": "2025-09-27",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6577070014648,
+    "revenue": 99.99
+  },
+  {
+    "date": "2025-12-21",
+    "product_name": "Clearance Jacket",
+    "product_group": "Group D",
+    "order_id": 6577070047416,
+    "revenue": 59.98
+  },
+  {
+    "date": "2025-03-01",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6577071489208,
+    "revenue": 199.98
+  },
+  {
+    "date": "2025-08-02",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577071521976,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-07-18",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577071587512,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-05-09",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6577071685816,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-04-25",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577073062072,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-09-20",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577073127608,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-07-15",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577073225912,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-11-12",
+    "product_name": "Basic Phone Case",
+    "product_group": "Group C",
+    "order_id": 6577073291448,
+    "revenue": 12.99
+  },
+  {
+    "date": "2025-05-15",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577074438328,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-05-03",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6577074536632,
+    "revenue": 99.98
+  },
+  {
+    "date": "2025-05-07",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577074569400,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-02-07",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6577074602168,
+    "revenue": 99.99
+  },
+  {
+    "date": "2025-10-13",
+    "product_name": "Casual Jeans",
+    "product_group": "Group B",
+    "order_id": 6577075585208,
+    "revenue": 119.98
+  },
+  {
+    "date": "2025-10-18",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577075650744,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-11-13",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577075683512,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-07-13",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577075716280,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-02-26",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6577076568248,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-08-10",
+    "product_name": "Simple Keychain",
+    "product_group": "Group C",
+    "order_id": 6577076666552,
+    "revenue": 9.99
+  },
+  {
+    "date": "2025-08-02",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577076699320,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-03-16",
+    "product_name": "Basic Socks 3-Pack",
+    "product_group": "Group C",
+    "order_id": 6577076732088,
+    "revenue": 19.99
+  },
+  {
+    "date": "2025-03-10",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577077944504,
+    "revenue": 109.99
+  },
+  {
+    "date": "2026-01-04",
+    "product_name": "Basic Socks 3-Pack",
+    "product_group": "Group C",
+    "order_id": 6577077977272,
+    "revenue": 39.98
+  },
+  {
+    "date": "2025-08-01",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577078010040,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-12-24",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6577078042808,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-06-10",
+    "product_name": "Basic Socks 3-Pack",
+    "product_group": "Group C",
+    "order_id": 6577079025848,
+    "revenue": 19.99
+  },
+  {
+    "date": "2025-07-02",
+    "product_name": "Overstock Pants",
+    "product_group": "Group D",
+    "order_id": 6577079058616,
+    "revenue": 19.99
+  },
+  {
+    "date": "2025-10-10",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577079124152,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-03-31",
+    "product_name": "Classic T-Shirt",
+    "product_group": "Group B",
+    "order_id": 6577079156920,
+    "revenue": 99.98
+  },
+  {
+    "date": "2025-09-01",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577080205496,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-07-20",
+    "product_name": "Baseball Cap",
+    "product_group": "Group B",
+    "order_id": 6577080238264,
+    "revenue": 59.98
+  },
+  {
+    "date": "2025-05-12",
+    "product_name": "Overstock Pants",
+    "product_group": "Group D",
+    "order_id": 6577080271032,
+    "revenue": 19.99
+  },
+  {
+    "date": "2025-02-09",
+    "product_name": "Casual Jeans",
+    "product_group": "Group B",
+    "order_id": 6577080336568,
+    "revenue": 119.98
+  },
+  {
+    "date": "2025-05-09",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577081483448,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-03-19",
+    "product_name": "Running Shorts",
+    "product_group": "Group B",
+    "order_id": 6577081516216,
+    "revenue": 69.98
+  },
+  {
+    "date": "2025-02-16",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577081581752,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-11-06",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577081614520,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-06-29",
+    "product_name": "Classic T-Shirt",
+    "product_group": "Group B",
+    "order_id": 6577082728632,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-08-04",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577082794168,
+    "revenue": 219.98
+  },
+  {
+    "date": "2026-01-13",
+    "product_name": "Plain Beanie",
+    "product_group": "Group C",
+    "order_id": 6577082826936,
+    "revenue": 29.98
+  },
+  {
+    "date": "2025-09-05",
+    "product_name": "Sport Sneakers",
+    "product_group": "Group B",
+    "order_id": 6577082859704,
+    "revenue": 54.99
+  },
+  {
+    "date": "2025-09-08",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577084268728,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-12-05",
+    "product_name": "Casual Jeans",
+    "product_group": "Group B",
+    "order_id": 6577084367032,
+    "revenue": 119.98
+  },
+  {
+    "date": "2025-03-05",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577084432568,
+    "revenue": 89.99
+  },
+  {
+    "date": "2026-01-29",
+    "product_name": "Basic Phone Case",
+    "product_group": "Group C",
+    "order_id": 6577084465336,
+    "revenue": 25.98
+  },
+  {
+    "date": "2025-07-27",
+    "product_name": "Baseball Cap",
+    "product_group": "Group B",
+    "order_id": 6577085743288,
+    "revenue": 59.98
+  },
+  {
+    "date": "2026-01-17",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577085776056,
+    "revenue": 219.98
+  },
+  {
+    "date": "2026-01-05",
+    "product_name": "Overstock Pants",
+    "product_group": "Group D",
+    "order_id": 6577085841592,
+    "revenue": 19.99
+  },
+  {
+    "date": "2025-12-02",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6577085874360,
+    "revenue": 15.98
+  },
+  {
+    "date": "2025-09-13",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577087381688,
+    "revenue": 109.99
+  },
+  {
+    "date": "2025-06-18",
+    "product_name": "Cotton Hoodie",
+    "product_group": "Group B",
+    "order_id": 6577087447224,
+    "revenue": 44.99
+  },
+  {
+    "date": "2025-12-30",
+    "product_name": "Basic Phone Case",
+    "product_group": "Group C",
+    "order_id": 6577087578296,
+    "revenue": 25.98
+  },
+  {
+    "date": "2025-09-13",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577087611064,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-12-25",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577089347768,
+    "revenue": 79.99
+  },
+  {
+    "date": "2026-01-07",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577089380536,
+    "revenue": 219.98
+  },
+  {
+    "date": "2025-02-13",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577089413304,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-05-15",
+    "product_name": "Baseball Cap",
+    "product_group": "Group B",
+    "order_id": 6577089446072,
+    "revenue": 59.98
+  },
+  {
+    "date": "2025-07-27",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577090625720,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-05-30",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6577090658488,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-03-21",
+    "product_name": "Casual Jeans",
+    "product_group": "Group B",
+    "order_id": 6577090691256,
+    "revenue": 119.98
+  },
+  {
+    "date": "2025-09-15",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577090756792,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-02-18",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577091969208,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-04-29",
+    "product_name": "Canvas Tote Bag",
+    "product_group": "Group B",
+    "order_id": 6577092001976,
+    "revenue": 79.98
+  },
+  {
+    "date": "2025-08-10",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577092034744,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-09-14",
+    "product_name": "Polo Shirt",
+    "product_group": "Group B",
+    "order_id": 6577092067512,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-10-30",
+    "product_name": "Standard Lanyard",
+    "product_group": "Group C",
+    "order_id": 6577093214392,
+    "revenue": 15.98
+  },
+  {
+    "date": "2025-11-02",
+    "product_name": "Overstock Pants",
+    "product_group": "Group D",
+    "order_id": 6577093279928,
+    "revenue": 39.98
+  },
+  {
+    "date": "2025-11-24",
+    "product_name": "Overstock Pants",
+    "product_group": "Group D",
+    "order_id": 6577093312696,
+    "revenue": 39.98
+  },
+  {
+    "date": "2025-06-19",
+    "product_name": "Basic Phone Case",
+    "product_group": "Group C",
+    "order_id": 6577093411000,
+    "revenue": 12.99
+  },
+  {
+    "date": "2025-09-24",
+    "product_name": "Simple Keychain",
+    "product_group": "Group C",
+    "order_id": 6577094721720,
+    "revenue": 19.98
+  },
+  {
+    "date": "2025-06-22",
+    "product_name": "Basic Socks 3-Pack",
+    "product_group": "Group C",
+    "order_id": 6577094787256,
+    "revenue": 39.98
+  },
+  {
+    "date": "2025-04-19",
+    "product_name": "Simple Keychain",
+    "product_group": "Group C",
+    "order_id": 6577094820024,
+    "revenue": 9.99
+  },
+  {
+    "date": "2025-12-22",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577094918328,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-03-01",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6577096130744,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-05-05",
+    "product_name": "Last Season Dress",
+    "product_group": "Group D",
+    "order_id": 6577096163512,
+    "revenue": 24.99
+  },
+  {
+    "date": "2025-10-19",
+    "product_name": "Basic Phone Case",
+    "product_group": "Group C",
+    "order_id": 6577096196280,
+    "revenue": 12.99
+  },
+  {
+    "date": "2025-07-31",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577096327352,
+    "revenue": 219.98
+  },
+  {
+    "date": "2025-04-18",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577097605304,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-08-11",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6577097670840,
+    "revenue": 39.99
+  },
+  {
+    "date": "2025-12-11",
+    "product_name": "Running Shorts",
+    "product_group": "Group B",
+    "order_id": 6577097736376,
+    "revenue": 34.99
+  },
+  {
+    "date": "2025-09-12",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577097801912,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-12-28",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577099374776,
+    "revenue": 219.98
+  },
+  {
+    "date": "2025-10-28",
+    "product_name": "Clearance Jacket",
+    "product_group": "Group D",
+    "order_id": 6577099440312,
+    "revenue": 59.98
+  },
+  {
+    "date": "2025-06-13",
+    "product_name": "Casual Jeans",
+    "product_group": "Group B",
+    "order_id": 6577099505848,
+    "revenue": 119.98
+  },
+  {
+    "date": "2025-09-16",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577099538616,
+    "revenue": 119.99
+  },
+  {
+    "date": "2025-02-16",
+    "product_name": "Clearance Jacket",
+    "product_group": "Group D",
+    "order_id": 6577100619960,
+    "revenue": 29.99
+  },
+  {
+    "date": "2025-10-02",
+    "product_name": "Luxury Silk Scarf",
+    "product_group": "Group A",
+    "order_id": 6577100652728,
+    "revenue": 89.99
+  },
+  {
+    "date": "2025-02-08",
+    "product_name": "Handcrafted Wallet",
+    "product_group": "Group A",
+    "order_id": 6577100685496,
+    "revenue": 159.98
+  },
+  {
+    "date": "2025-11-04",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577100718264,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-05-24",
+    "product_name": "Premium Leather Bag",
+    "product_group": "Group A",
+    "order_id": 6577101832376,
+    "revenue": 239.98
+  },
+  {
+    "date": "2025-08-11",
+    "product_name": "Overstock Pants",
+    "product_group": "Group D",
+    "order_id": 6577101930680,
+    "revenue": 39.98
+  },
+  {
+    "date": "2025-04-21",
+    "product_name": "Cashmere Sweater",
+    "product_group": "Group A",
+    "order_id": 6577101963448,
+    "revenue": 239.98
+  },
+  {
+    "date": "2026-01-24",
+    "product_name": "Sample Sale Coat",
+    "product_group": "Group D",
+    "order_id": 6577101996216,
+    "revenue": 49.99
+  },
+  {
+    "date": "2025-02-17",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6577102913720,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-03-04",
+    "product_name": "Discontinued Boots",
+    "product_group": "Group D",
+    "order_id": 6577102946488,
+    "revenue": 39.99
+  },
+  {
+    "date": "2025-12-15",
+    "product_name": "Designer Sunglasses",
+    "product_group": "Group A",
+    "order_id": 6577102979256,
+    "revenue": 199.98
+  },
+  {
+    "date": "2025-04-20",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6577103110328,
+    "revenue": 79.99
+  },
+  {
+    "date": "2025-08-10",
+    "product_name": "Overstock Pants",
+    "product_group": "Group D",
+    "order_id": 6577104289976,
+    "revenue": 19.99
+  },
+  {
+    "date": "2025-03-02",
+    "product_name": "Baseball Cap",
+    "product_group": "Group B",
+    "order_id": 6577104322744,
+    "revenue": 29.99
+  },
+  {
+    "date": "2025-10-10",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577104388280,
+    "revenue": 109.99
+  },
+  {
+    "date": "2025-06-27",
+    "product_name": "Plain Beanie",
+    "product_group": "Group C",
+    "order_id": 6577104421048,
+    "revenue": 29.98
+  },
+  {
+    "date": "2025-04-19",
+    "product_name": "Premium Backpack",
+    "product_group": "Group A",
+    "order_id": 6577105666232,
+    "revenue": 179.98
+  },
+  {
+    "date": "2025-07-23",
+    "product_name": "Artisan Watch",
+    "product_group": "Group A",
+    "order_id": 6577105699000,
+    "revenue": 219.98
+  },
+  {
+    "date": "2025-10-14",
+    "product_name": "Luxury Belt",
+    "product_group": "Group A",
+    "order_id": 6577105764536,
+    "revenue": 159.98
+  }
+]

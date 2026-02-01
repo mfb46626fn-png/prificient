@@ -3,6 +3,25 @@ import { ProductAnalysis } from '@/lib/analysis/product-profitability'
 
 export type PainLevel = 'safe' | 'unaware' | 'painful' | 'critical'
 
+// Turkish segment names for UI display
+export type PainSegment = 'Rahat' | 'Risk' | 'Tehlike' | 'Alarm'
+
+// Beta package assignment based on usage score
+export type BetaPackage = 'clear' | 'control' | 'vision'
+
+export interface UsageScore {
+    totalPoints: number
+    breakdown: {
+        apiCalls: number
+        reportExports: number
+        scenarioRuns: number
+        dashboardViews: number
+        productAnalysis: number
+        metaImports: number
+    }
+    recommendedPackage: BetaPackage
+}
+
 export interface PainDiagnosis {
     score: number
     level: PainLevel
@@ -187,5 +206,143 @@ export const PainEngine = {
                 status: 'ignored'
             })
         }
+    },
+
+    /**
+     * Get Turkish segment name for UI display
+     */
+    getSegmentName(score: number): PainSegment {
+        if (score >= 81) return 'Alarm'
+        if (score >= 61) return 'Tehlike'
+        if (score >= 31) return 'Risk'
+        return 'Rahat'
+    },
+
+    /**
+     * Get segment color for UI
+     */
+    getSegmentColor(score: number): string {
+        if (score >= 81) return '#dc2626' // Red - Alarm
+        if (score >= 61) return '#f97316' // Orange - Tehlike
+        if (score >= 31) return '#eab308' // Yellow - Risk
+        return '#22c55e' // Green - Rahat
+    },
+
+    /**
+     * Calculate beta usage score for package assignment
+     * Point values:
+     * - API calls: 10 pts each
+     * - Report exports: 8 pts each
+     * - Scenario runs: 5 pts each (changed from 2 to make it more valuable)
+     * - Dashboard views: 1 pt each
+     * - Product analysis: 3 pts each
+     * - Meta imports: 10 pts each
+     */
+    async calculateUsageScore(userId: string): Promise<UsageScore> {
+        const supabase = await createClient()
+
+        const { data: logs } = await supabase
+            .from('beta_usage_logs')
+            .select('action_type, points')
+            .eq('user_id', userId)
+
+        const breakdown = {
+            apiCalls: 0,
+            reportExports: 0,
+            scenarioRuns: 0,
+            dashboardViews: 0,
+            productAnalysis: 0,
+            metaImports: 0
+        }
+
+        let totalPoints = 0
+
+        logs?.forEach(log => {
+            const points = log.points || 1
+            totalPoints += points
+
+            switch (log.action_type) {
+                case 'api_call':
+                    breakdown.apiCalls += points
+                    break
+                case 'report_export':
+                    breakdown.reportExports += points
+                    break
+                case 'scenario_run':
+                    breakdown.scenarioRuns += points
+                    break
+                case 'dashboard_view':
+                    breakdown.dashboardViews += points
+                    break
+                case 'product_analysis':
+                    breakdown.productAnalysis += points
+                    break
+                case 'meta_csv_import':
+                    breakdown.metaImports += points
+                    break
+            }
+        })
+
+        // Determine recommended package based on usage
+        // 0-9 points: Clear (basic)
+        // 10-29 points: Control (intermediate)
+        // 30+ points: Vision (full)
+        let recommendedPackage: BetaPackage = 'clear'
+        if (totalPoints >= 30) {
+            recommendedPackage = 'vision'
+        } else if (totalPoints >= 10) {
+            recommendedPackage = 'control'
+        }
+
+        // Update user's usage score
+        await supabase
+            .from('users')
+            .update({ usage_score: totalPoints })
+            .eq('id', userId)
+
+        return {
+            totalPoints,
+            breakdown,
+            recommendedPackage
+        }
+    },
+
+    /**
+     * Log a usage action for beta scoring
+     */
+    async logUsage(userId: string, actionType: string, points: number = 1, metadata?: Record<string, any>) {
+        const supabase = await createClient()
+
+        await supabase.from('beta_usage_logs').insert({
+            user_id: userId,
+            action_type: actionType,
+            points,
+            metadata: metadata || {}
+        })
+    },
+
+    /**
+     * Get recommended package based on usage score
+     */
+    recommendPackage(usageScore: number): BetaPackage {
+        if (usageScore >= 30) return 'vision'
+        if (usageScore >= 10) return 'control'
+        return 'clear'
+    },
+
+    /**
+     * Update user's pain score in database
+     */
+    async updatePainScore(userId: string, score: number): Promise<void> {
+        const supabase = await createClient()
+        const segment = this.getSegmentName(score)
+
+        await supabase
+            .from('users')
+            .update({
+                pain_score: score,
+                pain_segment: segment
+            })
+            .eq('id', userId)
     }
 }
