@@ -164,9 +164,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             diagnosis = await PainEngine.diagnose(user.id)
             polarity = await ProductAnalysis.getProductsByProfitability(user.id)
 
-            const yesterday = new Date()
-            yesterday.setDate(yesterday.getDate() - 1)
-            autopsy = await LedgerService.getDailyAutopsy(user.id, yesterday)
+            autopsy = await LedgerService.getSmartDailyAutopsy(user.id)
         } catch (e) {
             console.error("Action Data Error", e)
         }

@@ -557,13 +557,39 @@ export class LedgerService {
 
         const netPocket = grossRevenue - returns - ads - cogsAndFees
 
+        // If no data for this day, return null to signal fallback
+        const hasData = grossRevenue > 0 || returns > 0 || ads > 0 || cogsAndFees > 0
+
         return {
             grossRevenue,
             returns: -returns, // Show as negative for display logic
             ads: -ads,
             cogsAndFees: -cogsAndFees,
             netPocket,
-            date: date.toISOString()
+            date: date.toISOString(),
+            isEmpty: !hasData // NEW: Flag to indicate no data
         }
+    }
+
+    // NEW: Smart Autopsy - Try yesterday, fallback to today
+    static async getSmartDailyAutopsy(user_id: string) {
+        // Try yesterday first
+        const yesterday = new Date()
+        yesterday.setDate(yesterday.getDate() - 1)
+        const yesterdayData = await this.getDailyAutopsy(user_id, yesterday)
+
+        if (yesterdayData && !yesterdayData.isEmpty) {
+            return yesterdayData
+        }
+
+        // Fallback to today
+        const today = new Date()
+        const todayData = await this.getDailyAutopsy(user_id, today)
+
+        if (todayData && !todayData.isEmpty) {
+            return todayData
+        }
+
+        return null // No data at all
     }
 }
