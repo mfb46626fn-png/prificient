@@ -10,7 +10,7 @@ import type { DiagnosisReport } from '@/lib/onboarding/diagnosis';
 
 function SlideRealityCheck({ data }: { data: DiagnosisReport }) {
     const formatCurrency = (n: number) =>
-        new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(n);
+        new Intl.NumberFormat('tr-TR', { style: 'currency', currency: data.currency || 'TRY', maximumFractionDigits: 0 }).format(n);
 
     return (
         <div className="flex flex-col items-center justify-center h-full px-6 text-center">
@@ -77,7 +77,7 @@ function SlideRealityCheck({ data }: { data: DiagnosisReport }) {
 
 function SlideTraitor({ data }: { data: DiagnosisReport }) {
     const formatCurrency = (n: number) =>
-        new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(n);
+        new Intl.NumberFormat('tr-TR', { style: 'currency', currency: data.currency || 'TRY', maximumFractionDigits: 0 }).format(n);
 
     if (!data.toxicChampion) return null;
 
@@ -137,7 +137,7 @@ function SlideTraitor({ data }: { data: DiagnosisReport }) {
 
 function SlideBreakdown({ data }: { data: DiagnosisReport }) {
     const formatCurrency = (n: number) =>
-        new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(n);
+        new Intl.NumberFormat('tr-TR', { style: 'currency', currency: data.currency || 'TRY', maximumFractionDigits: 0 }).format(n);
 
     if (!data.lossAnatomy) return null;
 
@@ -500,8 +500,8 @@ export default function DiagnosisPage() {
                         key={i}
                         onClick={() => setCurrentSlide(i)}
                         className={`w-2 h-2 rounded-full transition-all ${i === currentSlide
-                                ? 'bg-white w-6'
-                                : 'bg-gray-600 hover:bg-gray-500'
+                            ? 'bg-white w-6'
+                            : 'bg-gray-600 hover:bg-gray-500'
                             }`}
                     />
                 ))}

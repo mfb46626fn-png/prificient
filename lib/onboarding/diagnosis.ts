@@ -48,6 +48,7 @@ export interface DiagnosisReport {
     // Meta
     hasEnoughData: boolean;
     dateRange: { start: string; end: string };
+    currency: string; // Dynamic currency from Shopify
 }
 
 // --- Main Function ---
@@ -58,6 +59,15 @@ export async function generateDiagnosisReport(userId: string): Promise<Diagnosis
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 30);
+
+    // Fetch user's currency from store_settings
+    const { data: settings } = await supabase
+        .from('store_settings')
+        .select('currency')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+    const currency = settings?.currency || 'TRY';
 
     // --- 1. Fetch Aggregate Financials ---
     const { data: entries } = await supabase
@@ -222,6 +232,7 @@ export async function generateDiagnosisReport(userId: string): Promise<Diagnosis
         dateRange: {
             start: startDate.toISOString(),
             end: endDate.toISOString()
-        }
+        },
+        currency
     };
 }

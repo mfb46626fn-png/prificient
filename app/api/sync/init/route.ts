@@ -44,6 +44,25 @@ export async function POST(req: NextRequest) {
         const countRes: any = await client.get({ path: 'orders/count', query: { status: 'any' } });
         const totalOrders = countRes.body?.count || 0;
 
+        // 3.1. NEW: Fetch Shop Info to get Currency
+        let shopCurrency = 'TRY'; // Default fallback
+        try {
+            const shopRes: any = await client.get({ path: 'shop' });
+            shopCurrency = shopRes.body?.shop?.currency || 'TRY';
+            console.log(`[Sync Init] Detected Shopify currency: ${shopCurrency}`);
+        } catch (shopInfoError) {
+            console.warn('[Sync Init] Failed to fetch shop info, using default currency TRY');
+        }
+
+        // 3.2. Save shop currency to store_settings
+        await supabaseAdmin
+            .from('store_settings')
+            .upsert({
+                user_id: user.id,
+                currency: shopCurrency,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id' });
+
         // 3.5. HARD RESET DATA (Critical for re-syncing corrections)
         // Since we are starting a full sync, we must clear old faulty data for this user.
         // Order: Check dependencies (Entries -> Transactions -> Event Log)
