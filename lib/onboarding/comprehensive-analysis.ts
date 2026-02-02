@@ -1,4 +1,3 @@
-import { createClient } from '@/utils/supabase/server';
 import { createAdminClient } from '@/lib/supabase-admin';
 
 // --- Types ---
@@ -29,6 +28,8 @@ export interface CostBreakdown {
     tax: number;
     shipping: number;
     platform_fees: number;
+    refunds: number;
+    discounts: number;
     total_costs: number;
     net_profit: number;
 }
@@ -77,32 +78,41 @@ export interface ComprehensiveAnalysis {
     hasEnoughData: boolean;
 }
 
-// Helper: Shopify GraphQL query for orders
-async function fetchShopifyOrders(accessToken: string, shopDomain: string): Promise<any[]> {
+// Shopify GraphQL query for orders with refunds and discounts
+async function fetchShopifyOrders(accessToken: string, shopDomain: string): Promise<{ orders: any[]; currency: string }> {
     const orders: any[] = [];
     let hasNextPage = true;
     let cursor: string | null = null;
+    let currency = 'USD';
 
     while (hasNextPage) {
         const query = `
             query($cursor: String) {
-                orders(first: 100, after: $cursor) {
+                orders(first: 100, after: $cursor, query: "financial_status:paid OR financial_status:partially_refunded OR financial_status:refunded") {
                     pageInfo { hasNextPage endCursor }
                     edges {
                         node {
                             id
                             name
                             createdAt
+                            displayFinancialStatus
+                            subtotalPriceSet { shopMoney { amount currencyCode } }
                             totalPriceSet { shopMoney { amount currencyCode } }
                             totalTaxSet { shopMoney { amount } }
                             totalShippingPriceSet { shopMoney { amount } }
-                            lineItems(first: 50) {
+                            totalDiscountsSet { shopMoney { amount } }
+                            totalRefundedSet { shopMoney { amount } }
+                            refunds {
+                                totalRefundedSet { shopMoney { amount } }
+                            }
+                            lineItems(first: 100) {
                                 edges {
                                     node {
                                         title
                                         quantity
                                         variant { id sku product { id } }
                                         originalTotalSet { shopMoney { amount } }
+                                        discountedTotalSet { shopMoney { amount } }
                                     }
                                 }
                             }
@@ -122,27 +132,31 @@ async function fetchShopifyOrders(accessToken: string, shopDomain: string): Prom
         });
 
         const json: { data?: { orders?: { edges: any[]; pageInfo: { hasNextPage: boolean; endCursor: string } } } } = await response.json();
-        const ordersData: { edges: any[]; pageInfo: { hasNextPage: boolean; endCursor: string } } | undefined = json.data?.orders;
+        const ordersData = json.data?.orders;
 
         if (!ordersData) break;
 
         for (const edge of ordersData.edges) {
-            orders.push(edge.node);
+            const order = edge.node;
+            orders.push(order);
+            // Get currency from first order
+            if (!currency || currency === 'USD') {
+                currency = order.totalPriceSet?.shopMoney?.currencyCode || 'USD';
+            }
         }
 
         hasNextPage = ordersData.pageInfo.hasNextPage;
         cursor = ordersData.pageInfo.endCursor;
 
-        // Safety limit: max 5000 orders
+        // Safety limit
         if (orders.length >= 5000) break;
     }
 
-    return orders;
+    return { orders, currency };
 }
 
 // --- Main Analysis Function ---
 export async function generateComprehensiveAnalysis(userId: string): Promise<ComprehensiveAnalysis> {
-    const supabase = await createClient();
     const supabaseAdmin = createAdminClient();
 
     // Fetch store settings
@@ -160,17 +174,16 @@ export async function generateComprehensiveAnalysis(userId: string): Promise<Com
         .eq('platform', 'shopify')
         .single();
 
-    const currency = settings?.currency || 'TRY';
     const storeName = settings?.store_name || 'Mağazanız';
 
     // Default empty result
-    const emptyResult: ComprehensiveAnalysis = {
+    const emptyResult = (curr: string): ComprehensiveAnalysis => ({
         storeName,
-        currency,
+        currency: curr,
         dateRange: { start: new Date().toISOString(), end: new Date().toISOString() },
         overview: { totalRevenue: 0, totalOrders: 0, avgOrderValue: 0, totalProducts: 0, periodDays: 1 },
         realProfit: { grossRevenue: 0, totalCosts: 0, netProfit: 0, profitMargin: 0, gapMessage: 'Veri bulunamadı' },
-        costBreakdown: { revenue: 0, cogs: 0, tax: 0, shipping: 0, platform_fees: 0, total_costs: 0, net_profit: 0 },
+        costBreakdown: { revenue: 0, cogs: 0, tax: 0, shipping: 0, platform_fees: 0, refunds: 0, discounts: 0, total_costs: 0, net_profit: 0 },
         topProducts: [],
         dangerProducts: [],
         monthlyTrends: [],
@@ -178,25 +191,28 @@ export async function generateComprehensiveAnalysis(userId: string): Promise<Com
         opportunityCost: { lostProfit: 0, potentialGain: 0, worstProduct: null },
         recommendations: [],
         hasEnoughData: false
-    };
+    });
 
     if (!integration?.access_token || !integration?.shop_domain) {
-        return emptyResult;
+        return emptyResult('USD');
     }
 
     // Fetch all orders from Shopify
-    const orders = await fetchShopifyOrders(integration.access_token, integration.shop_domain);
+    const { orders, currency } = await fetchShopifyOrders(integration.access_token, integration.shop_domain);
 
     if (orders.length === 0) {
-        return emptyResult;
+        return emptyResult(currency);
     }
 
     // Aggregate data
-    let totalRevenue = 0;
+    let totalSubtotal = 0; // Revenue before tax/shipping
+    let totalGross = 0; // Total including tax/shipping
     let totalTax = 0;
     let totalShipping = 0;
+    let totalDiscounts = 0;
+    let totalRefunds = 0;
     let totalCogs = 0;
-    const platformFeeRate = 0.025; // Estimated 2.5% payment fee
+    const platformFeeRate = 0.026; // 2.6% payment processing
 
     const productMap = new Map<string, ProductMetric>();
     const monthlyMap = new Map<string, MonthlyTrend>();
@@ -209,13 +225,29 @@ export async function generateComprehensiveAnalysis(userId: string): Promise<Com
         if (orderDate < startDate) startDate = orderDate;
         if (orderDate > endDate) endDate = orderDate;
 
-        const orderTotal = parseFloat(order.totalPriceSet?.shopMoney?.amount || '0');
+        const subtotal = parseFloat(order.subtotalPriceSet?.shopMoney?.amount || '0');
+        const gross = parseFloat(order.totalPriceSet?.shopMoney?.amount || '0');
         const orderTax = parseFloat(order.totalTaxSet?.shopMoney?.amount || '0');
         const orderShipping = parseFloat(order.totalShippingPriceSet?.shopMoney?.amount || '0');
+        const orderDiscounts = parseFloat(order.totalDiscountsSet?.shopMoney?.amount || '0');
 
-        totalRevenue += orderTotal;
+        // Calculate refunds
+        let orderRefunds = parseFloat(order.totalRefundedSet?.shopMoney?.amount || '0');
+        if (order.refunds && order.refunds.length > 0) {
+            for (const refund of order.refunds) {
+                const refundAmount = parseFloat(refund.totalRefundedSet?.shopMoney?.amount || '0');
+                if (refundAmount > orderRefunds) {
+                    orderRefunds = refundAmount;
+                }
+            }
+        }
+
+        totalSubtotal += subtotal;
+        totalGross += gross;
         totalTax += orderTax;
         totalShipping += orderShipping;
+        totalDiscounts += orderDiscounts;
+        totalRefunds += orderRefunds;
 
         // Monthly tracking
         const monthKey = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}`;
@@ -223,7 +255,7 @@ export async function generateComprehensiveAnalysis(userId: string): Promise<Com
             monthlyMap.set(monthKey, { month: monthKey, revenue: 0, profit: 0, orders: 0 });
         }
         const monthly = monthlyMap.get(monthKey)!;
-        monthly.revenue += orderTotal;
+        monthly.revenue += subtotal;
         monthly.orders += 1;
 
         // Line items
@@ -233,10 +265,12 @@ export async function generateComprehensiveAnalysis(userId: string): Promise<Com
             const variantId = variantGid.replace('gid://shopify/ProductVariant/', '');
             const productGid = item.variant?.product?.id || '';
             const productId = productGid.replace('gid://shopify/Product/', '');
-            const lineTotal = parseFloat(item.originalTotalSet?.shopMoney?.amount || '0');
+            const lineTotal = parseFloat(item.discountedTotalSet?.shopMoney?.amount || item.originalTotalSet?.shopMoney?.amount || '0');
             const qty = item.quantity || 1;
 
-            if (!productMap.has(variantId) && variantId) {
+            if (!variantId) continue;
+
+            if (!productMap.has(variantId)) {
                 productMap.set(variantId, {
                     variant_id: variantId,
                     product_id: productId,
@@ -252,11 +286,9 @@ export async function generateComprehensiveAnalysis(userId: string): Promise<Com
                 });
             }
 
-            if (variantId && productMap.has(variantId)) {
-                const prod = productMap.get(variantId)!;
-                prod.revenue += lineTotal;
-                prod.quantity_sold += qty;
-            }
+            const prod = productMap.get(variantId)!;
+            prod.revenue += lineTotal;
+            prod.quantity_sold += qty;
         }
     }
 
@@ -276,25 +308,30 @@ export async function generateComprehensiveAnalysis(userId: string): Promise<Com
         const unitCost = costMap.get(p.variant_id) || 0;
         p.cogs = unitCost * p.quantity_sold;
         p.fees = p.revenue * platformFeeRate;
-        p.shipping = 0; // Per-product shipping not tracked
         p.profit = p.revenue - p.cogs - p.fees;
         p.profit_margin = p.revenue > 0 ? (p.profit / p.revenue) * 100 : 0;
         totalCogs += p.cogs;
         return p;
     });
 
-    // Calculate platform fees
-    const platformFees = totalRevenue * platformFeeRate;
+    // Platform fees based on subtotal
+    const platformFees = totalSubtotal * platformFeeRate;
 
-    // Total costs
-    const totalCosts = totalCogs + totalTax + totalShipping + platformFees;
-    const netProfit = totalRevenue - totalCosts;
-    const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+    // Total costs = COGS + Tax + Shipping + Fees + Refunds
+    // Note: Discounts are already subtracted from subtotal
+    const totalCosts = totalCogs + totalTax + totalShipping + platformFees + totalRefunds;
+
+    // Net revenue = Subtotal - Refunds
+    const netRevenue = totalSubtotal - totalRefunds;
+
+    // Net profit = Net Revenue - Costs (excluding refunds since already subtracted)
+    const netProfit = netRevenue - (totalCogs + totalTax + totalShipping + platformFees);
+    const profitMargin = netRevenue > 0 ? (netProfit / netRevenue) * 100 : 0;
 
     // Sort products
     const topProducts = [...products].sort((a, b) => b.revenue - a.revenue).slice(0, 5);
     const dangerProducts = [...products]
-        .filter(p => p.profit_margin < 10)
+        .filter(p => p.profit_margin < 10 || p.profit < 0)
         .sort((a, b) => a.profit - b.profit)
         .slice(0, 5);
 
@@ -310,9 +347,9 @@ export async function generateComprehensiveAnalysis(userId: string): Promise<Com
 
     // Cash flow
     const dailyBurnRate = netProfit < 0 ? Math.abs(netProfit / periodDays) : 0;
-    const averageDailyRevenue = totalRevenue / periodDays;
+    const averageDailyRevenue = netRevenue / periodDays;
     const averageDailyProfit = netProfit / periodDays;
-    const estimatedCash = totalRevenue * 0.3;
+    const estimatedCash = netRevenue * 0.3;
     const daysUntilZero = dailyBurnRate > 0 ? Math.round(estimatedCash / dailyBurnRate) : 999;
 
     // Opportunity cost
@@ -334,12 +371,30 @@ export async function generateComprehensiveAnalysis(userId: string): Promise<Com
     // Recommendations
     const recommendations: Recommendation[] = [];
 
+    if (totalRefunds > netRevenue * 0.05) {
+        recommendations.push({
+            type: 'warning',
+            title: 'Yüksek İade Oranı',
+            description: `İadeler cirunuzun %${((totalRefunds / totalSubtotal) * 100).toFixed(1)}'ini oluşturuyor.`,
+            impact: 'İade nedenlerini analiz edin, kalite veya açıklama sorunları olabilir.'
+        });
+    }
+
     if (dangerProducts.length > 0 && dangerProducts[0].profit < 0) {
         recommendations.push({
             type: 'warning',
             title: 'Zarar Eden Ürünü Değerlendirin',
             description: `"${dangerProducts[0].title}" ürünü zarar ettiriyor.`,
             impact: `Bu ürünü optimize etmek ${Math.abs(dangerProducts[0].profit).toFixed(0)} ${currency} kazandırabilir.`
+        });
+    }
+
+    if (totalCogs === 0) {
+        recommendations.push({
+            type: 'action',
+            title: 'Ürün Maliyetlerini Ekleyin',
+            description: 'Henüz ürün maliyeti tanımlanmamış. Gerçek kârlılık için maliyetleri girin.',
+            impact: 'Dashboard > Ürünler bölümünden maliyetleri ekleyin.'
         });
     }
 
@@ -352,37 +407,41 @@ export async function generateComprehensiveAnalysis(userId: string): Promise<Com
         });
     }
 
-    recommendations.push({
-        type: 'action',
-        title: 'Ürün Maliyetlerini Güncelleyin',
-        description: 'Daha doğru analiz için tüm ürünlerin maliyetlerini girin.',
-        impact: 'Gerçek kârlılığınızı görün.'
-    });
+    if (recommendations.length < 3) {
+        recommendations.push({
+            type: 'action',
+            title: 'Fiyatlandırmayı Gözden Geçirin',
+            description: 'Tüm gizli maliyetleri hesaba katarak fiyatlarınızı güncelleyin.',
+            impact: 'Doğru fiyatlandırma kârlılığın temelidir.'
+        });
+    }
 
     return {
         storeName,
         currency,
         dateRange: { start: startDate.toISOString(), end: endDate.toISOString() },
         overview: {
-            totalRevenue,
+            totalRevenue: netRevenue,
             totalOrders: orders.length,
-            avgOrderValue: orders.length > 0 ? totalRevenue / orders.length : 0,
+            avgOrderValue: orders.length > 0 ? netRevenue / orders.length : 0,
             totalProducts: products.length,
             periodDays
         },
         realProfit: {
-            grossRevenue: totalRevenue,
+            grossRevenue: totalSubtotal,
             totalCosts,
             netProfit,
             profitMargin,
             gapMessage
         },
         costBreakdown: {
-            revenue: totalRevenue,
+            revenue: totalSubtotal,
             cogs: totalCogs,
             tax: totalTax,
             shipping: totalShipping,
             platform_fees: platformFees,
+            refunds: totalRefunds,
+            discounts: totalDiscounts,
             total_costs: totalCosts,
             net_profit: netProfit
         },
@@ -401,6 +460,6 @@ export async function generateComprehensiveAnalysis(userId: string): Promise<Com
             worstProduct
         },
         recommendations,
-        hasEnoughData: orders.length >= 5 && totalRevenue > 0
+        hasEnoughData: orders.length >= 5 && totalSubtotal > 0
     };
 }

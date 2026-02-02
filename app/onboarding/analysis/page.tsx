@@ -217,6 +217,7 @@ function SlideHiddenCosts({ data }: { data: ComprehensiveAnalysis }) {
         { name: 'Vergiler (KDV)', value: costs.tax, color: 'bg-orange-500', pct: (costs.tax / total * 100) },
         { name: 'Platform Komisyonu', value: costs.platform_fees, color: 'bg-purple-500', pct: (costs.platform_fees / total * 100) },
         { name: 'Kargo Gideri', value: costs.shipping, color: 'bg-blue-500', pct: (costs.shipping / total * 100) },
+        { name: 'İadeler', value: (costs as any).refunds || 0, color: 'bg-pink-500', pct: (((costs as any).refunds || 0) / total * 100) },
     ].filter(i => i.value > 0);
 
     return (
