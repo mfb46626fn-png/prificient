@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
         const { access_token, shop_domain } = integration;
         const client = shopifyClient(shop_domain, access_token);
 
-        // 2. Fetch Orders (Last 1 Year)
+        // 2. Fetch Orders (ALL TIME - no date filter)
         // Use pagination with cursor for subsequent batches
         let params: any = { limit: 50 };
 
@@ -41,11 +41,9 @@ export async function POST(req: NextRequest) {
             // IF CURSOR EXISTS: ONLY PASS PAGE_INFO & LIMIT
             params.page_info = cursor;
         } else {
-            // FIRST BATCH: Apply filters - Last 1 year of data
+            // FIRST BATCH: Apply filters - ALL orders
             params.status = 'any';
-            const oneYearAgo = new Date();
-            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-            params.created_at_min = oneYearAgo.toISOString();
+            // No date filter - fetch all time data
         }
 
         const response = await client.get({ path: 'orders', query: params });

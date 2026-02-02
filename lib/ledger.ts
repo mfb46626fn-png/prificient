@@ -127,131 +127,150 @@ export class LedgerService {
 
         switch (event_type) {
             case 'OrderCreated':
-                // Örnek: payload = { total_price: "120.00", subtotal_price: "100.00", total_tax: "20.00", id: 12345 }
+                // === SINGLE TRANSACTION PER ORDER ===
+                // Captures: Revenue, Tax, Shipping, Platform Fees, COGS
+
                 const total = parseFloat(payload.total_price || '0')
                 const tax = parseFloat(payload.total_tax || '0')
                 const revenue = parseFloat(payload.subtotal_price || (total - tax).toString())
 
-                // Eğer tutar 0 ise kayda gerek yok (veya 0 TL'lik fiş kesilebilir)
+                // Parse shipping cost
+                const shippingCost = parseFloat(
+                    payload.total_shipping_price_set?.shop_money?.amount ||
+                    payload.shipping_lines?.reduce((sum: number, s: any) => sum + parseFloat(s.price || '0'), 0) ||
+                    '0'
+                )
+
+                // Estimate Shopify transaction fee (2.9% + $0.30 per transaction)
+                // This is an estimate - actual may vary by payment provider
+                const platformFee = (total * 0.029) + 0.30
+
+                // Skip zero-value orders
                 if (total === 0) return
 
-                // 1. Prepare Entries
+                // === BUILD ALL ENTRIES IN ONE TRANSACTION ===
                 const entries: LedgerEntryInput[] = []
 
-                // A. Kasa/Banka (Borç) - Total Tutar
-                entries.push({ account_code: '100', direction: 'DEBIT', amount: total })
+                // 1. DEBIT: Cash/Bank (100) - Total amount received
+                entries.push({
+                    account_code: '100',
+                    direction: 'DEBIT',
+                    amount: total,
+                    metadata: { order_id: String(payload.id) }
+                })
 
-                // B. KDV (Alacak) - Toplam Vergi
+                // 2. CREDIT: Tax Payable (200)
                 if (tax > 0) {
-                    entries.push({ account_code: '200', direction: 'CREDIT', amount: tax })
+                    entries.push({
+                        account_code: '200',
+                        direction: 'CREDIT',
+                        amount: tax,
+                        metadata: { type: 'sales_tax' }
+                    })
                 }
 
-                // C. Satışlar (Alacak) - Granular Line Items for Product Analysis
-                // We split the revenue per line item to enable "Product Profitability" calculation
-                if (payload.line_items && Array.isArray(payload.line_items)) {
+                // 3. CREDIT: Revenue (600) - Per line item for product analysis
+                if (payload.line_items && Array.isArray(payload.line_items) && payload.line_items.length > 0) {
                     payload.line_items.forEach((item: any) => {
-                        // Calculate item revenue share
-                        // Item Price * Qty - (Discount per item if any)
-                        // Simple approach: Price * Qty
-                        const itemRevenue = parseFloat(item.price) * (item.quantity || 1)
-                        // Note: Discount logic might be complex, MVP uses price * qty. 
-                        // If subtotal mismatch, we add a rounding correction entry later.
-
-                        // Metadata is CRITICAL for ProductAnalysis
-                        entries.push({
-                            account_code: '600',
-                            direction: 'CREDIT',
-                            amount: itemRevenue,
-                            metadata: {
-                                variant_id: String(item.variant_id),
-                                product_id: String(item.product_id),
-                                sku: item.sku,
-                                title: item.title,
-                                qty: item.quantity
-                            }
-                        })
+                        const itemRevenue = parseFloat(item.price || '0') * (item.quantity || 1)
+                        if (itemRevenue > 0) {
+                            entries.push({
+                                account_code: '600',
+                                direction: 'CREDIT',
+                                amount: itemRevenue,
+                                metadata: {
+                                    variant_id: String(item.variant_id || ''),
+                                    product_id: String(item.product_id || ''),
+                                    sku: item.sku || '',
+                                    title: item.title || 'Unknown Product',
+                                    qty: item.quantity || 1
+                                }
+                            })
+                        }
                     })
 
-                    // Correction for rounding diff between sum(items) and subtotal_price
-                    // (Discounts often apply to subtotal, affecting revenue)
-                    const calculatedRevenue = payload.line_items.reduce((sum: number, item: any) => sum + (parseFloat(item.price) * (item.quantity || 1)), 0)
-                    const diff = revenue - calculatedRevenue
-
-                    if (Math.abs(diff) > 0.01) {
-                        // Add correction entry (often discount)
+                    // Revenue correction for discounts
+                    const calculatedRevenue = payload.line_items.reduce(
+                        (sum: number, item: any) => sum + (parseFloat(item.price || '0') * (item.quantity || 1)),
+                        0
+                    )
+                    const revenueDiff = revenue - calculatedRevenue
+                    if (Math.abs(revenueDiff) > 0.01) {
                         entries.push({
                             account_code: '600',
-                            direction: diff > 0 ? 'CREDIT' : 'DEBIT', // Adjust revenue
-                            amount: Math.abs(diff),
-                            metadata: { type: 'rounding_or_discount_correction' }
+                            direction: revenueDiff > 0 ? 'CREDIT' : 'DEBIT',
+                            amount: Math.abs(revenueDiff),
+                            metadata: { type: 'discount_adjustment' }
                         })
                     }
                 } else {
-                    // Fallback if no line items
-                    entries.push({ account_code: '600', direction: 'CREDIT', amount: revenue })
+                    // Fallback: single revenue entry if no line items
+                    entries.push({
+                        account_code: '600',
+                        direction: 'CREDIT',
+                        amount: revenue,
+                        metadata: { type: 'bulk_revenue', order_id: String(payload.id) }
+                    })
                 }
 
-                await this.postTransaction(
-                    user_id,
-                    `Sipariş #${payload.id || payload.order_number}`,
-                    entries,
-                    event_id,
-                    supabase, // Pass client!
-                    transactionDate // Pass Date
-                )
+                // 4. DEBIT: Shipping Cost (750) as expense
+                if (shippingCost > 0) {
+                    entries.push({
+                        account_code: '750',
+                        direction: 'DEBIT',
+                        amount: shippingCost,
+                        metadata: { type: 'shipping_expense' }
+                    })
+                }
 
-                // 2. Maliyet Kaydı (COGS)
-                // History Scanner tarafından 'line_items' içine '__cost' enjekte edildiğini varsayıyoruz.
-                let totalCost = 0
+                // 5. DEBIT: Platform Fee (740) - Shopify transaction fee estimate
+                if (platformFee > 0) {
+                    entries.push({
+                        account_code: '740',
+                        direction: 'DEBIT',
+                        amount: platformFee,
+                        metadata: { type: 'shopify_transaction_fee', rate: '2.9% + $0.30' }
+                    })
+                }
+
+                // 6. DEBIT: COGS (621) + CREDIT: Inventory (153)
                 if (payload.line_items && Array.isArray(payload.line_items)) {
-                    totalCost = payload.line_items.reduce((sum: number, item: any) => {
-                        const unitCost = Number(item.__cost || item.cost_per_item || 0)
-                        return sum + (unitCost * (item.quantity || 1))
-                    }, 0)
-                }
-
-                if (totalCost > 0) {
-                    const costEntries: LedgerEntryInput[] = []
-
-                    // Granular Cost Entries
                     payload.line_items.forEach((item: any) => {
                         const unitCost = Number(item.__cost || item.cost_per_item || 0)
                         const lineCost = unitCost * (item.quantity || 1)
 
                         if (lineCost > 0) {
-                            // 621 Expense - Debit
-                            costEntries.push({
+                            // COGS expense
+                            entries.push({
                                 account_code: '621',
                                 direction: 'DEBIT',
                                 amount: lineCost,
                                 metadata: {
-                                    variant_id: String(item.variant_id),
-                                    product_id: String(item.product_id),
-                                    sku: item.sku,
-                                    title: item.title
+                                    variant_id: String(item.variant_id || ''),
+                                    product_id: String(item.product_id || ''),
+                                    sku: item.sku || '',
+                                    title: item.title || ''
                                 }
                             })
-                            // 153 Inventory - Credit (Asset decrease)
-                            // We lump this or split it. Splitting is fine.
-                            costEntries.push({
+                            // Inventory decrease
+                            entries.push({
                                 account_code: '153',
                                 direction: 'CREDIT',
                                 amount: lineCost
                             })
                         }
                     })
-
-                    if (costEntries.length > 0) {
-                        await this.postTransaction(
-                            user_id,
-                            `Maliyet Fişi: Sipariş #${payload.order_number}`,
-                            costEntries,
-                            event_id,
-                            supabase,
-                            transactionDate
-                        )
-                    }
                 }
+
+                // === SINGLE POST TRANSACTION ===
+                await this.postTransaction(
+                    user_id,
+                    `Sipariş #${payload.order_number || payload.id}`,
+                    entries,
+                    event_id,
+                    supabase,
+                    transactionDate
+                )
 
                 break
 

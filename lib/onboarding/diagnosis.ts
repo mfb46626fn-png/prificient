@@ -55,11 +55,6 @@ export interface DiagnosisReport {
 export async function generateDiagnosisReport(userId: string): Promise<DiagnosisReport> {
     const supabase = await createClient();
 
-    // Date Range: Last 1 Year (365 days)
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setFullYear(startDate.getFullYear() - 1);
-
     // Fetch user's currency from store_settings
     const { data: settings } = await supabase
         .from('store_settings')
@@ -69,7 +64,7 @@ export async function generateDiagnosisReport(userId: string): Promise<Diagnosis
 
     const currency = settings?.currency || 'TRY';
 
-    // --- 1. Fetch Aggregate Financials ---
+    // --- 1. Fetch ALL Ledger Entries (No Date Filter) ---
     const { data: entries } = await supabase
         .from('ledger_entries')
         .select(`
@@ -79,9 +74,22 @@ export async function generateDiagnosisReport(userId: string): Promise<Diagnosis
             account:ledger_accounts!inner(code, type),
             transaction:ledger_transactions!inner(transaction_date)
         `)
-        .eq('user_id', userId)
-        .gte('transaction.transaction_date', startDate.toISOString())
-        .lte('transaction.transaction_date', endDate.toISOString());
+        .eq('user_id', userId);
+
+    // Determine date range from actual data
+    let startDate = new Date();
+    let endDate = new Date();
+
+    if (entries && entries.length > 0) {
+        const dates = entries
+            .map((e: any) => new Date(e.transaction?.transaction_date))
+            .filter((d: Date) => !isNaN(d.getTime()));
+
+        if (dates.length > 0) {
+            startDate = new Date(Math.min(...dates.map((d: Date) => d.getTime())));
+            endDate = new Date(Math.max(...dates.map((d: Date) => d.getTime())));
+        }
+    }
 
     // Aggregate totals
     let totalRevenue = 0;
