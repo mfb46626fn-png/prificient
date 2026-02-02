@@ -94,7 +94,7 @@ export async function updateSession(request: NextRequest) {
 
         if (syncStatus !== 'completed') {
           // Redirect to sync page
-          return NextResponse.redirect(new URL('/onboarding/sync', request.url))
+          return NextResponse.redirect(new URL('/onboarding/analysis', request.url))
         }
       }
     }
