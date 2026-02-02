@@ -55,10 +55,10 @@ export interface DiagnosisReport {
 export async function generateDiagnosisReport(userId: string): Promise<DiagnosisReport> {
     const supabase = await createClient();
 
-    // Date Range: Last 30 Days
+    // Date Range: Last 1 Year (365 days)
     const endDate = new Date();
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 30);
+    startDate.setFullYear(startDate.getFullYear() - 1);
 
     // Fetch user's currency from store_settings
     const { data: settings } = await supabase

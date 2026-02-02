@@ -2,72 +2,92 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, AlertTriangle, TrendingDown, Skull, Target, ArrowRight, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, AlertTriangle, Target, ArrowRight, Loader2, Package, DollarSign, Percent, Clock } from 'lucide-react';
 import type { DiagnosisReport } from '@/lib/onboarding/diagnosis';
 
-// --- Slide Components ---
+// Helper function for currency formatting
+const createFormatter = (currency: string) => (n: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD', maximumFractionDigits: 0 }).format(n);
 
-function SlideRealityCheck({ data }: { data: DiagnosisReport }) {
-    const formatCurrency = (n: number) =>
-        new Intl.NumberFormat('tr-TR', { style: 'currency', currency: data.currency || 'TRY', maximumFractionDigits: 0 }).format(n);
+// --- Slide 1: Overview ---
+function SlideOverview({ data }: { data: DiagnosisReport }) {
+    const formatCurrency = createFormatter(data.currency);
+    const profitMargin = data.illusion.revenue > 0
+        ? ((data.illusion.realProfit / data.illusion.revenue) * 100).toFixed(1)
+        : '0';
 
     return (
-        <div className="flex flex-col items-center justify-center h-full px-6 text-center">
+        <div className="flex flex-col items-center justify-center h-full px-6">
             <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2 }}
-                className="mb-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center mb-8"
             >
-                <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-4 animate-pulse" />
-                <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Gerçeklik Kontrolü</h2>
-                <p className="text-gray-400 text-sm">Son 30 günde {data.illusion.salesCount} satış yaptınız.</p>
+                <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">Yıllık Finansal Özet</h2>
+                <p className="text-gray-500">Son 365 günde {data.illusion.salesCount} satış analiz edildi</p>
             </motion.div>
 
-            <div className="flex flex-col md:flex-row gap-8 md:gap-16 items-center justify-center w-full max-w-2xl">
-                {/* Revenue */}
+            <div className="w-full max-w-xl grid grid-cols-2 gap-4">
+                {/* Revenue Card */}
                 <motion.div
-                    initial={{ opacity: 0, x: -50 }}
-                    animate={{ opacity: 0.5, x: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="text-center"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100"
                 >
-                    <p className="text-gray-500 text-sm uppercase tracking-wider mb-2">Ciro</p>
-                    <p className="text-4xl md:text-5xl font-bold text-gray-500">
+                    <TrendingUp className="w-6 h-6 text-blue-600 mb-3" />
+                    <p className="text-xs text-blue-600 font-bold uppercase tracking-wide mb-1">Toplam Ciro</p>
+                    <p className="text-2xl md:text-3xl font-black text-gray-900">
                         {formatCurrency(data.illusion.revenue)}
                     </p>
                 </motion.div>
 
-                {/* Divider */}
+                {/* Profit Card */}
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.8 }}
-                    className="text-4xl text-gray-600"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className={`rounded-2xl p-6 border ${data.illusion.realProfit >= 0
+                        ? 'bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-100'
+                        : 'bg-gradient-to-br from-red-50 to-rose-50 border-red-100'}`}
                 >
-                    →
-                </motion.div>
-
-                {/* Real Profit */}
-                <motion.div
-                    initial={{ opacity: 0, x: 50, scale: 0.8 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    transition={{ delay: 1.2, type: 'spring', stiffness: 200 }}
-                    className="text-center"
-                >
-                    <p className="text-gray-500 text-sm uppercase tracking-wider mb-2">Gerçek Kâr</p>
-                    <p className={`text-5xl md:text-6xl font-black ${data.illusion.realProfit < 0 ? 'text-red-500' : 'text-green-500'}`}>
+                    {data.illusion.realProfit >= 0
+                        ? <TrendingUp className="w-6 h-6 text-emerald-600 mb-3" />
+                        : <TrendingDown className="w-6 h-6 text-red-600 mb-3" />}
+                    <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${data.illusion.realProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                        Net Kâr
+                    </p>
+                    <p className={`text-2xl md:text-3xl font-black ${data.illusion.realProfit >= 0 ? 'text-gray-900' : 'text-red-600'}`}>
                         {formatCurrency(data.illusion.realProfit)}
                     </p>
+                </motion.div>
+
+                {/* Profit Margin */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                    className="bg-white rounded-2xl p-6 border border-gray-200 col-span-2"
+                >
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Kâr Marjı</p>
+                            <p className={`text-3xl font-black ${Number(profitMargin) >= 10 ? 'text-emerald-600' : Number(profitMargin) >= 0 ? 'text-amber-600' : 'text-red-600'}`}>
+                                %{profitMargin}
+                            </p>
+                        </div>
+                        <Percent className="w-10 h-10 text-gray-200" />
+                    </div>
                 </motion.div>
             </div>
 
             <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.8 }}
-                className="mt-12 text-lg md:text-xl text-gray-300 max-w-md"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 }}
+                className="mt-8 text-center text-gray-600 max-w-md"
             >
                 {data.illusion.gapMessage}
             </motion.p>
@@ -75,298 +95,250 @@ function SlideRealityCheck({ data }: { data: DiagnosisReport }) {
     );
 }
 
-function SlideTraitor({ data }: { data: DiagnosisReport }) {
-    const formatCurrency = (n: number) =>
-        new Intl.NumberFormat('tr-TR', { style: 'currency', currency: data.currency || 'TRY', maximumFractionDigits: 0 }).format(n);
-
+// --- Slide 2: Problem Product ---
+function SlideProblemProduct({ data }: { data: DiagnosisReport }) {
+    const formatCurrency = createFormatter(data.currency);
     if (!data.toxicChampion) return null;
 
     return (
-        <div className="flex flex-col items-center justify-center h-full px-6 text-center">
+        <div className="flex flex-col items-center justify-center h-full px-6">
             <motion.div
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 150 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center mb-8"
             >
-                <Skull className="w-20 h-20 text-red-600 mx-auto mb-4" />
-                <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Haini Tanı</h2>
-                <p className="text-gray-400 text-sm mb-8">En çok satan ürününüz = En büyük düşmanınız</p>
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <AlertTriangle className="w-8 h-8 text-amber-600" />
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">Dikkat Gerektiren Ürün</h2>
+                <p className="text-gray-500">Yüksek satış, düşük karlılık</p>
             </motion.div>
 
-            {/* Toxic Product Card */}
             <motion.div
-                initial={{ opacity: 0, y: 50, rotateX: 45 }}
-                animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                transition={{ delay: 0.4, type: 'spring' }}
-                className="bg-gradient-to-br from-red-950/50 to-gray-900 border border-red-800/50 rounded-2xl p-8 max-w-sm w-full shadow-2xl shadow-red-900/20"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3 }}
+                className="w-full max-w-md bg-white rounded-3xl border-2 border-amber-200 shadow-xl shadow-amber-100/50 p-6"
             >
-                <div className="w-16 h-16 bg-red-900/30 rounded-xl mx-auto mb-4 flex items-center justify-center">
-                    <TrendingDown className="w-8 h-8 text-red-500" />
+                <div className="flex items-center gap-4 mb-6">
+                    <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
+                        <Package className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="font-bold text-gray-900 text-lg leading-tight">{data.toxicChampion.productName}</h3>
+                        <p className="text-sm text-gray-500">{data.toxicChampion.salesVolume} adet satıldı</p>
+                    </div>
                 </div>
 
-                <h3 className="text-xl font-bold text-white mb-1 truncate">
-                    {data.toxicChampion.productName}
-                </h3>
-                <p className="text-gray-500 text-sm mb-6">{data.toxicChampion.salesVolume} adet satıldı</p>
-
-                <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 1, type: 'spring', stiffness: 200 }}
-                    className="bg-red-950/70 rounded-xl p-4"
-                >
-                    <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Net Zarar</p>
-                    <p className="text-4xl font-black text-red-500">
-                        {formatCurrency(data.toxicChampion.netLoss)}
-                    </p>
-                </motion.div>
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-gray-50 rounded-xl p-4">
+                        <p className="text-xs text-gray-500 font-medium mb-1">Ciro</p>
+                        <p className="text-lg font-bold text-gray-900">{formatCurrency(data.toxicChampion.grossRevenue)}</p>
+                    </div>
+                    <div className="bg-red-50 rounded-xl p-4">
+                        <p className="text-xs text-red-600 font-medium mb-1">Net Zarar</p>
+                        <p className="text-lg font-bold text-red-600">{formatCurrency(data.toxicChampion.netLoss)}</p>
+                    </div>
+                </div>
             </motion.div>
 
             <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 1.5 }}
-                className="mt-8 text-sm text-gray-500 max-w-xs"
+                transition={{ delay: 0.8 }}
+                className="mt-6 text-center text-gray-500 text-sm max-w-sm"
             >
-                Shopify size bu ürünün "Best Seller" olduğunu söylüyor.<br />
-                <span className="text-red-400">Prificient ise "Nakit Yakıcı" olduğunu söylüyor.</span>
+                Bu ürün çok satıyor ama her satışta zarar yaratıyor.
             </motion.p>
         </div>
     );
 }
 
-function SlideBreakdown({ data }: { data: DiagnosisReport }) {
-    const formatCurrency = (n: number) =>
-        new Intl.NumberFormat('tr-TR', { style: 'currency', currency: data.currency || 'TRY', maximumFractionDigits: 0 }).format(n);
-
+// --- Slide 3: Cost Breakdown ---
+function SlideCostBreakdown({ data }: { data: DiagnosisReport }) {
+    const formatCurrency = createFormatter(data.currency);
     if (!data.lossAnatomy) return null;
 
     const items = [
-        { label: 'Satış Geliri', value: data.lossAnatomy.grossRevenue, positive: true },
-        { label: 'Ürün Maliyeti (COGS)', value: -data.lossAnatomy.cogs, positive: false },
-        { label: 'Reklam Gideri (Meta)', value: -data.lossAnatomy.adSpend, positive: false },
-        { label: 'İade Maliyeti', value: -data.lossAnatomy.refundCost, positive: false },
-        { label: 'Platform Komisyonları', value: -data.lossAnatomy.platformFees, positive: false },
-        { label: 'Kargo Farkı', value: -data.lossAnatomy.shippingGap, positive: false },
+        { label: 'Satış Geliri', value: data.lossAnatomy.grossRevenue, positive: true, icon: DollarSign },
+        { label: 'Ürün Maliyeti', value: -data.lossAnatomy.cogs, positive: false, icon: Package },
+        { label: 'Reklam Gideri', value: -data.lossAnatomy.adSpend, positive: false, icon: TrendingUp },
+        { label: 'İade Maliyeti', value: -data.lossAnatomy.refundCost, positive: false, icon: AlertTriangle },
+        { label: 'Platform Komisyonu', value: -data.lossAnatomy.platformFees, positive: false, icon: Percent },
     ].filter(i => i.value !== 0);
 
     return (
         <div className="flex flex-col items-center justify-center h-full px-6">
             <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 className="text-center mb-8"
             >
-                <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Zararın Otopsisi</h2>
-                <p className="text-gray-400 text-sm">{data.toxicChampion?.productName}</p>
+                <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">Maliyet Anatomisi</h2>
+                <p className="text-gray-500">Paranız nereye gidiyor?</p>
             </motion.div>
 
-            {/* Receipt */}
-            <div className="bg-[#f5f5f0] rounded-lg p-6 max-w-sm w-full font-mono text-sm text-gray-800 shadow-2xl">
-                {/* Zigzag Top */}
-                <div className="h-4 -mt-6 -mx-6 bg-[#111] mb-4" style={{
-                    clipPath: 'polygon(0% 100%, 5% 0%, 10% 100%, 15% 0%, 20% 100%, 25% 0%, 30% 100%, 35% 0%, 40% 100%, 45% 0%, 50% 100%, 55% 0%, 60% 100%, 65% 0%, 70% 100%, 75% 0%, 80% 100%, 85% 0%, 90% 100%, 95% 0%, 100% 100%)'
-                }} />
-
-                <div className="text-center mb-4 pb-2 border-b border-dashed border-gray-400">
-                    <p className="font-bold text-xs tracking-widest">FİNANSAL OTOPSİ RAPORU</p>
-                </div>
-
-                <div className="space-y-2">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="w-full max-w-md bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden"
+            >
+                <div className="divide-y divide-gray-100">
                     {items.map((item, i) => (
                         <motion.div
                             key={item.label}
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.3 + i * 0.2 }}
-                            className="flex justify-between items-center"
+                            transition={{ delay: 0.3 + i * 0.1 }}
+                            className="flex items-center justify-between p-4"
                         >
-                            <span className="text-gray-600">{item.label}</span>
-                            <span className={item.positive ? 'text-green-700 font-bold' : 'text-red-600 font-bold'}>
+                            <div className="flex items-center gap-3">
+                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${item.positive ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-500'}`}>
+                                    <item.icon className="w-4 h-4" />
+                                </div>
+                                <span className="text-gray-700 font-medium">{item.label}</span>
+                            </div>
+                            <span className={`font-bold ${item.positive ? 'text-emerald-600' : 'text-gray-900'}`}>
                                 {item.positive ? '+' : ''}{formatCurrency(item.value)}
                             </span>
                         </motion.div>
                     ))}
                 </div>
 
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 + items.length * 0.2 }}
-                    className="border-t-2 border-double border-gray-800 mt-4 pt-4"
-                >
-                    <div className="flex justify-between items-center">
-                        <span className="font-bold text-lg">TOPLAM</span>
-                        <span className={`font-black text-xl ${data.lossAnatomy.netResult < 0 ? 'text-red-600' : 'text-green-700'}`}>
+                {/* Total */}
+                <div className={`p-4 ${data.lossAnatomy.netResult >= 0 ? 'bg-emerald-50' : 'bg-red-50'}`}>
+                    <div className="flex items-center justify-between">
+                        <span className="font-bold text-gray-900">Net Sonuç</span>
+                        <span className={`text-xl font-black ${data.lossAnatomy.netResult >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                             {formatCurrency(data.lossAnatomy.netResult)}
                         </span>
                     </div>
-                </motion.div>
-
-                {/* Zigzag Bottom */}
-                <div className="h-4 -mb-6 -mx-6 mt-4 bg-[#111]" style={{
-                    clipPath: 'polygon(0% 0%, 5% 100%, 10% 0%, 15% 100%, 20% 0%, 25% 100%, 30% 0%, 35% 100%, 40% 0%, 45% 100%, 50% 0%, 55% 100%, 60% 0%, 65% 100%, 70% 0%, 75% 100%, 80% 0%, 85% 100%, 90% 0%, 95% 100%, 100% 0%)'
-                }} />
-            </div>
+                </div>
+            </motion.div>
         </div>
     );
 }
 
-function SlideOpportunityCost({ data }: { data: DiagnosisReport }) {
+// --- Slide 4: Opportunity Cost ---
+function SlideOpportunity({ data }: { data: DiagnosisReport }) {
     if (!data.opportunityCost) return null;
 
     return (
         <div className="flex flex-col items-center justify-center h-full px-6 text-center">
             <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
             >
-                <Target className="w-16 h-16 text-amber-500 mx-auto mb-4" />
-                <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Fırsat Maliyeti</h2>
-                <p className="text-gray-400 text-sm mb-8">Boşuna harcanan emek</p>
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Target className="w-8 h-8 text-blue-600" />
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">Fırsat Maliyeti</h2>
+                <p className="text-gray-500 mb-8">Kaçan potansiyel kâr</p>
             </motion.div>
 
             <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="max-w-md"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4, type: 'spring' }}
+                className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl p-8 text-white max-w-sm shadow-2xl shadow-blue-200"
             >
-                <p className="text-xl md:text-2xl text-gray-300 leading-relaxed">
-                    Eğer bu <span className="text-red-400 font-bold">&quot;Çok Satan&quot;</span> ürünü hiç satmasaydınız,
-                </p>
-                <motion.p
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 1.2, type: 'spring', stiffness: 150 }}
-                    className="text-5xl md:text-7xl font-black text-amber-400 my-6"
-                >
-                    %{data.opportunityCost.percentageGain}
-                </motion.p>
-                <p className="text-xl md:text-2xl text-gray-300">
-                    daha yüksek kâr elde edecektiniz.
-                </p>
+                <p className="text-blue-100 mb-2">Bu ürünü satmasaydınız</p>
+                <p className="text-6xl font-black mb-2">%{data.opportunityCost.percentageGain}</p>
+                <p className="text-blue-100">daha yüksek kâr elde edecektiniz</p>
             </motion.div>
 
             <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 1.8 }}
-                className="mt-12 text-gray-500 text-sm max-w-xs"
+                transition={{ delay: 0.8 }}
+                className="mt-8 text-gray-500 text-sm max-w-sm"
             >
-                Zarar etmek kötüdür. Ama &quot;boşu boşuna çalışmış olmak&quot; daha acı verir.
+                Her satış otomatik kâr demek değil. Doğru ürün karmasını bulmak kritik.
             </motion.p>
         </div>
     );
 }
 
-function SlideCliff({ data }: { data: DiagnosisReport }) {
+// --- Slide 5: Cash Flow Projection ---
+function SlideCashFlow({ data }: { data: DiagnosisReport }) {
+    const formatCurrency = createFormatter(data.currency);
+    const isHealthy = data.burnProjection.dailyBurnRate === 0 || data.burnProjection.daysUntilZero > 180;
+
     return (
         <div className="flex flex-col items-center justify-center h-full px-6 text-center">
             <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
             >
-                <motion.div
-                    animate={{ y: [0, -5, 0] }}
-                    transition={{ repeat: Infinity, duration: 2 }}
-                    className="w-20 h-20 bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6"
-                >
-                    <span className="text-4xl">⚠️</span>
-                </motion.div>
-                <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Uçuruma Koşuyorsunuz</h2>
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isHealthy ? 'bg-emerald-100' : 'bg-amber-100'}`}>
+                    <Clock className={`w-8 h-8 ${isHealthy ? 'text-emerald-600' : 'text-amber-600'}`} />
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">Nakit Akışı</h2>
+                <p className="text-gray-500 mb-8">Finansal sürdürülebilirlik analizi</p>
             </motion.div>
 
-            {data.burnProjection.dailyBurnRate > 0 && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="bg-red-950/30 border border-red-800/30 rounded-2xl p-8 max-w-sm w-full mt-8"
-                >
-                    <p className="text-gray-400 text-sm mb-2">Tahmini Nakit Açığı</p>
-                    <p className="text-5xl font-black text-red-500">{data.burnProjection.daysUntilZero} gün</p>
-                    <p className="text-gray-500 text-sm mt-2">
-                        Günlük kayıp: ₺{data.burnProjection.dailyBurnRate.toLocaleString('tr-TR')}
-                    </p>
-                </motion.div>
-            )}
-
             <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.2 }}
-                className="mt-10 max-w-md"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="w-full max-w-sm space-y-4"
             >
-                <p className="text-lg text-gray-300 mb-6">
-                    Bu kaderiniz değil. Sadece <span className="text-green-400 font-bold">3 küçük karar</span> ile bu tabloyu pozitife çevirebilirsiniz.
-                </p>
-
-                {/* Blurred Solutions Teaser */}
-                <div className="bg-gray-800/50 rounded-xl p-4 blur-sm select-none">
-                    <p className="text-gray-400 text-sm">1. Fiyat optimizasyonu</p>
-                    <p className="text-gray-400 text-sm">2. Reklam bütçesi revizyonu</p>
-                    <p className="text-gray-400 text-sm">3. İade politikası güncellemesi</p>
+                <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                    <p className="text-xs text-gray-500 font-bold uppercase tracking-wide mb-2">Günlük Nakit Değişimi</p>
+                    <p className={`text-3xl font-black ${data.burnProjection.dailyBurnRate > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                        {data.burnProjection.dailyBurnRate > 0 ? '-' : '+'}{formatCurrency(data.burnProjection.dailyBurnRate)}
+                    </p>
                 </div>
-                <p className="text-gray-600 text-xs mt-2">Detaylar Dashboard&apos;da</p>
+
+                {data.burnProjection.dailyBurnRate > 0 && (
+                    <div className={`rounded-2xl p-6 ${data.burnProjection.daysUntilZero < 90 ? 'bg-red-50 border-2 border-red-200' : 'bg-amber-50 border border-amber-200'}`}>
+                        <p className="text-xs text-gray-600 font-bold uppercase tracking-wide mb-2">Tahmini Nakit Süresi</p>
+                        <p className={`text-4xl font-black ${data.burnProjection.daysUntilZero < 90 ? 'text-red-600' : 'text-amber-600'}`}>
+                            {data.burnProjection.daysUntilZero} Gün
+                        </p>
+                    </div>
+                )}
+
+                {isHealthy && (
+                    <div className="bg-emerald-50 rounded-2xl p-6 border border-emerald-200">
+                        <p className="text-emerald-700 font-medium">✓ Nakit akışınız sağlıklı görünüyor</p>
+                    </div>
+                )}
             </motion.div>
         </div>
     );
 }
 
+// --- Slide 6: CTA ---
 function SlideCTA() {
     const router = useRouter();
 
     return (
         <div className="flex flex-col items-center justify-center h-full px-6 text-center">
             <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
             >
-                <div className="w-24 h-24 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg shadow-emerald-500/30">
-                    <span className="text-5xl">🚀</span>
+                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-blue-200">
+                    <TrendingUp className="w-10 h-10 text-white" />
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Kontrolü Geri Alın</h2>
-                <p className="text-gray-400 max-w-md mb-10">
-                    Artık problemi biliyorsunuz. Şimdi çözümü inşa etme zamanı.
+                <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">Analiziniz Hazır</h2>
+                <p className="text-gray-500 max-w-sm mb-10">
+                    Dashboard'unuzda detaylı raporlar, ürün bazlı analizler ve AI destekli öneriler sizi bekliyor.
                 </p>
             </motion.div>
 
             <motion.button
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                transition={{ delay: 0.3 }}
                 onClick={() => router.push('/dashboard')}
-                className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-lg px-10 py-4 rounded-xl shadow-lg shadow-emerald-500/30 flex items-center gap-3"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-5 px-12 rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-xl shadow-blue-200 flex items-center gap-3 text-lg"
             >
-                Karar Masasına Git
+                Dashboard'a Git
                 <ArrowRight className="w-5 h-5" />
             </motion.button>
-        </div>
-    );
-}
-
-// --- Loading Screen ---
-function LoadingScreen() {
-    return (
-        <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center">
-            <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
-                className="mb-6"
-            >
-                <div className="w-20 h-20 border-4 border-gray-800 border-t-cyan-500 rounded-full" />
-            </motion.div>
-            <motion.p
-                animate={{ opacity: [0.5, 1, 0.5] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-                className="text-cyan-400 text-lg font-medium"
-            >
-                Finansal Röntgen Çekiliyor...
-            </motion.p>
-            <p className="text-gray-600 text-sm mt-2">Verileriniz analiz ediliyor</p>
         </div>
     );
 }
@@ -374,96 +346,68 @@ function LoadingScreen() {
 // --- Main Page ---
 export default function DiagnosisPage() {
     const router = useRouter();
-    const [loading, setLoading] = useState(true);
     const [report, setReport] = useState<DiagnosisReport | null>(null);
+    const [loading, setLoading] = useState(true);
     const [currentSlide, setCurrentSlide] = useState(0);
-    const [error, setError] = useState<string | null>(null);
 
-    // Fetch diagnosis report
     useEffect(() => {
-        async function fetchReport() {
+        const fetchReport = async () => {
             try {
                 const res = await fetch('/api/onboarding/diagnosis');
                 const data = await res.json();
 
-                if (!res.ok) {
-                    throw new Error(data.error || 'Diagnosis fetch failed');
-                }
-
                 if (!data.hasEnoughData) {
-                    // Not enough data, skip to dashboard
-                    router.push('/dashboard');
+                    router.replace('/dashboard');
                     return;
                 }
 
                 setReport(data);
-            } catch (err: any) {
-                console.error('Diagnosis error:', err);
-                setError(err.message);
-                // On error, redirect to dashboard after delay
-                setTimeout(() => router.push('/dashboard'), 2000);
+            } catch (error) {
+                console.error('Failed to fetch diagnosis:', error);
+                router.replace('/dashboard');
             } finally {
                 setLoading(false);
             }
-        }
+        };
 
         fetchReport();
     }, [router]);
 
-    // Build slides array
     const slides = report ? [
-        <SlideRealityCheck key="reality" data={report} />,
-        report.toxicChampion && <SlideTraitor key="traitor" data={report} />,
-        report.lossAnatomy && <SlideBreakdown key="breakdown" data={report} />,
-        report.opportunityCost && <SlideOpportunityCost key="opportunity" data={report} />,
-        <SlideCliff key="cliff" data={report} />,
-        <SlideCTA key="cta" />,
+        <SlideOverview key="overview" data={report} />,
+        report.toxicChampion && <SlideProblemProduct key="problem" data={report} />,
+        report.lossAnatomy && <SlideCostBreakdown key="breakdown" data={report} />,
+        report.opportunityCost && <SlideOpportunity key="opportunity" data={report} />,
+        <SlideCashFlow key="cashflow" data={report} />,
+        <SlideCTA key="cta" />
     ].filter(Boolean) : [];
 
-    const totalSlides = slides.length;
-
-    const goNext = useCallback(() => {
-        if (currentSlide < totalSlides - 1) {
-            setCurrentSlide(prev => prev + 1);
+    const goTo = useCallback((direction: 'next' | 'prev') => {
+        if (direction === 'next' && currentSlide < slides.length - 1) {
+            setCurrentSlide(c => c + 1);
+        } else if (direction === 'prev' && currentSlide > 0) {
+            setCurrentSlide(c => c - 1);
         }
-    }, [currentSlide, totalSlides]);
-
-    const goPrev = useCallback(() => {
-        if (currentSlide > 0) {
-            setCurrentSlide(prev => prev - 1);
-        }
-    }, [currentSlide]);
+    }, [currentSlide, slides.length]);
 
     // Keyboard navigation
     useEffect(() => {
-        const handleKey = (e: KeyboardEvent) => {
-            if (e.key === 'ArrowRight' || e.key === ' ') goNext();
-            if (e.key === 'ArrowLeft') goPrev();
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') goTo('next');
+            if (e.key === 'ArrowLeft') goTo('prev');
         };
-        window.addEventListener('keydown', handleKey);
-        return () => window.removeEventListener('keydown', handleKey);
-    }, [goNext, goPrev]);
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [goTo]);
 
-    // Touch swipe
-    const [touchStart, setTouchStart] = useState<number | null>(null);
-    const handleTouchStart = (e: React.TouchEvent) => setTouchStart(e.touches[0].clientX);
-    const handleTouchEnd = (e: React.TouchEvent) => {
-        if (touchStart === null) return;
-        const diff = touchStart - e.changedTouches[0].clientX;
-        if (diff > 50) goNext();
-        if (diff < -50) goPrev();
-        setTouchStart(null);
-    };
-
-    if (loading) return <LoadingScreen />;
-
-    if (error) {
+    if (loading) {
         return (
-            <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center text-center px-6">
-                <AlertTriangle className="w-16 h-16 text-yellow-500 mb-4" />
-                <p className="text-white text-lg mb-2">Bir sorun oluştu</p>
-                <p className="text-gray-500 text-sm">{error}</p>
-                <p className="text-gray-600 text-xs mt-4">Dashboard&apos;a yönlendiriliyorsunuz...</p>
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center">
+                <div className="text-center">
+                    <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">Finansal Analiz Yapılıyor</h2>
+                    <p className="text-gray-500">1 yıllık verileriniz işleniyor...</p>
+                </div>
             </div>
         );
     }
@@ -471,13 +415,27 @@ export default function DiagnosisPage() {
     if (!report) return null;
 
     return (
-        <div
-            className="min-h-screen bg-[#0a0a0a] relative overflow-hidden"
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-        >
-            {/* Background Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent pointer-events-none" />
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 relative overflow-hidden">
+            {/* Header */}
+            <div className="absolute top-0 left-0 right-0 z-50">
+                <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <Image src="/logo.png" alt="Prificient" width={32} height={32} className="rounded-lg" />
+                        <span className="font-bold text-gray-900">Prificient</span>
+                    </div>
+
+                    {/* Progress dots */}
+                    <div className="flex items-center gap-2">
+                        {slides.map((_, i) => (
+                            <button
+                                key={i}
+                                onClick={() => setCurrentSlide(i)}
+                                className={`w-2 h-2 rounded-full transition-all ${i === currentSlide ? 'bg-blue-600 w-6' : 'bg-gray-300 hover:bg-gray-400'}`}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
 
             {/* Slide Content */}
             <AnimatePresence mode="wait">
@@ -487,55 +445,36 @@ export default function DiagnosisPage() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -50 }}
                     transition={{ duration: 0.3 }}
-                    className="min-h-screen flex items-center justify-center"
+                    className="min-h-screen pt-20 pb-24"
                 >
                     {slides[currentSlide]}
                 </motion.div>
             </AnimatePresence>
 
-            {/* Progress Dots */}
-            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-50">
-                {slides.map((_, i) => (
+            {/* Navigation */}
+            <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white to-transparent">
+                <div className="max-w-md mx-auto flex items-center justify-between">
                     <button
-                        key={i}
-                        onClick={() => setCurrentSlide(i)}
-                        className={`w-2 h-2 rounded-full transition-all ${i === currentSlide
-                            ? 'bg-white w-6'
-                            : 'bg-gray-600 hover:bg-gray-500'
-                            }`}
-                    />
-                ))}
+                        onClick={() => goTo('prev')}
+                        disabled={currentSlide === 0}
+                        className="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors shadow-sm"
+                    >
+                        <ChevronLeft className="w-5 h-5" />
+                    </button>
+
+                    <span className="text-sm text-gray-400 font-medium">
+                        {currentSlide + 1} / {slides.length}
+                    </span>
+
+                    <button
+                        onClick={() => goTo('next')}
+                        disabled={currentSlide === slides.length - 1}
+                        className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200"
+                    >
+                        <ChevronRight className="w-5 h-5" />
+                    </button>
+                </div>
             </div>
-
-            {/* Navigation Arrows */}
-            {currentSlide > 0 && (
-                <button
-                    onClick={goPrev}
-                    className="fixed left-4 top-1/2 -translate-y-1/2 p-3 text-gray-500 hover:text-white transition-colors z-50"
-                >
-                    <ChevronLeft className="w-8 h-8" />
-                </button>
-            )}
-
-            {currentSlide < totalSlides - 1 && (
-                <button
-                    onClick={goNext}
-                    className="fixed right-4 top-1/2 -translate-y-1/2 p-3 text-gray-500 hover:text-white transition-colors z-50"
-                >
-                    <ChevronRight className="w-8 h-8" />
-                </button>
-            )}
-
-            {/* Next Button (Mobile Friendly) */}
-            {currentSlide < totalSlides - 1 && (
-                <button
-                    onClick={goNext}
-                    className="fixed bottom-20 right-6 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-full flex items-center gap-2 transition-colors z-50 text-sm"
-                >
-                    Sonraki Gerçek
-                    <ChevronRight className="w-4 h-4" />
-                </button>
-            )}
         </div>
     );
 }

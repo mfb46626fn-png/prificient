@@ -33,25 +33,19 @@ export async function POST(req: NextRequest) {
         const { access_token, shop_domain } = integration;
         const client = shopifyClient(shop_domain, access_token);
 
-        // 2. Fetch Orders (1 Day Chunk or Page)
-        // Optimization: Reduce limit to 50 to process faster and avoid timeouts
-        // 2. Fetch Orders (1 Day Chunk or Page)
-        // Optimization: Reduce limit to 50 to process faster and avoid timeouts
-        // 2. Fetch Orders (1 Day Chunk or Page)
-        // Optimization: Reduce limit to 50 to process faster and avoid timeouts
+        // 2. Fetch Orders (Last 1 Year)
+        // Use pagination with cursor for subsequent batches
         let params: any = { limit: 50 };
 
         if (cursor) {
             // IF CURSOR EXISTS: ONLY PASS PAGE_INFO & LIMIT
             params.page_info = cursor;
         } else {
-            // FIRST BATCH: Apply filters
+            // FIRST BATCH: Apply filters - Last 1 year of data
             params.status = 'any';
-            // Align with Init Route (which uses no date filter currently), 
-            // OR enforce a reasonable date like 2023-01-01.
-            // But if user has older orders, they expect them.
-            // Let's stick to 2023-01-01 for now as per previous plan, but ensure it's not passed with cursor.
-            params.created_at_min = '2023-01-01T00:00:00Z';
+            const oneYearAgo = new Date();
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+            params.created_at_min = oneYearAgo.toISOString();
         }
 
         const response = await client.get({ path: 'orders', query: params });

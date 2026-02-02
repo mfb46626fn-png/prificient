@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Terminal } from 'lucide-react';
+import Image from 'next/image';
+import { CheckCircle2, Loader2, AlertTriangle, ArrowRight, ShoppingBag, TrendingUp, Package } from 'lucide-react';
 
 interface InitResponse {
     success: boolean;
@@ -10,22 +11,17 @@ interface InitResponse {
     status: string;
 }
 
-interface BatchResponse {
-    processed: number;
-    next_cursor: string | null;
-}
-
 export default function SyncPage() {
     const router = useRouter();
     const [progress, setProgress] = useState(0);
-    const [status, setStatus] = useState<'optimizing' | 'syncing' | 'finishing' | 'completed' | 'failed_auth'>('optimizing');
+    const [status, setStatus] = useState<'initializing' | 'syncing' | 'finishing' | 'completed' | 'failed_auth'>('initializing');
     const [logs, setLogs] = useState<string[]>(['Sistem başlatılıyor...']);
-    const [stats, setStats] = useState({ processed: 0, total: 0, revenue: 0, currency: 'TRY' });
+    const [stats, setStats] = useState({ processed: 0, total: 0, revenue: 0, currency: 'USD' });
     const [topProducts, setTopProducts] = useState<Record<string, number>>({});
     const isRunning = useRef(false);
 
     const addLog = (msg: string) => {
-        setLogs(prev => [msg, ...prev].slice(0, 100));
+        setLogs(prev => [msg, ...prev].slice(0, 50));
     };
 
     useEffect(() => {
@@ -36,10 +32,8 @@ export default function SyncPage() {
 
     const startSyncEngine = async () => {
         try {
-            // Step 1: Init & Reset
-            addLog('Veritabanı temizleniyor ve bağlantı kontrol ediliyor...');
+            addLog('Shopify bağlantısı kontrol ediliyor...');
 
-            // Call Init
             const initRes = await fetch('/api/sync/init', { method: 'POST' });
             if (!initRes.ok) {
                 const errData = await initRes.json();
@@ -50,13 +44,12 @@ export default function SyncPage() {
             const total = initData.totalOrders || 0;
             setStats(prev => ({ ...prev, total }));
             setStatus('syncing');
-            addLog(`Geçmiş ${total} sipariş tespit edildi (2023'ten bugüne).`);
+            addLog(`Son 1 yıldaki ${total} sipariş tespit edildi.`);
 
-            // Step 2: Batch Loop
             let cursor = null;
             let processedCount = 0;
             let totalRevenue = 0;
-            let currentCurrency = 'TRY';
+            let currentCurrency = 'USD';
             let productMap: Record<string, number> = {};
             let hasMore = true;
 
@@ -72,41 +65,30 @@ export default function SyncPage() {
                     try {
                         const errorData = await batchRes.json();
                         if (errorData.error) errorMessage = errorData.error;
-
-                        // SHOW LOGS EVEN ON ERROR
-                        if (errorData.debug_logs && Array.isArray(errorData.debug_logs)) {
-                            errorData.debug_logs.forEach((l: string) => addLog(`[ERR-SRV] ${l}`));
-                        }
                     } catch (e) {
-                        // Fallback to text if JSON fails
                         const text = await batchRes.text();
                         if (text) errorMessage = text;
                     }
                     throw new Error(errorMessage);
                 }
 
-                const batchData = await batchRes.json();
+                const batchData: any = await batchRes.json();
 
-                // Update Logic
                 processedCount += batchData.processed || 0;
                 cursor = batchData.next_cursor;
 
-                // Stats
                 if (batchData.stats) {
                     totalRevenue += batchData.stats.revenue || 0;
                     currentCurrency = batchData.stats.currency || currentCurrency;
 
-                    // Merge products
                     Object.entries(batchData.stats.products || {}).forEach(([name, count]) => {
                         productMap[name] = (productMap[name] || 0) + (count as number);
                     });
                 }
 
-                // Update UI State
-                const safeTotal = total > 0 ? total : 1;
-                const percent = Math.min(Math.round((processedCount / safeTotal) * 100), 99);
+                const calcProgress = total > 0 ? Math.floor((processedCount / total) * 100) : 0;
+                setProgress(Math.min(calcProgress, 99));
 
-                setProgress(percent);
                 setStats({
                     processed: processedCount,
                     total,
@@ -114,34 +96,28 @@ export default function SyncPage() {
                     currency: currentCurrency
                 });
 
-                // Keep top 5 products for display
                 const sortedProducts = Object.entries(productMap)
                     .sort(([, a], [, b]) => b - a)
                     .slice(0, 5)
                     .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
                 setTopProducts(sortedProducts);
 
-                addLog(`Paket: ${batchData.processed} sipariş (${(batchData.stats?.revenue || 0).toLocaleString()} ${currentCurrency}).`);
-
-                // CRITICAL DEBUG: Show server logs in UI
-                if (batchData.debug_logs && Array.isArray(batchData.debug_logs)) {
-                    batchData.debug_logs.forEach((l: string) => addLog(`[SRV] ${l}`));
-                }
+                addLog(`${batchData.processed} sipariş işlendi...`);
 
                 if (!cursor || (total > 0 && processedCount >= total)) {
                     hasMore = false;
                 }
             }
 
-            // Step 3: Verification (Pause)
             setStatus('finishing');
-            addLog('Veri doğrulama bekleniyor...');
+            setProgress(100);
+            addLog('Senkronizasyon tamamlandı!');
 
         } catch (error: any) {
             console.error(error);
             const msg = error.message || 'Bir sorun oluştu';
             addLog(`HATA: ${msg}`);
-            if (msg.includes('Integration record') || msg.includes('not connected')) {
+            if (msg.includes('Integration') || msg.includes('not connected')) {
                 setStatus('failed_auth');
             }
         }
@@ -150,64 +126,96 @@ export default function SyncPage() {
     const handleComplete = async () => {
         try {
             await fetch('/api/sync/complete', { method: 'POST' });
-            setProgress(100);
             setStatus('completed');
-            // Redirect to diagnosis page to show financial insights before dashboard
-            setTimeout(() => router.replace('/onboarding/diagnosis'), 1500);
+            setTimeout(() => router.replace('/onboarding/diagnosis'), 1000);
         } catch (e) {
             addLog('Tamamlama hatası, tekrar deneyin.');
         }
     };
 
     const formatMoney = (amount: number, currency: string) => {
-        return new Intl.NumberFormat('tr-TR', { style: 'currency', currency }).format(amount);
-    }
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+    };
 
     return (
-        <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
-            <div className="w-full max-w-2xl space-y-8">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+            {/* Header */}
+            <div className="border-b border-gray-100 bg-white/80 backdrop-blur sticky top-0 z-50">
+                <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-3">
+                    <Image src="/logo.png" alt="Prificient" width={32} height={32} className="rounded-lg" />
+                    <span className="font-bold text-gray-900 text-lg">Prificient</span>
+                </div>
+            </div>
 
-                <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                        Prificient Finansal Senkronizasyon
+            <div className="max-w-2xl mx-auto px-6 py-12">
+                {/* Title */}
+                <div className="text-center mb-10">
+                    <h1 className="text-3xl font-black text-gray-900 mb-2">
+                        {status === 'finishing' || status === 'completed'
+                            ? 'Verileriniz Hazır!'
+                            : 'Verileriniz Yükleniyor'}
                     </h1>
-                    <p className="text-zinc-400 text-sm">
-                        {status === 'finishing' ? 'Lütfen verilerinizi doğrulayın.' : 'Verileriniz işleniyor, lütfen bekleyin.'}
+                    <p className="text-gray-500">
+                        {status === 'finishing' || status === 'completed'
+                            ? 'Son 1 yıllık mağaza verileriniz analiz edildi.'
+                            : 'Shopify mağazanızdan son 1 yıllık veriler çekiliyor.'}
                     </p>
                 </div>
 
                 {/* Main Card */}
-                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl">
+                <div className="bg-white rounded-3xl border border-gray-200 shadow-xl shadow-blue-900/5 overflow-hidden">
 
-                    {/* Status: Syncing */}
-                    {status !== 'finishing' && status !== 'completed' && status !== 'failed_auth' && (
-                        <div className="space-y-8">
-                            <div className="relative flex items-center justify-center py-4">
-                                <div className="w-32 h-32 rounded-full border-4 border-zinc-800 absolute"></div>
-                                <svg className="w-32 h-32 -rotate-90 transform" viewBox="0 0 100 100">
-                                    <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" strokeWidth="8"
-                                        className="text-purple-600 transition-all duration-500 ease-out"
-                                        strokeDasharray={`${progress * 2.89} 289`} strokeLinecap="round" />
+                    {/* Progress Section */}
+                    {(status === 'initializing' || status === 'syncing') && (
+                        <div className="p-8 space-y-8">
+                            {/* Circular Progress */}
+                            <div className="relative flex items-center justify-center py-6">
+                                <div className="w-40 h-40 rounded-full bg-gradient-to-br from-blue-50 to-indigo-50 absolute" />
+                                <svg className="w-40 h-40 -rotate-90 transform relative" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="42" fill="none" stroke="#e2e8f0" strokeWidth="6" />
+                                    <circle
+                                        cx="50" cy="50" r="42"
+                                        fill="none"
+                                        stroke="url(#blueGradient)"
+                                        strokeWidth="6"
+                                        strokeDasharray={`${progress * 2.64} 264`}
+                                        strokeLinecap="round"
+                                        className="transition-all duration-500 ease-out"
+                                    />
+                                    <defs>
+                                        <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stopColor="#3b82f6" />
+                                            <stop offset="100%" stopColor="#6366f1" />
+                                        </linearGradient>
+                                    </defs>
                                 </svg>
-                                <div className="absolute font-mono text-2xl font-bold">{progress}%</div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4 text-center">
-                                <div className="p-4 bg-zinc-950 rounded-xl">
-                                    <div className="text-zinc-500 text-xs uppercase">Toplam Ciro</div>
-                                    <div className="text-xl font-bold text-green-400">{formatMoney(stats.revenue, stats.currency)}</div>
-                                </div>
-                                <div className="p-4 bg-zinc-950 rounded-xl">
-                                    <div className="text-zinc-500 text-xs uppercase">İşlenen Sipariş</div>
-                                    <div className="text-xl font-bold text-white">{stats.processed} / {stats.total}</div>
+                                <div className="absolute text-center">
+                                    <div className="text-4xl font-black text-gray-900">{progress}%</div>
+                                    <div className="text-xs text-gray-400 font-medium">Tamamlandı</div>
                                 </div>
                             </div>
 
-                            <div className="bg-black/80 rounded-lg p-4 font-mono text-xs h-64 overflow-y-auto border border-zinc-800">
-                                <div className="space-y-1">
-                                    {logs.map((log, i) => (
-                                        <div key={i} className={`break-all ${log.includes('[ERR') ? 'text-red-400 font-bold' : log.includes('[SRV]') ? 'text-blue-300' : 'text-zinc-500'}`}>
-                                            <span className="opacity-50 mr-2">{'>'}</span> {log}
+                            {/* Stats Grid */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl p-5 border border-emerald-100">
+                                    <TrendingUp className="w-5 h-5 text-emerald-600 mb-2" />
+                                    <div className="text-xs text-emerald-600 font-bold uppercase tracking-wide mb-1">Toplam Ciro</div>
+                                    <div className="text-2xl font-black text-gray-900">{formatMoney(stats.revenue, stats.currency)}</div>
+                                </div>
+                                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 border border-blue-100">
+                                    <Package className="w-5 h-5 text-blue-600 mb-2" />
+                                    <div className="text-xs text-blue-600 font-bold uppercase tracking-wide mb-1">Siparişler</div>
+                                    <div className="text-2xl font-black text-gray-900">{stats.processed} / {stats.total}</div>
+                                </div>
+                            </div>
+
+                            {/* Activity Log */}
+                            <div className="bg-gray-50 rounded-xl p-4 max-h-40 overflow-y-auto">
+                                <div className="space-y-1 font-mono text-xs">
+                                    {logs.slice(0, 10).map((log, i) => (
+                                        <div key={i} className={`flex items-start gap-2 ${i === 0 ? 'text-blue-600 font-medium' : 'text-gray-400'}`}>
+                                            {i === 0 && <Loader2 className="w-3 h-3 mt-0.5 animate-spin" />}
+                                            <span>{log}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -215,67 +223,95 @@ export default function SyncPage() {
                         </div>
                     )}
 
-                    {/* Status: Finishing (Verification) */}
-                    {status === 'finishing' && (
-                        <div className="space-y-6 animate-in fade-in zoom-in duration-300">
+                    {/* Finishing State */}
+                    {(status === 'finishing' || status === 'completed') && (
+                        <div className="p-8 space-y-6">
+                            {/* Success Icon */}
                             <div className="text-center">
-                                <div className="w-16 h-16 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Terminal size={32} />
-                                </div>
-                                <h2 className="text-2xl font-bold text-white">Senkronizasyon Tamamlandı</h2>
-                                <p className="text-zinc-400 text-sm mt-2">Aşağıdaki veriler sisteminize aktarıldı.</p>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-xl text-center">
-                                    <div className="text-zinc-500 text-xs">Toplam Ciro</div>
-                                    <div className="text-lg font-bold text-green-400">{formatMoney(stats.revenue, stats.currency)}</div>
-                                </div>
-                                <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-xl text-center">
-                                    <div className="text-zinc-500 text-xs">Sipariş Sayısı</div>
-                                    <div className="text-lg font-bold text-white">{stats.processed}</div>
-                                </div>
-                                <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-xl text-center">
-                                    <div className="text-zinc-500 text-xs">Tarih Aralığı</div>
-                                    <div className="text-lg font-bold text-blue-400">2023 - Bugün</div>
+                                <div className="w-20 h-20 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-emerald-200">
+                                    <CheckCircle2 className="w-10 h-10 text-white" />
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-widest">En Çok Satanlar</h3>
-                                <div className="space-y-1">
-                                    {Object.entries(topProducts).map(([name, count], i) => (
-                                        <div key={i} className="flex justify-between text-sm py-2 border-b border-zinc-800 last:border-0">
-                                            <span className="text-zinc-300 truncate pr-4">{name}</span>
-                                            <span className="font-mono text-zinc-500">{count} adet</span>
-                                        </div>
-                                    ))}
+                            {/* Stats Summary */}
+                            <div className="grid grid-cols-3 gap-3">
+                                <div className="bg-gray-50 rounded-xl p-4 text-center">
+                                    <div className="text-xs text-gray-500 font-medium mb-1">Toplam Ciro</div>
+                                    <div className="text-lg font-black text-gray-900">{formatMoney(stats.revenue, stats.currency)}</div>
+                                </div>
+                                <div className="bg-gray-50 rounded-xl p-4 text-center">
+                                    <div className="text-xs text-gray-500 font-medium mb-1">Siparişler</div>
+                                    <div className="text-lg font-black text-gray-900">{stats.processed}</div>
+                                </div>
+                                <div className="bg-gray-50 rounded-xl p-4 text-center">
+                                    <div className="text-xs text-gray-500 font-medium mb-1">Dönem</div>
+                                    <div className="text-lg font-black text-blue-600">1 Yıl</div>
                                 </div>
                             </div>
 
+                            {/* Top Products */}
+                            {Object.keys(topProducts).length > 0 && (
+                                <div className="space-y-3">
+                                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">En Çok Satanlar</h3>
+                                    <div className="space-y-2">
+                                        {Object.entries(topProducts).map(([name, count], i) => (
+                                            <div key={i} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                                                <span className="text-sm text-gray-700 truncate pr-4 flex items-center gap-2">
+                                                    <span className="w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                                                    {name}
+                                                </span>
+                                                <span className="text-sm font-bold text-gray-500">{count} adet</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* CTA Button */}
                             <button
                                 onClick={handleComplete}
-                                className="w-full bg-white text-black font-bold py-4 rounded-xl hover:scale-[1.02] transition-transform"
+                                disabled={status === 'completed'}
+                                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-3 disabled:opacity-50"
                             >
-                                Onayla ve Dashboard'a Git
+                                {status === 'completed' ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        Yönlendiriliyor...
+                                    </>
+                                ) : (
+                                    <>
+                                        Finansal Analize Devam Et
+                                        <ArrowRight className="w-5 h-5" />
+                                    </>
+                                )}
                             </button>
                         </div>
                     )}
 
-                    {/* Status: Failed */}
+                    {/* Error State */}
                     {status === 'failed_auth' && (
-                        <div className="text-center space-y-4">
-                            <div className="bg-red-500/10 text-red-500 p-4 rounded-xl">
-                                <p className="font-bold">Bağlantı Hatası</p>
-                                <p className="text-sm">Shopify bağlantısı doğrulanamadı.</p>
+                        <div className="p-8 text-center space-y-6">
+                            <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto">
+                                <AlertTriangle className="w-8 h-8" />
                             </div>
-                            <button onClick={() => router.push('/connect/shopify')} className="w-full bg-zinc-800 py-3 rounded-xl">
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-900 mb-2">Bağlantı Hatası</h2>
+                                <p className="text-gray-500 text-sm">Shopify bağlantısı doğrulanamadı. Lütfen tekrar deneyin.</p>
+                            </div>
+                            <button
+                                onClick={() => router.push('/connect/shopify')}
+                                className="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold hover:bg-gray-800 transition-colors"
+                            >
                                 Tekrar Bağla
                             </button>
                         </div>
                     )}
-
                 </div>
+
+                {/* Footer */}
+                <p className="text-center text-xs text-gray-400 mt-8">
+                    Verileriniz güvenli bir şekilde işleniyor ve yalnızca analiz için kullanılıyor.
+                </p>
             </div>
         </div>
     );

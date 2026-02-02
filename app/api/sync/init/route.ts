@@ -39,9 +39,17 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Shopify credentials missing' }, { status: 400 });
         }
 
-        // 3. Fetch Order Count from Shopify
+        // 3. Fetch Order Count from Shopify (Last 1 Year)
         const client = shopifyClient(shop_domain, access_token);
-        const countRes: any = await client.get({ path: 'orders/count', query: { status: 'any' } });
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+        const countRes: any = await client.get({
+            path: 'orders/count',
+            query: {
+                status: 'any',
+                created_at_min: oneYearAgo.toISOString()
+            }
+        });
         const totalOrders = countRes.body?.count || 0;
 
         // 3.1. NEW: Fetch Shop Info to get Currency
