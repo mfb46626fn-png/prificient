@@ -152,7 +152,8 @@ export default function SyncPage() {
             await fetch('/api/sync/complete', { method: 'POST' });
             setProgress(100);
             setStatus('completed');
-            setTimeout(() => router.replace('/dashboard'), 1500);
+            // Redirect to diagnosis page to show financial insights before dashboard
+            setTimeout(() => router.replace('/onboarding/diagnosis'), 1500);
         } catch (e) {
             addLog('Tamamlama hatası, tekrar deneyin.');
         }

@@ -137,9 +137,9 @@ export async function POST(req: NextRequest) {
                 email,
                 payload,
                 {
-                    revenue: revenue,
-                    costs: totalCosts,
-                    profit: profit
+                    revenue: revenue.toFixed(2),
+                    costs: totalCosts.toFixed(2),
+                    profit: profit.toFixed(2)
                 }
             );
         }
