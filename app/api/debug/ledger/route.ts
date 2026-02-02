@@ -1,66 +1,119 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/lib/supabase-admin';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
 
-        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
 
-        // Get today's date range
-        const today = new Date();
-        const startOfDay = new Date(today);
-        startOfDay.setUTCHours(0, 0, 0, 0);
-        const endOfDay = new Date(today);
-        endOfDay.setUTCHours(23, 59, 59, 999);
+        const supabaseAdmin = createAdminClient();
+        const userId = user.id;
 
-        // Fetch ledger_transactions for today
-        const { data: transactions, error: txError } = await supabase
-            .from('ledger_transactions')
-            .select('*')
-            .eq('user_id', user.id)
-            .gte('transaction_date', startOfDay.toISOString())
-            .lte('transaction_date', endOfDay.toISOString())
-            .limit(20);
-
-        // Fetch all transactions (last 10)
-        const { data: allTransactions } = await supabase
-            .from('ledger_transactions')
-            .select('id, description, transaction_date')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(10);
-
-        // Fetch ledger_entries count
-        const { count: entryCount } = await supabase
-            .from('ledger_entries')
+        // 1. Count financial_event_log entries
+        const { count: eventCount } = await supabaseAdmin
+            .from('financial_event_log')
             .select('*', { count: 'exact', head: true })
-            .eq('user_id', user.id);
+            .eq('user_id', userId);
 
-        // Fetch accounts
-        const { data: accounts } = await supabase
-            .from('ledger_accounts')
-            .select('code, name')
-            .eq('user_id', user.id);
+        // 2. Get event types breakdown
+        const { data: events } = await supabaseAdmin
+            .from('financial_event_log')
+            .select('event_type')
+            .eq('user_id', userId);
+
+        const eventTypes: Record<string, number> = {};
+        events?.forEach(e => {
+            eventTypes[e.event_type] = (eventTypes[e.event_type] || 0) + 1;
+        });
+
+        // 3. Count ledger_transactions
+        const { count: txCount } = await supabaseAdmin
+            .from('ledger_transactions')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', userId);
+
+        // 4. Get ledger entries by account
+        const { data: entries } = await supabaseAdmin
+            .from('ledger_entries')
+            .select(`
+                amount,
+                account:ledger_accounts!inner(code, name)
+            `)
+            .eq('user_id', userId);
+
+        const accountTotals: Record<string, number> = {};
+        entries?.forEach((e: any) => {
+            const key = `${e.account.code} - ${e.account.name}`;
+            accountTotals[key] = (accountTotals[key] || 0) + Number(e.amount);
+        });
+
+        // 5. Calculate what diagnosis shows (revenue from code 600)
+        let totalRevenue = 0;
+        let totalCogs = 0;
+        let lineItemCount = 0;
+
+        entries?.forEach((e: any) => {
+            const code = e.account.code;
+            const amt = Number(e.amount);
+            if (code === '600') {
+                totalRevenue += amt;
+                lineItemCount++;
+            }
+            if (code === '621') {
+                totalCogs += amt;
+            }
+        });
+
+        // 6. Date range
+        const { data: oldest } = await supabaseAdmin
+            .from('ledger_transactions')
+            .select('transaction_date')
+            .eq('user_id', userId)
+            .order('transaction_date', { ascending: true })
+            .limit(1);
+
+        const { data: newest } = await supabaseAdmin
+            .from('ledger_transactions')
+            .select('transaction_date')
+            .eq('user_id', userId)
+            .order('transaction_date', { ascending: false })
+            .limit(1);
+
+        // 7. Check integration sync status
+        const { data: integration } = await supabaseAdmin
+            .from('integrations')
+            .select('sync_status, total_orders_to_sync, sync_progress, updated_at')
+            .eq('user_id', userId)
+            .eq('platform', 'shopify')
+            .single();
 
         return NextResponse.json({
-            user_id: user.id,
-            today_range: {
-                start: startOfDay.toISOString(),
-                end: endOfDay.toISOString()
+            summary: {
+                eventLogCount: eventCount,
+                transactionCount: txCount,
+                lineItemCount: lineItemCount,
+                totalRevenue: totalRevenue,
+                totalCogs: totalCogs,
+                netProfit: totalRevenue - totalCogs
             },
-            today_transactions: transactions || [],
-            today_tx_count: transactions?.length || 0,
-            all_recent_transactions: allTransactions || [],
-            total_entry_count: entryCount || 0,
-            accounts: accounts || [],
-            tx_error: txError?.message || null
-        }, { status: 200 });
+            eventTypes,
+            accountTotals,
+            dateRange: {
+                oldest: oldest?.[0]?.transaction_date,
+                newest: newest?.[0]?.transaction_date
+            },
+            syncStatus: integration
+        });
 
     } catch (error: any) {
+        console.error('Debug API error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
