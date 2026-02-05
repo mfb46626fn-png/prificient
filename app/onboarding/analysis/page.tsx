@@ -747,6 +747,7 @@ export default function UnifiedAnalysisPage() {
     const prevSlide = () => setCurrentSlide(s => Math.max(s - 1, 0));
 
     const handleComplete = () => {
+        router.refresh();
         router.push('/dashboard');
     };
 
@@ -798,13 +799,11 @@ export default function UnifiedAnalysisPage() {
                 <div className="text-center">
                     {/* Animated Logo */}
                     <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                        className="w-24 h-24 mx-auto mb-8"
+                        animate={{ scale: [1, 1.1, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                        className="w-32 h-32 mx-auto mb-8 flex items-center justify-center"
                     >
-                        <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-xl">
-                            <Image src="/logo-icon.svg" alt="Prificient" width={48} height={48} className="invert" />
-                        </div>
+                        <Image src="/logo.png" alt="Prificient" width={128} height={128} className="object-contain" priority />
                     </motion.div>
 
                     {/* Progress Ring */}

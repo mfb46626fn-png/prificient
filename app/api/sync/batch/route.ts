@@ -253,12 +253,20 @@ export async function POST(req: NextRequest) {
         }
 
         // 5. Update Progress in DB
+        // 5. Update Progress in DB
+        const updateData: any = {
+            last_synced_cursor: nextCursor,
+            updated_at: new Date().toISOString()
+        };
+
+        if (!nextCursor) {
+            updateData.sync_status = 'completed';
+            updateData.sync_progress = 100;
+        }
+
         await supabaseAdmin
             .from('integrations')
-            .update({
-                last_synced_cursor: nextCursor,
-                updated_at: new Date().toISOString()
-            })
+            .update(updateData)
             .eq('user_id', user.id)
             .eq('platform', 'shopify');
 
