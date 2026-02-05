@@ -85,8 +85,8 @@ async function fetchShopifyOrders(accessToken: string, shopDomain: string, start
     let cursor: string | null = null;
     let currency = 'USD';
 
-    // Build Query String
-    let queryString = "financial_status:paid OR financial_status:partially_refunded OR financial_status:refunded";
+    // Build Query String (Parentheses crucial for correct AND logic with Date)
+    let queryString = "(financial_status:paid OR financial_status:partially_refunded OR financial_status:refunded)";
 
     // Append Date Filters if provided
     if (start) {
