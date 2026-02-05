@@ -17,7 +17,8 @@ const createFormatter = (currency: string) => {
     return new Intl.NumberFormat('tr-TR', {
         style: 'currency',
         currency: currency || 'USD',
-        maximumFractionDigits: 0
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
     });
 };
 
@@ -350,36 +351,59 @@ function SlideDangerProducts({ data }: { data: ComprehensiveAnalysis }) {
                 </p>
             </div>
 
+
+
             <div className="space-y-3">
-                {data.dangerProducts.slice(0, 5).map((product, i) => (
-                    <motion.div
-                        key={product.variant_id}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.1 * i }}
-                        className="bg-white border border-red-100 rounded-xl p-4"
-                    >
-                        <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                                    <XCircle className="w-4 h-4 text-red-500" />
+                {data.dangerProducts.length === 0 ? (
+                    <div className="bg-gray-50 rounded-xl p-6 text-center">
+                        {data.costBreakdown.cogs === 0 ? (
+                            <>
+                                <div className="text-amber-500 font-bold mb-2">Maliyet Bilgisi Eksik</div>
+                                <p className="text-sm text-gray-600">
+                                    Ürün maliyetlerinizi henüz girmediğiniz için kârlılık analizi tam yapılamıyor.
+                                    Maliyetler girildiğinde burada zarar eden ürünleri görebileceksiniz.
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <div className="text-green-500 font-bold mb-2">Harika Haber!</div>
+                                <p className="text-sm text-gray-600">
+                                    Şu an için zarar eden veya çok düşük marjlı (%10 altı) ürününüz bulunmuyor.
+                                </p>
+                            </>
+                        )}
+                    </div>
+                ) : (
+                    data.dangerProducts.slice(0, 5).map((product, i) => (
+                        <motion.div
+                            key={product.variant_id}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.1 * i }}
+                            className="bg-white border border-red-100 rounded-xl p-4"
+                        >
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                                        <XCircle className="w-4 h-4 text-red-500" />
+                                    </div>
+                                    <div>
+                                        <div className="font-medium text-gray-900 line-clamp-1">{product.title}</div>
+                                        <div className="text-xs text-gray-500">{product.quantity_sold} adet</div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div className="font-medium text-gray-900 line-clamp-1">{product.title}</div>
-                                    <div className="text-xs text-gray-500">{product.quantity_sold} adet</div>
+                                <div className="text-right">
+                                    <div className={`font-bold ${product.profit < 0 ? 'text-red-600' : 'text-orange-500'}`}>
+                                        {product.profit < 0 ? '-' : ''}{fmt.format(Math.abs(product.profit))}
+                                    </div>
+                                    <div className="text-xs text-gray-400">%{product.profit_margin.toFixed(1)} marj</div>
                                 </div>
                             </div>
-                            <div className="text-right">
-                                <div className={`font-bold ${product.profit < 0 ? 'text-red-600' : 'text-orange-500'}`}>
-                                    {product.profit < 0 ? '-' : ''}{fmt.format(Math.abs(product.profit))}
-                                </div>
-                                <div className="text-xs text-gray-400">%{product.profit_margin.toFixed(0)} marj</div>
-                            </div>
-                        </div>
-                    </motion.div>
-                ))}
+                        </motion.div>
+                    ))
+                )}
             </div>
-        </div>
+        </div >
     );
 }
 
@@ -402,6 +426,23 @@ function SlideTrends({ data }: { data: ComprehensiveAnalysis }) {
                 <div className="text-center py-8 text-gray-500">Yeterli trend verisi yok</div>
             ) : (
                 <div className="space-y-4">
+                    {trends.length >= 2 && (
+                        <div className="bg-indigo-50 rounded-xl p-4 mb-4 flex items-center justify-between">
+                            <div>
+                                <div className="text-xs text-indigo-600 font-medium mb-1">Son Ay Performansı</div>
+                                <div className="text-sm text-indigo-800">
+                                    Geçen aya göre cironuz
+                                    <span className="font-bold">
+                                        {((trends[trends.length - 1].revenue - trends[trends.length - 2].revenue) / (trends[trends.length - 2].revenue || 1) * 100).toFixed(1)}%
+                                    </span>
+                                    {trends[trends.length - 1].revenue > trends[trends.length - 2].revenue ? ' arttı 📈' : ' azaldı 📉'}
+                                </div>
+                            </div>
+                            <div className="text-2xl font-bold text-indigo-600">
+                                {fmt.format(trends[trends.length - 1].revenue)}
+                            </div>
+                        </div>
+                    )}
                     {trends.map((month, i) => {
                         const monthName = new Date(month.month + '-01').toLocaleDateString('tr-TR', { month: 'short', year: '2-digit' });
                         const barWidth = (month.revenue / maxRevenue) * 100;
@@ -442,39 +483,28 @@ function SlideCashFlow({ data }: { data: ComprehensiveAnalysis }) {
                 <h2 className="text-xl font-bold text-gray-900">Nakit Akışı</h2>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4">
-                    <div className="text-sm text-green-600 font-medium mb-1">Günlük Ciro</div>
-                    <div className="text-2xl font-bold text-gray-900">
-                        {fmt.format(data.cashFlow.averageDailyRevenue)}
+            {isNegative ? (
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-red-50 rounded-xl p-4">
+                        <div className="text-sm text-gray-500 mb-1">Günlük Nakit Yakma</div>
+                        <div className="text-xl font-bold text-red-600">{fmt.format(data.cashFlow.dailyBurnRate)}</div>
+                        <div className="text-xs text-red-400 mt-1">Zarar ediyoruz</div>
+                    </div>
+                    <div className="bg-blue-50 rounded-xl p-4">
+                        <div className="text-sm text-gray-500 mb-1">Tahmini Ömür</div>
+                        <div className="text-xl font-bold text-blue-600">{data.cashFlow.daysUntilZero > 900 ? '900+ Gün' : `${data.cashFlow.daysUntilZero} Gün`}</div>
+                        <div className="text-xs text-blue-400 mt-1">Mevcut nakit ile</div>
                     </div>
                 </div>
-
-                <div className={`bg-gradient-to-br ${isNegative ? 'from-red-50 to-red-100' : 'from-green-50 to-green-100'} rounded-xl p-4`}>
-                    <div className={`text-sm font-medium mb-1 ${isNegative ? 'text-red-600' : 'text-green-600'}`}>
-                        Günlük Kâr
-                    </div>
-                    <div className={`text-2xl font-bold ${isNegative ? 'text-red-600' : 'text-gray-900'}`}>
-                        {fmt.format(data.cashFlow.averageDailyProfit)}
-                    </div>
-                </div>
-            </div>
-
-            {isNegative && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                    <div className="flex items-center gap-3">
-                        <AlertTriangle className="w-6 h-6 text-red-500" />
-                        <div>
-                            <div className="font-medium text-red-800">
-                                Günlük Zarar: {fmt.format(data.cashFlow.dailyBurnRate)}
-                            </div>
-                            <div className="text-sm text-red-600">
-                                Bu hızla yaklaşık {data.cashFlow.daysUntilZero} gün dayanabilirsiniz.
-                            </div>
-                        </div>
-                    </div>
+            ) : (
+                <div className="bg-green-50 rounded-xl p-6 mb-6 text-center">
+                    <div className="block mb-2 text-4xl">🚀</div>
+                    <div className="text-xl font-bold text-green-700">Nakit Akışınız Pozitif</div>
+                    <p className="text-sm text-green-600 mt-1">Her gün kâr ediyorsunuz, bu harika!</p>
                 </div>
             )}
+
+
         </div>
     );
 }

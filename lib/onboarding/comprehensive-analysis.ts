@@ -110,7 +110,14 @@ async function fetchShopifyOrders(accessToken: string, shopDomain: string): Prom
                                     node {
                                         title
                                         quantity
-                                        variant { id sku product { id } }
+                                        variant { 
+                                            id 
+                                            sku 
+                                            product { id } 
+                                            inventoryItem { 
+                                                unitCost { amount } 
+                                            }
+                                        }
                                         originalTotalSet { shopMoney { amount } }
                                         discountedTotalSet { shopMoney { amount } }
                                     }
@@ -216,6 +223,7 @@ export async function generateComprehensiveAnalysis(userId: string): Promise<Com
 
     const productMap = new Map<string, ProductMetric>();
     const monthlyMap = new Map<string, MonthlyTrend>();
+    const shopifyCostMap = new Map<string, number>();
 
     let startDate = new Date();
     let endDate = new Date(0);
@@ -268,6 +276,12 @@ export async function generateComprehensiveAnalysis(userId: string): Promise<Com
             const lineTotal = parseFloat(item.discountedTotalSet?.shopMoney?.amount || item.originalTotalSet?.shopMoney?.amount || '0');
             const qty = item.quantity || 1;
 
+            // Capture Shopify Unit Cost
+            const shopifyCost = parseFloat(item.variant?.inventoryItem?.unitCost?.amount || '0');
+            if (shopifyCost > 0 && variantId) {
+                shopifyCostMap.set(variantId, shopifyCost);
+            }
+
             if (!variantId) continue;
 
             if (!productMap.has(variantId)) {
@@ -305,7 +319,9 @@ export async function generateComprehensiveAnalysis(userId: string): Promise<Com
 
     // Calculate product metrics
     const products = Array.from(productMap.values()).map(p => {
-        const unitCost = costMap.get(p.variant_id) || 0;
+        // Priority: Database Cost > Shopify Cost > 0
+        const unitCost = costMap.get(p.variant_id) || shopifyCostMap.get(p.variant_id) || 0;
+
         p.cogs = unitCost * p.quantity_sold;
         p.fees = p.revenue * platformFeeRate;
         p.profit = p.revenue - p.cogs - p.fees;
