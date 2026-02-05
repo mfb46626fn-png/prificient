@@ -79,16 +79,27 @@ export interface ComprehensiveAnalysis {
 }
 
 // Shopify GraphQL query for orders with refunds and discounts
-async function fetchShopifyOrders(accessToken: string, shopDomain: string): Promise<{ orders: any[]; currency: string }> {
+async function fetchShopifyOrders(accessToken: string, shopDomain: string, start?: Date, end?: Date): Promise<{ orders: any[]; currency: string }> {
     const orders: any[] = [];
     let hasNextPage = true;
     let cursor: string | null = null;
     let currency = 'USD';
 
+    // Build Query String
+    let queryString = "financial_status:paid OR financial_status:partially_refunded OR financial_status:refunded";
+
+    // Append Date Filters if provided
+    if (start) {
+        queryString += ` AND created_at:>=${start.toISOString()}`;
+    }
+    if (end) {
+        queryString += ` AND created_at:<=${end.toISOString()}`;
+    }
+
     while (hasNextPage) {
         const query = `
-            query($cursor: String) {
-                orders(first: 100, after: $cursor, query: "financial_status:paid OR financial_status:partially_refunded OR financial_status:refunded") {
+            query($cursor: String, $query: String) {
+                orders(first: 100, after: $cursor, query: $query) {
                     pageInfo { hasNextPage endCursor }
                     edges {
                         node {
@@ -135,7 +146,7 @@ async function fetchShopifyOrders(accessToken: string, shopDomain: string): Prom
                 'Content-Type': 'application/json',
                 'X-Shopify-Access-Token': accessToken,
             },
-            body: JSON.stringify({ query, variables: { cursor } }),
+            body: JSON.stringify({ query, variables: { cursor, query: queryString } }),
         });
 
         const json: { data?: { orders?: { edges: any[]; pageInfo: { hasNextPage: boolean; endCursor: string } } } } = await response.json();
@@ -155,8 +166,10 @@ async function fetchShopifyOrders(accessToken: string, shopDomain: string): Prom
         hasNextPage = ordersData.pageInfo.hasNextPage;
         cursor = ordersData.pageInfo.endCursor;
 
-        // Safety limit
-        if (orders.length >= 5000) break;
+        // Safety limit (increased for filtered queries)
+        // If specific range, we trust the range.
+        // But keep a sanity cap to prevent timeouts (~10k orders is feasible in chunks, but let's stick to 5k-10k)
+        if (orders.length >= 10000) break;
     }
 
     return { orders, currency };
@@ -204,8 +217,14 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
         return emptyResult('USD');
     }
 
-    // Fetch all orders from Shopify
-    const { orders, currency } = await fetchShopifyOrders(integration.access_token, integration.shop_domain);
+    // Prepare Date Filter for API (Server-Side Filtering)
+    // If we have a filter, we pass it to Shopify to get EXACT and COMPLETE data for that range.
+    // If no filter (All Time), we pass undefined, which hits the 10k limit (acceptable compromise).
+    const fetchStart = dateRangeFilter ? new Date(dateRangeFilter.start) : undefined;
+    const fetchEnd = dateRangeFilter ? new Date(dateRangeFilter.end) : undefined;
+
+    // Fetch orders from Shopify
+    const { orders, currency } = await fetchShopifyOrders(integration.access_token, integration.shop_domain, fetchStart, fetchEnd);
 
     if (orders.length === 0) {
         return emptyResult(currency);
