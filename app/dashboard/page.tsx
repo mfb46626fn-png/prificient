@@ -95,7 +95,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             score,
             level,
             factors,
-            opportunity_loss: analysis.opportunityCost.lostProfit / 30, // Approx daily
+            opportunity_loss: analysis.opportunityCost.lostProfit / (analysis.overview.periodDays || 1), // Exact daily avg
             financials: {
                 revenue: analysis.realProfit.grossRevenue,
                 expenses: analysis.realProfit.totalCosts,
@@ -111,11 +111,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         };
 
         // Autopsy: Use Average Daily Stats from Analysis
-        // OR simply use totals if period is short. Let's use Daily Averages derived from total / periodDays
-        // analysis.overview.periodDays usually isn't set perfectly in current simple implementation (default 1).
-        // Let's assume the analysis covers "All Time" or the fetched range.
-        // We'll compute daily averages approximately.
-        const days = Math.max(1, analysis.monthlyTrends.length * 30); // Rough estimate if trends exist
+        const days = analysis.overview.periodDays || 1;
 
         autopsy = {
             grossRevenue: analysis.realProfit.grossRevenue / days,
