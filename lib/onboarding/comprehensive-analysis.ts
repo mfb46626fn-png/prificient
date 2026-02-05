@@ -163,7 +163,7 @@ async function fetchShopifyOrders(accessToken: string, shopDomain: string): Prom
 }
 
 // --- Main Analysis Function ---
-export async function generateComprehensiveAnalysis(userId: string): Promise<ComprehensiveAnalysis> {
+export async function generateComprehensiveAnalysis(userId: string, dateRangeFilter?: { start: Date, end: Date }): Promise<ComprehensiveAnalysis> {
     const supabaseAdmin = createAdminClient();
 
     // Fetch store settings
@@ -225,13 +225,31 @@ export async function generateComprehensiveAnalysis(userId: string): Promise<Com
     const monthlyMap = new Map<string, MonthlyTrend>();
     const shopifyCostMap = new Map<string, number>();
 
-    let startDate = new Date();
-    let endDate = new Date(0);
+    // If filter provided, use it. Else default to full range logic.
+    let startDate = dateRangeFilter ? new Date(dateRangeFilter.start) : new Date();
+    let endDate = dateRangeFilter ? new Date(dateRangeFilter.end) : new Date(0);
+
+    // If NO filter provided, we let the loop expand the range naturally.
+    // If filter provided, we stick to it and skip orders outside.
+    const isFiltering = !!dateRangeFilter;
+
+    // Reset loop bounds if not filtering, to detect range from data
+    if (!isFiltering) {
+        startDate = new Date();
+        endDate = new Date(0);
+    }
 
     for (const order of orders) {
         const orderDate = new Date(order.createdAt);
-        if (orderDate < startDate) startDate = orderDate;
-        if (orderDate > endDate) endDate = orderDate;
+
+        if (isFiltering) {
+            // Apply Filter
+            if (orderDate < startDate || orderDate > endDate) continue;
+        } else {
+            // Auto Range Detection
+            if (orderDate < startDate) startDate = orderDate;
+            if (orderDate > endDate) endDate = orderDate;
+        }
 
         const subtotal = parseFloat(order.subtotalPriceSet?.shopMoney?.amount || '0');
         const gross = parseFloat(order.totalPriceSet?.shopMoney?.amount || '0');

@@ -21,10 +21,27 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     const view = params.view || 'action'
     const syncStart = params.sync_start === 'true'
 
+    // Date Logic
+    const range = (params.range as string) || '30d'
+    const now = new Date()
+    const startDate = new Date()
+
+    if (range === '7d') startDate.setDate(now.getDate() - 7)
+    else if (range === '30d') startDate.setDate(now.getDate() - 30)
+    else if (range === 'this_month') startDate.setDate(1)
+    else if (range === 'last_month') {
+        startDate.setMonth(startDate.getMonth() - 1)
+        startDate.setDate(1)
+        now.setDate(0) // Last day of previous month
+    } else if (range === 'all') {
+        startDate.setFullYear(2020)
+    }
+
     // Fetch REAL Analysis Data
     let analysis: any = null
     try {
-        analysis = await generateComprehensiveAnalysis(user.id)
+        const filter = range === 'all' ? undefined : { start: startDate, end: now };
+        analysis = await generateComprehensiveAnalysis(user.id, filter)
     } catch (e) {
         console.error("Dashboard Analysis Error", e)
     }
