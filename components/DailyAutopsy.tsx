@@ -43,15 +43,15 @@ export default function DailyAutopsy({ data }: DailyAutopsyProps) {
             <div className={`space-y-2 ${isMock ? 'opacity-50 grayscale' : ''}`}>
                 <div className="flex justify-between">
                     <span>CİRO</span>
-                    <span className="font-bold">{isMock ? '-- ₺' : grossRevenue.toLocaleString() + '₺'}</span>
+                    <span className="font-bold">{isMock ? '-- ₺' : (grossRevenue || 0).toLocaleString() + '₺'}</span>
                 </div>
                 <div className="flex justify-between text-gray-500">
                     <span>İADE</span>
-                    <span>{isMock ? '-- ₺' : `-${returns.toLocaleString()}₺`}</span>
+                    <span>{isMock ? '-- ₺' : `-${(returns || 0).toLocaleString()}₺`}</span>
                 </div>
                 <div className="flex justify-between text-gray-500">
                     <span>REKLAM</span>
-                    <span>{isMock ? '-- ₺' : `-${ads.toLocaleString()}₺`}</span>
+                    <span>{isMock ? '-- ₺' : `-${(ads || 0).toLocaleString()}₺`}</span>
                 </div>
                 <div className="flex justify-between text-gray-500">
                     <span>MALİYET</span>
@@ -63,7 +63,7 @@ export default function DailyAutopsy({ data }: DailyAutopsyProps) {
 
             <div className={`flex justify-between items-center text-lg md:text-xl font-bold ${isMock ? 'opacity-50' : netPocket > 0 ? 'text-gray-900' : 'text-red-600'}`}>
                 <span>NET CEPTE:</span>
-                <span>{isMock ? 'Hesaplanıyor...' : netPocket.toLocaleString() + '₺'}</span>
+                <span>{isMock ? 'Hesaplanıyor...' : (netPocket || 0).toLocaleString() + '₺'}</span>
             </div>
 
             {/* Bottom Zigzag */}

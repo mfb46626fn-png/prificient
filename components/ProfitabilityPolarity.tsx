@@ -63,7 +63,7 @@ export default function ProfitabilityPolarity({ heroes, villains }: Profitabilit
                                         <span className="font-mono text-emerald-300 text-xs">#{i + 1}</span>
                                         <span className="font-bold text-gray-700 truncate group-hover:text-emerald-700 transition-colors">{product.title}</span>
                                     </div>
-                                    <span className="font-mono font-bold text-emerald-600">+{product.net_sales.toLocaleString()}₺</span>
+                                    <span className="font-mono font-bold text-emerald-600">+{(product.net_sales || 0).toLocaleString()}₺</span>
                                 </div>
                             ))
                     )}
@@ -87,7 +87,7 @@ export default function ProfitabilityPolarity({ heroes, villains }: Profitabilit
                                         <span className="font-mono text-red-300 text-xs">#{i + 1}</span>
                                         <span className="font-bold text-gray-700 truncate group-hover:text-red-700 transition-colors">{product.title}</span>
                                     </div>
-                                    <span className="font-mono font-bold text-red-500">{product.net_sales.toLocaleString()}₺</span>
+                                    <span className="font-mono font-bold text-red-500">{(product.net_sales || 0).toLocaleString()}₺</span>
                                 </div>
                             ))
                     )}
