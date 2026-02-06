@@ -156,6 +156,15 @@ export default function AnalyticsDashboard({ currency = 'TRY', data }: Analytics
                                 />
                                 <Area
                                     type="monotone"
+                                    dataKey="cogs"
+                                    stroke="#f59e0b"
+                                    strokeWidth={2}
+                                    fillOpacity={0.8}
+                                    fill="#fcd34d"
+                                    name="Maliyet"
+                                />
+                                <Area
+                                    type="monotone"
                                     dataKey="profit"
                                     stroke="#10b981"
                                     strokeWidth={2}
@@ -191,7 +200,7 @@ export default function AnalyticsDashboard({ currency = 'TRY', data }: Analytics
                                     {data.products.slice(0, 10).map((p, i) => (
                                         <tr key={i} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                                             <td className="p-3 pl-5">
-                                                <div className="font-medium text-gray-900 line-clamp-1" title={p.name}>{p.name}</div>
+                                                <div className="font-medium text-gray-900 line-clamp-1" title={p.title}>{p.title}</div>
                                                 <div className="text-xs text-gray-400">Marj: {p.margin}%</div>
                                             </td>
                                             <td className="p-3 pr-5 text-right font-bold text-emerald-600">

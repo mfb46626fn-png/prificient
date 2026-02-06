@@ -20,6 +20,7 @@ export interface MonthlyTrend {
     revenue: number;
     profit: number;
     orders: number;
+    cogs: number;
 }
 
 export interface CostBreakdown {
@@ -217,6 +218,19 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
         return emptyResult('USD');
     }
 
+    // Fetch product costs from product_costs table BEFORE processing
+    let dbCostMap = new Map<string, number>();
+    try {
+        const { data: costs } = await supabaseAdmin
+            .from('product_costs')
+            .select('variant_id, unit_cost')
+            .eq('user_id', userId);
+
+        costs?.forEach(pc => {
+            dbCostMap.set(String(pc.variant_id), Number(pc.unit_cost) || 0);
+        });
+    } catch (e) { console.error("Cost fetch failed", e); }
+
     // Prepare Date Filter for API (Server-Side Filtering)
     // If we have a filter, we pass it to Shopify to get EXACT and COMPLETE data for that range.
     // If no filter (All Time), we pass undefined, which hits the 10k limit (acceptable compromise).
@@ -242,6 +256,7 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
 
     const productMap = new Map<string, ProductMetric>();
     const monthlyMap = new Map<string, MonthlyTrend>();
+    const productsToSync = new Map<string, any>(); // Check this for background sync
     const shopifyCostMap = new Map<string, number>();
 
     // If filter provided, use it. Else default to full range logic.
@@ -297,7 +312,7 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
         // Monthly tracking
         const monthKey = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}`;
         if (!monthlyMap.has(monthKey)) {
-            monthlyMap.set(monthKey, { month: monthKey, revenue: 0, profit: 0, orders: 0 });
+            monthlyMap.set(monthKey, { month: monthKey, revenue: 0, profit: 0, orders: 0, cogs: 0 });
         }
         const monthly = monthlyMap.get(monthKey)!;
         monthly.revenue += subtotal;
@@ -318,6 +333,13 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
             if (shopifyCost > 0 && variantId) {
                 shopifyCostMap.set(variantId, shopifyCost);
             }
+
+            // Determine Unit Cost (DB > Shopify > 0)
+            const unitCost = dbCostMap.get(variantId) || shopifyCost || 0;
+            const lineCogs = unitCost * qty;
+
+            totalCogs += lineCogs;
+            monthly.cogs += lineCogs;
 
             if (!variantId) continue;
 
@@ -340,30 +362,61 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
             const prod = productMap.get(variantId)!;
             prod.revenue += lineTotal;
             prod.quantity_sold += qty;
+            prod.cogs += lineCogs; // Accumulate COGS
+
+            // Collect for Sync
+            if (!productsToSync.has(variantId)) {
+                productsToSync.set(variantId, {
+                    user_id: userId,
+                    variant_id: variantId,
+                    product_id: productId,
+                    title: item.title || 'Unknown',
+                    sku: item.variant?.sku || '',
+                    price: lineTotal / qty,
+                    cost: unitCost,
+                    updated_at: new Date().toISOString()
+                });
+            }
+
+            // Collect for Sync
+            if (!productsToSync.has(variantId)) {
+                productsToSync.set(variantId, {
+                    user_id: userId,
+                    variant_id: variantId,
+                    product_id: productId,
+                    title: item.title || 'Unknown',
+                    sku: item.variant?.sku || '',
+                    price: lineTotal / qty, // approx
+                    cost: unitCost,
+                    updated_at: new Date().toISOString()
+                });
+            }
         }
     }
 
-    // Fetch product costs from product_costs table
-    const { data: productCosts } = await supabaseAdmin
-        .from('product_costs')
-        .select('variant_id, unit_cost')
-        .eq('user_id', userId);
+    // Background Sync (Try/Catch)
+    if (productsToSync.size > 0) {
+        // We do this async without awaiting? No, Next.js generic functions should await or use waitUntil.
+        // We'll await to ensure consistency.
+        const productsPayload = Array.from(productsToSync.values());
+        try {
+            await supabaseAdmin.from('products').upsert(productsPayload, { onConflict: 'variant_id' });
+        } catch (e) {
+            console.warn("Auto-sync to 'products' table failed (table likely missing)", e);
+        }
+    }
 
-    const costMap = new Map<string, number>();
-    productCosts?.forEach(pc => {
-        costMap.set(String(pc.variant_id), Number(pc.unit_cost) || 0);
-    });
-
-    // Calculate product metrics
+    // Calculate product metrics (Finalize)
     const products = Array.from(productMap.values()).map(p => {
-        // Priority: Database Cost > Shopify Cost > 0
-        const unitCost = costMap.get(p.variant_id) || shopifyCostMap.get(p.variant_id) || 0;
-
-        p.cogs = unitCost * p.quantity_sold;
-        p.fees = p.revenue * platformFeeRate;
-        p.profit = p.revenue - p.cogs - p.fees;
+        // Costs are already accumulated in p.cogs
+        // Add proportional fees/shipping?
+        // Simple Profit = Revenue - COGS
+        // User might want Fees separated. 
+        // Let's stick to Net Profit = Revenue - COGS - (Revenue * FeeRate)
+        const fees = p.revenue * platformFeeRate;
+        p.fees = fees;
+        p.profit = p.revenue - p.cogs - fees;
         p.profit_margin = p.revenue > 0 ? (p.profit / p.revenue) * 100 : 0;
-        totalCogs += p.cogs;
         return p;
     });
 
@@ -392,7 +445,8 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
     const monthlyTrends = Array.from(monthlyMap.values())
         .sort((a, b) => a.month.localeCompare(b.month));
     monthlyTrends.forEach(m => {
-        m.profit = profitMargin > 0 ? m.revenue * (profitMargin / 100) : m.revenue * 0.1;
+        const fees = m.revenue * platformFeeRate;
+        m.profit = m.revenue - m.cogs - fees;
     });
 
     // Period calculation
