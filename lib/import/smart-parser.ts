@@ -1,4 +1,5 @@
 import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 import Fuse from 'fuse.js';
 import { createClient } from '@/utils/supabase/client';
 
@@ -52,6 +53,16 @@ export class SmartParser {
     async parseAndMatch(file: File): Promise<ParsedCampaign[]> {
         await this.loadMemory();
 
+        if (file.name.endsWith('.csv')) {
+            return this.parseCSV(file);
+        } else if (file.name.match(/\.(xlsx|xls)$/i)) {
+            return this.parseExcel(file);
+        } else {
+            throw new Error("Desteklenmeyen dosya formatı. Lütfen .csv veya .xlsx yükleyin.");
+        }
+    }
+
+    private parseCSV(file: File): Promise<ParsedCampaign[]> {
         return new Promise((resolve, reject) => {
             Papa.parse(file, {
                 header: true,
@@ -64,6 +75,15 @@ export class SmartParser {
                 error: (error) => reject(error)
             });
         });
+    }
+
+    private async parseExcel(file: File): Promise<ParsedCampaign[]> {
+        const buffer = await file.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(sheet) as CSVRow[];
+        return this.processRows(json);
     }
 
     private processRows(rows: CSVRow[]): ParsedCampaign[] {

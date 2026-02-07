@@ -172,7 +172,7 @@ export default function ImportWizardPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Reklam Harcaması İçeri Aktar</h1>
-                    <p className="text-gray-500">Meta/Facebook CSV dosyasını yükleyin ve harcamaları ürünlere dağıtın.</p>
+                    <p className="text-gray-500">Meta/Facebook CSV veya Excel dosyasını yükleyin ve harcamaları ürünlere dağıtın.</p>
                 </div>
             </div>
 
@@ -180,7 +180,7 @@ export default function ImportWizardPage() {
                 <Card className="p-12 border-dashed border-2 border-gray-300 bg-gray-50 text-center">
                     <input
                         type="file"
-                        accept=".csv"
+                        accept=".csv, .xlsx, .xls"
                         onChange={handleFileUpload}
                         className="hidden"
                         id="file-upload"
@@ -188,8 +188,8 @@ export default function ImportWizardPage() {
                     />
                     <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center">
                         <Upload size={48} className="text-gray-400 mb-4" />
-                        <span className="text-lg font-medium text-gray-700">CSV Dosyasını Buraya Sürükleyin veya Seçin</span>
-                        <span className="text-sm text-gray-500 mt-2">sadece .csv formatı</span>
+                        <span className="text-lg font-medium text-gray-700">Dosyayı Buraya Sürükleyin veya Seçin</span>
+                        <span className="text-sm text-gray-500 mt-2">.csv, .xlsx, .xls formatları</span>
                         {isParsing && <span className="mt-4 text-blue-600 animate-pulse">Analiz ediliyor...</span>}
                     </label>
                 </Card>
