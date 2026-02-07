@@ -94,71 +94,80 @@ export class SmartParser {
             threshold: 0.4
         });
 
-        // Helper to find key case-insensitive
-        const findKey = (row: any, keywords: string[]): string | undefined => {
-            const keys = Object.keys(row);
-            for (const k of keywords) {
-                const match = keys.find(key => key.toLowerCase().includes(k.toLowerCase()));
-                if (match) return match;
-            }
-            return undefined;
-        };
+        if (rows.length === 0) return [];
+
+        // Dynamic Header matching
+        const headers = Object.keys(rows[0]);
+        const campaignKey = headers.find(h => h.match(/campaign\s*name/i) || h.match(/kampanya/i));
+        const dateKey = headers.find(h => h.match(/reporting\s*starts/i) || h.match(/date/i) || h.match(/tarih/i));
+        // Amount key: Look for "Amount Spent" or "Harcanan Tutar", ignoring currency in parens
+        const amountKey = headers.find(h => h.match(/amount\s*spent/i) || h.match(/harcanan/i));
 
         rows.forEach(row => {
-            // Dynamic Column Detection
-            const nameKey = findKey(row, ['Campaign Name', 'Campaign', 'Kampanya']);
-            const dateKey = findKey(row, ['Reporting Starts', 'Date', 'Tarih', 'Starts']);
-            const amountKey = findKey(row, ['Amount Spent', 'Tutar', 'Harcama', 'Cost', 'Spent']);
+            const name = campaignKey ? String(row[campaignKey] || '').trim() : '';
 
-            const name = nameKey ? row[nameKey] : '';
-
-            // Amount Parsing
-            let amount = 0;
-            if (amountKey) {
-                const rawVal = row[amountKey];
-                if (typeof rawVal === 'number') {
-                    amount = rawVal;
-                } else if (typeof rawVal === 'string') {
-                    // Handle "1.234,56" (TR) or "1,234.56" (US)
-                    // Heuristic: If comma exists and is after the last dot, or no dot?
-                    // Safe bet: Remove all non-numeric chars except last punctuation?
-                    // Actually, simpler: replace ',' with '.' if it looks like decimal separator?
-                    // Replace 'TL', spaces.
-                    let clean = rawVal.replace(/[^0-9.,-]/g, '');
-                    // Check if it has comma as decimal
-                    if (clean.includes(',') && !clean.includes('.')) {
-                        clean = clean.replace(',', '.');
-                    } else if (clean.includes('.') && clean.includes(',')) {
-                        // "1.234,56" -> remove dot, replace comma
-                        if (clean.indexOf('.') < clean.indexOf(',')) {
-                            clean = clean.replace(/\./g, '').replace(',', '.');
-                        } else {
-                            // "1,234.56" -> remove comma
-                            clean = clean.replace(/,/g, '');
-                        }
-                    }
-                    amount = parseFloat(clean);
-                }
-            }
-
-            // Date Parsing
+            // Date parsing
             let dateStr = new Date().toISOString();
-            if (dateKey) {
-                const rawDate = row[dateKey];
-                if (rawDate) {
-                    // Handle DD.MM.YYYY
-                    if (typeof rawDate === 'string' && rawDate.match(/^\d{1,2}\.\d{1,2}\.\d{4}$/)) {
-                        const [d, m, y] = rawDate.split('.');
-                        dateStr = `${y}-${m}-${d}`;
+            if (dateKey && row[dateKey]) {
+                const val = row[dateKey];
+                // Handle Excel Serial Date (numbers like 45321)
+                if (typeof val === 'number') {
+                    // Excel base date: Dec 30 1899
+                    const d = new Date(Math.round((val - 25569) * 86400 * 1000));
+                    dateStr = d.toISOString();
+                } else {
+                    // Handle "3.02.2026" or "2026-02-03"
+                    const s = String(val).trim();
+                    if (s.match(/^\d{1,2}\.\d{1,2}\.\d{4}$/)) {
+                        // DD.MM.YYYY
+                        const parts = s.split('.');
+                        dateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
                     } else {
-                        // Fallback to standard
-                        const d = new Date(rawDate);
-                        if (!isNaN(d.getTime())) dateStr = d.toISOString();
+                        dateStr = s;
                     }
                 }
             }
 
-            if (!name || isNaN(amount) || amount === 0) return;
+            // Amount parsing
+            let amount = 0;
+            if (amountKey && row[amountKey] !== undefined && row[amountKey] !== null) {
+                const val = row[amountKey];
+                if (typeof val === 'number') {
+                    amount = val;
+                } else {
+                    // String: "1.234,56" (TR) or "1,234.56" (US)
+                    // We need to guess format or assume standard dot decimal if from API?
+                    // Meta CSV usually standard "123.45". 
+                    // But if local Excel saved formatted...
+                    // Let's assume dot decimal for now as per CSV example "13.03"
+                    const clean = String(val).replace(/[^0-9.,-]+/g, '');
+                    // Verify if comma is decimal separator? 
+                    // If "13.03" -> 13.03. If "13,03" -> 13.03?
+                    // Simple approach: replace comma with dot if dot doesn't exist?
+                    // Or standard parseFloat.
+                    amount = parseFloat(clean.replace(',', '.')); // Risk for 1,000.00 -> 1.000.00
+                    // Better:
+                    // If it matches 123.45 -> parseFloat
+                    amount = parseFloat(String(val).replace(/,/g, '')); // Remove thousands separator? 
+                    // Wait, if it is "13,42" (TR decimal), removing comma makes it 1342.
+                    // Let's use a safer approach.
+                    // If the original CSV has "13.03", generic replacement might break.
+
+                    // Revert to simple parse float if dot present.
+                    const s = String(val);
+                    if (s.includes('.') && !s.includes(',')) {
+                        amount = parseFloat(s);
+                    } else if (s.includes(',') && !s.includes('.')) {
+                        // Likely "13,42"
+                        amount = parseFloat(s.replace(',', '.'));
+                    } else {
+                        // Mixed? "1,234.56" -> 1234.56
+                        amount = parseFloat(s.replace(/,/g, ''));
+                    }
+                }
+            }
+
+            if (!name || amount === 0) return;
 
             let matchStatus: ParsedCampaign['matchStatus'] = 'unmatched';
             let matchedProduct: ParsedCampaign['matchedProduct'] = undefined;
@@ -169,6 +178,7 @@ export class SmartParser {
                 const pid = this.mappings.get(name);
                 if (pid === 'GENERAL') {
                     matchStatus = 'matched';
+                    // matchedProduct undefined means General
                 } else if (pid) {
                     const product = this.products.find(p => p.id === pid);
                     if (product) {
@@ -178,12 +188,14 @@ export class SmartParser {
                 }
             } else {
                 // 2. Fuzzy Match
+                // Check if SKU is in name (Strong signal)
                 const skuMatch = this.products.find(p => p.sku && name.includes(p.sku));
                 if (skuMatch) {
                     matchStatus = 'auto-match';
                     matchedProduct = skuMatch;
                     confidence = 1.0;
                 } else {
+                    // Fuse.js search
                     const result = fuse.search(name);
                     if (result.length > 0) {
                         const topMatch = result[0];
