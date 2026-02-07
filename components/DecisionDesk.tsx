@@ -94,6 +94,12 @@ export default function DecisionDesk({ diagnosis, userName }: DecisionDeskProps)
                             )}
                         </p>
 
+                        {topFactor === 'toxic_product_impact' && !isClean && (
+                            <Link href="/dashboard/toxic-products" className="mb-4 inline-flex items-center text-red-600 font-bold hover:underline text-sm md:text-base group-hover:translate-x-1 transition-transform">
+                                Detaylı İncele <ArrowRight size={16} className="ml-1" />
+                            </Link>
+                        )}
+
                         {!isClean && (
                             <div className="hidden md:block p-4 bg-gray-50 rounded-2xl border border-gray-100">
                                 <div className="text-xs text-gray-400 font-bold uppercase mb-1">Tahmini Çözüm Etkisi</div>
@@ -118,12 +124,12 @@ export default function DecisionDesk({ diagnosis, userName }: DecisionDeskProps)
                             "{advice}"
                         </div>
 
-                        <Link href={isClean ? '/simulation' : `/dashboard/suggestion?type=${topFactor}`} className="hidden md:flex w-full py-4 bg-white text-black font-black rounded-xl hover:bg-gray-200 transition-colors items-center justify-center gap-2">
-                            {isClean ? 'Simülasyon Modu' : 'Öneriyi İncele'} <ArrowRight size={18} />
+                        <Link href="/simulation" className="hidden md:flex w-full py-4 bg-white text-black font-black rounded-xl hover:bg-gray-200 transition-colors items-center justify-center gap-2">
+                            {isClean ? 'Simülasyon Modu' : 'Simüle Et'} <ArrowRight size={18} />
                         </Link>
                     </div>
                     {/* Mobile Button Icon Only */}
-                    <Link href={isClean ? '/simulation' : `/dashboard/suggestion?type=${topFactor}`} className="md:hidden w-10 h-10 flex items-center justify-center bg-white text-black rounded-full shadow-lg shrink-0">
+                    <Link href="/simulation" className="md:hidden w-10 h-10 flex items-center justify-center bg-white text-black rounded-full shadow-lg shrink-0">
                         <ArrowRight size={16} />
                     </Link>
                 </div>
