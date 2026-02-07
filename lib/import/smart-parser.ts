@@ -91,31 +91,74 @@ export class SmartParser {
         const fuse = new Fuse(this.products, {
             keys: ['title', 'sku'],
             includeScore: true,
-            threshold: 0.4 // 0.0 is perfect match, 1.0 is no match
+            threshold: 0.4
         });
 
-        // Group by Campaign Name first? Or treat each day row?
-        // Usually Meta export has daily rows.
-        // We probably want to group distinct Campaign Names for the "Wizard" review step
-        // But for "Financial Distribution", we need the daily data.
-        // The Wizard usually asks user to map "Campaign Names" not "Rows".
-        // SO: We process rows to extract Unique Campaigns?
-        // NO, the requirement says "Smart Parser... CSV'den... verilerini al".
-        // But UI Wizard says: "Otomatik Eşleşen: 12 Kampanya".
-        // So we should return a list of Unique Campaigns with their total spend, and let user map them.
-        // THEN we apply that mapping to all rows.
-
-        // Wait, `processRows` currently returns parsed campaigns row by row?
-        // Let's make it return row-by-row but with match info attached.
-        // The UI will aggregate them.
+        // Helper to find key case-insensitive
+        const findKey = (row: any, keywords: string[]): string | undefined => {
+            const keys = Object.keys(row);
+            for (const k of keywords) {
+                const match = keys.find(key => key.toLowerCase().includes(k.toLowerCase()));
+                if (match) return match;
+            }
+            return undefined;
+        };
 
         rows.forEach(row => {
-            const name = row['Campaign Name'] || row['Campaign name'] || '';
-            const dateStr = row['Reporting Starts'] || row['Reporting starts'] || row['Date'] || new Date().toISOString();
-            const amountStr = row['Amount Spent (TRY)'] || row['Amount spent (TRY)'] || row['Amount Spent'] || '0';
-            const amount = parseFloat(amountStr.replace(/[^0-9.-]+/g, ''));
+            // Dynamic Column Detection
+            const nameKey = findKey(row, ['Campaign Name', 'Campaign', 'Kampanya']);
+            const dateKey = findKey(row, ['Reporting Starts', 'Date', 'Tarih', 'Starts']);
+            const amountKey = findKey(row, ['Amount Spent', 'Tutar', 'Harcama', 'Cost', 'Spent']);
 
-            if (!name || amount === 0) return;
+            const name = nameKey ? row[nameKey] : '';
+
+            // Amount Parsing
+            let amount = 0;
+            if (amountKey) {
+                const rawVal = row[amountKey];
+                if (typeof rawVal === 'number') {
+                    amount = rawVal;
+                } else if (typeof rawVal === 'string') {
+                    // Handle "1.234,56" (TR) or "1,234.56" (US)
+                    // Heuristic: If comma exists and is after the last dot, or no dot?
+                    // Safe bet: Remove all non-numeric chars except last punctuation?
+                    // Actually, simpler: replace ',' with '.' if it looks like decimal separator?
+                    // Replace 'TL', spaces.
+                    let clean = rawVal.replace(/[^0-9.,-]/g, '');
+                    // Check if it has comma as decimal
+                    if (clean.includes(',') && !clean.includes('.')) {
+                        clean = clean.replace(',', '.');
+                    } else if (clean.includes('.') && clean.includes(',')) {
+                        // "1.234,56" -> remove dot, replace comma
+                        if (clean.indexOf('.') < clean.indexOf(',')) {
+                            clean = clean.replace(/\./g, '').replace(',', '.');
+                        } else {
+                            // "1,234.56" -> remove comma
+                            clean = clean.replace(/,/g, '');
+                        }
+                    }
+                    amount = parseFloat(clean);
+                }
+            }
+
+            // Date Parsing
+            let dateStr = new Date().toISOString();
+            if (dateKey) {
+                const rawDate = row[dateKey];
+                if (rawDate) {
+                    // Handle DD.MM.YYYY
+                    if (typeof rawDate === 'string' && rawDate.match(/^\d{1,2}\.\d{1,2}\.\d{4}$/)) {
+                        const [d, m, y] = rawDate.split('.');
+                        dateStr = `${y}-${m}-${d}`;
+                    } else {
+                        // Fallback to standard
+                        const d = new Date(rawDate);
+                        if (!isNaN(d.getTime())) dateStr = d.toISOString();
+                    }
+                }
+            }
+
+            if (!name || isNaN(amount) || amount === 0) return;
 
             let matchStatus: ParsedCampaign['matchStatus'] = 'unmatched';
             let matchedProduct: ParsedCampaign['matchedProduct'] = undefined;
@@ -126,7 +169,6 @@ export class SmartParser {
                 const pid = this.mappings.get(name);
                 if (pid === 'GENERAL') {
                     matchStatus = 'matched';
-                    // matchedProduct undefined means General
                 } else if (pid) {
                     const product = this.products.find(p => p.id === pid);
                     if (product) {
@@ -136,19 +178,15 @@ export class SmartParser {
                 }
             } else {
                 // 2. Fuzzy Match
-                // Check if SKU is in name (Strong signal)
                 const skuMatch = this.products.find(p => p.sku && name.includes(p.sku));
                 if (skuMatch) {
                     matchStatus = 'auto-match';
                     matchedProduct = skuMatch;
                     confidence = 1.0;
                 } else {
-                    // Fuse.js search
                     const result = fuse.search(name);
                     if (result.length > 0) {
                         const topMatch = result[0];
-                        // Fuse score: lower is better. < 0.2 is very good.
-                        // User said > 80% similarity. Fuse score 0.2 ~= 80% similarity.
                         if (topMatch.score !== undefined && topMatch.score < 0.3) {
                             matchStatus = 'auto-match';
                             matchedProduct = topMatch.item;
