@@ -13,6 +13,7 @@ export interface ProductMetric {
     shipping: number;
     profit: number;
     profit_margin: number;
+    ads: number; // New field
 }
 
 export interface MonthlyTrend {
@@ -21,6 +22,7 @@ export interface MonthlyTrend {
     profit: number;
     orders: number;
     cogs: number;
+    ads: number; // New field
 }
 
 export interface CostBreakdown {
@@ -33,6 +35,7 @@ export interface CostBreakdown {
     discounts: number;
     total_costs: number;
     net_profit: number;
+    ads: number; // New field
 }
 
 export interface Recommendation {
@@ -215,7 +218,7 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
         dateRange: { start: new Date().toISOString(), end: new Date().toISOString() },
         overview: { totalRevenue: 0, totalOrders: 0, avgOrderValue: 0, totalProducts: 0, periodDays: 1 },
         realProfit: { grossRevenue: 0, totalCosts: 0, netProfit: 0, profitMargin: 0, gapMessage: 'Veri bulunamadı' },
-        costBreakdown: { revenue: 0, cogs: 0, tax: 0, shipping: 0, platform_fees: 0, refunds: 0, discounts: 0, total_costs: 0, net_profit: 0 },
+        costBreakdown: { revenue: 0, cogs: 0, tax: 0, shipping: 0, platform_fees: 0, refunds: 0, discounts: 0, total_costs: 0, net_profit: 0, ads: 0 },
         topProducts: [],
         dangerProducts: [],
         monthlyTrends: [],
@@ -242,6 +245,21 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
             dbCostMap.set(String(pc.variant_id), Number(pc.unit_cost) || 0);
         });
     } catch (e) { console.error("Cost fetch failed", e); }
+
+    // Fetch Marketing Spends
+    // We need to fetch for the potential range. 
+    // If dateRangeFilter is set, use it. Else full history might be heavy? 
+    // For MVP, we fetch all if unlimited, or range.
+    let adSpends: any[] = [];
+    try {
+        let q = supabaseAdmin.from('marketing_spends').select('*').eq('user_id', userId);
+        if (dateRangeFilter) {
+            q = q.gte('date', dateRangeFilter.start.toISOString().split('T')[0])
+                .lte('date', dateRangeFilter.end.toISOString().split('T')[0]);
+        }
+        const { data: ads } = await q;
+        if (ads) adSpends = ads;
+    } catch (e) { console.error("Ad spend fetch failed", e); }
 
     // Prepare Date Filter for API (Server-Side Filtering)
     // If we have a filter, we pass it to Shopify to get EXACT and COMPLETE data for that range.
@@ -324,7 +342,7 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
         // Monthly tracking
         const monthKey = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}`;
         if (!monthlyMap.has(monthKey)) {
-            monthlyMap.set(monthKey, { month: monthKey, revenue: 0, profit: 0, orders: 0, cogs: 0 });
+            monthlyMap.set(monthKey, { month: monthKey, revenue: 0, profit: 0, orders: 0, cogs: 0, ads: 0 });
         }
         const monthly = monthlyMap.get(monthKey)!;
         monthly.revenue += subtotal;
@@ -367,7 +385,8 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
                     fees: 0,
                     shipping: 0,
                     profit: 0,
-                    profit_margin: 0
+                    profit_margin: 0,
+                    ads: 0
                 });
             }
 
@@ -420,14 +439,14 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
 
     // Calculate product metrics (Finalize)
     const products = Array.from(productMap.values()).map(p => {
-        // Costs are already accumulated in p.cogs
-        // Add proportional fees/shipping?
-        // Simple Profit = Revenue - COGS
-        // User might want Fees separated. 
-        // Let's stick to Net Profit = Revenue - COGS - (Revenue * FeeRate)
+        // Distribute Ad Spends to Products
+        // Find ads for this product variant
+        const productAds = adSpends.filter(a => a.product_id === p.variant_id).reduce((sum, a) => sum + Number(a.amount), 0);
+        p.ads = productAds;
+
         const fees = p.revenue * platformFeeRate;
         p.fees = fees;
-        p.profit = p.revenue - p.cogs - fees;
+        p.profit = p.revenue - p.cogs - fees - p.ads; // Subtract ads from profit
         p.profit_margin = p.revenue > 0 ? (p.profit / p.revenue) * 100 : 0;
         return p;
     });
@@ -439,11 +458,25 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
     // Note: Discounts are already subtracted from subtotal
     const totalCosts = totalCogs + totalTax + totalShipping + platformFees + totalRefunds;
 
+    // Total Ads from fetched spends
+    const totalAds = adSpends.reduce((sum, a) => sum + Number(a.amount), 0);
+
+    // Distribute to Monthly Trends
+    adSpends.forEach(ad => {
+        const d = new Date(ad.date);
+        const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        if (monthlyMap.has(monthKey)) {
+            const m = monthlyMap.get(monthKey)!;
+            m.ads += Number(ad.amount);
+        }
+    });
+
     // Net revenue = Subtotal - Refunds
     const netRevenue = totalSubtotal - totalRefunds;
 
     // Net profit = Net Revenue - Costs (excluding refunds since already subtracted)
-    const netProfit = netRevenue - (totalCogs + totalTax + totalShipping + platformFees);
+    // totalCosts needs to include ads now for correctness in breakdown
+    const netProfit = netRevenue - (totalCogs + totalTax + totalShipping + platformFees + totalAds);
     const profitMargin = netRevenue > 0 ? (netProfit / netRevenue) * 100 : 0;
 
     // Sort products (all)
@@ -463,7 +496,7 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
         .sort((a, b) => a.month.localeCompare(b.month));
     monthlyTrends.forEach(m => {
         const fees = m.revenue * platformFeeRate;
-        m.profit = m.revenue - m.cogs - fees;
+        m.profit = m.revenue - m.cogs - fees - m.ads;
     });
 
     // Period calculation
@@ -550,8 +583,14 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
         ydTax += parseFloat(order.current_total_tax_set?.shop_money?.amount || '0');
     });
 
+    // Yesterday Ads
+    const ydAds = adSpends.filter(a => {
+        const d = new Date(a.date);
+        return d.toDateString() === yesterdayDate.toDateString();
+    }).reduce((sum, a) => sum + Number(a.amount), 0);
+
     ydFees = ydRevenue * platformFeeRate; // Estimate
-    const ydNetProfit = (ydRevenue - ydRefunds) - (ydCogs + ydShipping + ydTax + ydFees);
+    const ydNetProfit = (ydRevenue - ydRefunds) - (ydCogs + ydShipping + ydTax + ydFees + ydAds);
 
     // Fallback: If no orders yesterday (maybe sync issue or logic), 
     // leave as 0.
@@ -660,7 +699,8 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
             refunds: totalRefunds,
             discounts: totalDiscounts,
             total_costs: totalCosts,
-            net_profit: netProfit
+            net_profit: netProfit,
+            ads: totalAds
         },
         topProducts,
         dangerProducts,

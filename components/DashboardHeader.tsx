@@ -429,6 +429,11 @@ export default function DashboardHeader({ isDemo = false }: DashboardHeaderProps
             <span className="text-sm font-black uppercase tracking-wider">Karar Masası</span>
           </Link>
 
+          <Link href="/import" onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all group">
+            <FolderInput size={20} className="group-hover:text-blue-600" />
+            <span className="text-sm font-black uppercase tracking-wider">İçe Aktar</span>
+          </Link>
+
 
 
           <Link href="/simulation" onClick={() => setIsSideMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-gray-500 font-bold hover:text-black hover:bg-gray-50 rounded-[2rem] transition-all group">
