@@ -119,12 +119,12 @@ export default function DecisionDesk({ diagnosis, userName }: DecisionDeskProps)
                             "{advice}"
                         </div>
 
-                        <Link href="/simulation" className="hidden md:flex w-full py-4 bg-white text-black font-black rounded-xl hover:bg-gray-200 transition-colors items-center justify-center gap-2">
-                            {isClean ? 'Simülasyon Modu' : 'Simüle Et'} <ArrowRight size={18} />
+                        <Link href="/dashboard/oneri" className="hidden md:flex w-full py-4 bg-white text-black font-black rounded-xl hover:bg-gray-200 transition-colors items-center justify-center gap-2">
+                            {isClean ? 'Simülasyon Modu' : 'Öneriyi Uygula'} <ArrowRight size={18} />
                         </Link>
                     </div>
                     {/* Mobile Button Icon Only */}
-                    <Link href="/simulation" className="md:hidden w-10 h-10 flex items-center justify-center bg-white text-black rounded-full shadow-lg shrink-0">
+                    <Link href="/dashboard/oneri" className="md:hidden w-10 h-10 flex items-center justify-center bg-white text-black rounded-full shadow-lg shrink-0">
                         <ArrowRight size={16} />
                     </Link>
                 </div>
