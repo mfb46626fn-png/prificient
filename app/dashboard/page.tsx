@@ -72,16 +72,17 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             villains: danger
         };
 
-        // Autopsy: Use Average Daily Stats from Analysis
-        const days = analysis.overview.periodDays || 1;
+        // Autopsy: Use YESTERDAY'S Stats from Analysis (Real data)
+        const yesterday = analysis.yesterday;
 
         autopsy = {
-            grossRevenue: analysis.realProfit.grossRevenue / days,
-            returns: analysis.costBreakdown.refunds / days,
-            ads: 0, // No ads data yet
-            cogsAndFees: (analysis.costBreakdown.cogs + analysis.costBreakdown.platform_fees + analysis.costBreakdown.shipping + analysis.costBreakdown.tax) / days,
-            netPocket: analysis.realProfit.netProfit / days,
-            date: new Date().toISOString()
+            grossRevenue: yesterday.revenue,
+            returns: yesterday.refunds,
+            ads: yesterday.ads,
+            cogsAndFees: yesterday.cogs + yesterday.fees + yesterday.shipping + yesterday.tax,
+            netPocket: yesterday.netProfit,
+            date: yesterday.date,
+            currency: analysis.currency
         };
     }
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { Receipt, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Receipt } from 'lucide-react'
 
 interface DailyAutopsyProps {
     data: {
@@ -10,10 +10,23 @@ interface DailyAutopsyProps {
         cogsAndFees: number
         netPocket: number
         date: string
+        currency?: string
     } | null
 }
 
 export default function DailyAutopsy({ data }: DailyAutopsyProps) {
+
+    // Default currency
+    const currency = data?.currency || 'TRY'
+
+    // Formatter
+    const formatMoney = (amount: number) => {
+        return new Intl.NumberFormat('tr-TR', {
+            style: 'currency',
+            currency: currency,
+            maximumFractionDigits: 0
+        }).format(amount)
+    }
 
     // Receipt Metaphor
     // If no data, we show a "Ghost Receipt" (Mock) to keep the UI populated.
@@ -27,7 +40,8 @@ export default function DailyAutopsy({ data }: DailyAutopsyProps) {
         isMock: true
     }
 
-    const { grossRevenue, returns, ads, netPocket, isMock } = displayData as any
+    const { grossRevenue, returns, ads, netPocket } = displayData as any
+    const isMock = (displayData as any).isMock
 
     return (
         <div className="relative bg-[#f8f9fa] rounded-none sm:rounded-sm shadow-sm border-x border-[#e5e7eb] max-w-sm mx-auto w-full font-mono text-xs md:text-sm p-6 text-gray-800">
@@ -37,25 +51,25 @@ export default function DailyAutopsy({ data }: DailyAutopsyProps) {
             <div className="text-center mb-6 opacity-80">
                 <Receipt className="mx-auto mb-2 opacity-50" size={24} />
                 <h3 className="font-bold text-base tracking-widest border-b border-dashed border-gray-300 pb-2 inline-block">DÜNÜN OTOPSİSİ</h3>
-                <p className="mt-1 text-[10px] text-gray-400">{new Date(displayData.date).toLocaleDateString()}</p>
+                <p className="mt-1 text-[10px] text-gray-400">{new Date(displayData.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
             </div>
 
             <div className={`space-y-2 ${isMock ? 'opacity-50 grayscale' : ''}`}>
                 <div className="flex justify-between">
                     <span>CİRO</span>
-                    <span className="font-bold">{isMock ? '-- ₺' : (grossRevenue || 0).toLocaleString() + '₺'}</span>
+                    <span className="font-bold">{isMock ? '--' : formatMoney(grossRevenue || 0)}</span>
                 </div>
                 <div className="flex justify-between text-gray-500">
                     <span>İADE</span>
-                    <span>{isMock ? '-- ₺' : `-${(returns || 0).toLocaleString()}₺`}</span>
+                    <span>{isMock ? '--' : `${formatMoney((returns || 0) * -1)}`}</span>
                 </div>
                 <div className="flex justify-between text-gray-500">
                     <span>REKLAM</span>
-                    <span>{isMock ? '-- ₺' : `-${(ads || 0).toLocaleString()}₺`}</span>
+                    <span>{isMock ? '--' : `${formatMoney((ads || 0) * -1)}`}</span>
                 </div>
                 <div className="flex justify-between text-gray-500">
                     <span>MALİYET</span>
-                    <span>{isMock ? '-- ₺' : `-${(displayData.cogsAndFees || 0).toLocaleString()}₺`}</span>
+                    <span>{isMock ? '--' : `${formatMoney((displayData.cogsAndFees || 0) * -1)}`}</span>
                 </div>
             </div>
 
@@ -63,7 +77,7 @@ export default function DailyAutopsy({ data }: DailyAutopsyProps) {
 
             <div className={`flex justify-between items-center text-lg md:text-xl font-bold ${isMock ? 'opacity-50' : netPocket > 0 ? 'text-gray-900' : 'text-red-600'}`}>
                 <span>NET CEPTE:</span>
-                <span>{isMock ? 'Hesaplanıyor...' : (netPocket || 0).toLocaleString() + '₺'}</span>
+                <span>{isMock ? 'Hesaplanıyor...' : formatMoney(netPocket || 0)}</span>
             </div>
 
             {/* Bottom Zigzag */}
