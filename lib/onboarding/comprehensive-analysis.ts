@@ -177,7 +177,7 @@ async function fetchShopifyOrders(accessToken: string, shopDomain: string, start
 }
 
 // --- Main Analysis Function ---
-export async function generateComprehensiveAnalysis(userId: string, dateRangeFilter?: { start: Date, end: Date }): Promise<ComprehensiveAnalysis> {
+export async function generateComprehensiveAnalysis(userId: string, dateRangeFilter?: { start: Date, end: Date }, options: { limitLists?: boolean } = { limitLists: true }): Promise<ComprehensiveAnalysis> {
     const supabaseAdmin = createAdminClient();
 
     // Fetch store settings
@@ -435,11 +435,12 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
     const profitMargin = netRevenue > 0 ? (netProfit / netRevenue) * 100 : 0;
 
     // Sort products
-    const topProducts = [...products].sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+    const limit = options.limitLists ? 5 : undefined;
+    const topProducts = [...products].sort((a, b) => b.revenue - a.revenue).slice(0, limit);
     const dangerProducts = [...products]
         .filter(p => p.profit_margin < 10 || p.profit < 0)
         .sort((a, b) => a.profit - b.profit)
-        .slice(0, 5);
+        .slice(0, limit);
 
     // Monthly trends
     const monthlyTrends = Array.from(monthlyMap.values())

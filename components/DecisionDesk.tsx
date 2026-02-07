@@ -68,7 +68,7 @@ export default function DecisionDesk({ diagnosis, userName }: DecisionDeskProps)
             <div className="flex flex-col gap-4 md:grid md:grid-cols-3 md:gap-8">
 
                 {/* 1. DIAGNOSTIC CARD */}
-                <div className={`bg-white rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 border ${isClean ? 'border-emerald-100' : 'border-red-100'} shadow-sm relative overflow-hidden group min-h-[160px] flex flex-row items-center gap-4 transition-colors`}>
+                <Link href={isClean ? '#' : '/dashboard/kanayan-yara'} className={`block bg-white rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 border ${isClean ? 'border-emerald-100 cursor-default' : 'border-red-100 hover:border-red-200 cursor-pointer'} shadow-sm relative overflow-hidden group min-h-[160px] flex flex-row items-center gap-4 transition-all no-underline`}>
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                         {isClean ? <div className="w-24 h-24 border-4 border-emerald-200 rounded-full animate-ping opacity-20"></div> : <Skull size={80} className="md:w-[120px] md:h-[120px]" />}
                     </div>
@@ -94,22 +94,17 @@ export default function DecisionDesk({ diagnosis, userName }: DecisionDeskProps)
                             )}
                         </p>
 
-                        {topFactor === 'toxic_product_impact' && !isClean && (
-                            <Link href="/dashboard/toxic-products" className="mb-4 inline-flex items-center text-red-600 font-bold hover:underline text-sm md:text-base group-hover:translate-x-1 transition-transform">
-                                Detaylı İncele <ArrowRight size={16} className="ml-1" />
-                            </Link>
-                        )}
-
                         {!isClean && (
-                            <div className="hidden md:block p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                            <div className="hidden md:block p-4 bg-gray-50 rounded-2xl border border-gray-100 group-hover:bg-red-50/30 transition-colors">
                                 <div className="text-xs text-gray-400 font-bold uppercase mb-1">Tahmini Çözüm Etkisi</div>
-                                <div className="text-2xl font-black text-gray-900">
-                                    +{topFactorScore} Puan <span className="text-sm font-medium text-gray-400">İyileşme</span>
+                                <div className="text-2xl font-black text-gray-900 flex items-center justify-between">
+                                    <span>+{topFactorScore} Puan <span className="text-sm font-medium text-gray-400">İyileşme</span></span>
+                                    <ArrowRight className="text-gray-300 group-hover:text-red-400 transition-colors" size={24} />
                                 </div>
                             </div>
                         )}
                     </div>
-                </div>
+                </Link>
 
                 {/* 2. ACTION PLAN */}
                 <div className="bg-black text-white rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 shadow-2xl flex flex-row md:flex-col items-center md:items-start justify-between relative overflow-hidden min-h-[160px] gap-4">
