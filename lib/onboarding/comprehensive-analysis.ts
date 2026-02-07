@@ -434,13 +434,17 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
     const netProfit = netRevenue - (totalCogs + totalTax + totalShipping + platformFees);
     const profitMargin = netRevenue > 0 ? (netProfit / netRevenue) * 100 : 0;
 
-    // Sort products
+    // Sort products (all)
     const limit = options.limitLists ? 5 : undefined;
-    const topProducts = [...products].sort((a, b) => b.revenue - a.revenue).slice(0, limit);
-    const dangerProducts = [...products]
+
+    const allTopProducts = [...products].sort((a, b) => b.revenue - a.revenue);
+    const topProducts = allTopProducts.slice(0, limit);
+
+    const allDangerProducts = [...products]
         .filter(p => p.profit_margin < 10 || p.profit < 0)
-        .sort((a, b) => a.profit - b.profit)
-        .slice(0, limit);
+        .sort((a, b) => a.profit - b.profit);
+
+    const dangerProducts = allDangerProducts.slice(0, limit);
 
     // Monthly trends
     const monthlyTrends = Array.from(monthlyMap.values())
@@ -462,7 +466,8 @@ export async function generateComprehensiveAnalysis(userId: string, dateRangeFil
 
     // Opportunity cost
     const worstProduct = dangerProducts.length > 0 ? dangerProducts[0] : null;
-    const lostProfit = dangerProducts.reduce((sum, p) => sum + (p.profit < 0 ? Math.abs(p.profit) : 0), 0);
+    // Calculate total lost profit from ALL danger products, not just top 5
+    const lostProfit = allDangerProducts.reduce((sum, p) => sum + (p.profit < 0 ? Math.abs(p.profit) : 0), 0);
 
     // Gap message
     let gapMessage = '';

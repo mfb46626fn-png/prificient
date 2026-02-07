@@ -141,7 +141,7 @@ export default function DecisionDesk({ diagnosis, userName }: DecisionDeskProps)
                         <p className="text-[10px] md:text-sm text-gray-500 font-bold uppercase tracking-wide">Son 72 Saat</p>
                     </div>
                     {/* Mobile Link Icon */}
-                    <Link href="/dashboard/settings/billing" className="md:hidden w-10 h-10 flex items-center justify-center bg-gray-50 text-indigo-600 rounded-full shrink-0">
+                    <Link href="/dashboard/oneri" className="md:hidden w-10 h-10 flex items-center justify-center bg-gray-50 text-indigo-600 rounded-full shrink-0">
                         <ArrowRight size={16} />
                     </Link>
 
@@ -149,7 +149,7 @@ export default function DecisionDesk({ diagnosis, userName }: DecisionDeskProps)
                         <p className="text-gray-500 text-sm leading-relaxed mb-4">
                             Günlük kayıp: <span className="text-gray-900 font-bold">{Math.floor(opportunity_loss).toLocaleString('tr-TR')}₺</span>
                         </p>
-                        <Link href="/dashboard/settings/billing" className="text-indigo-600 font-black text-sm flex items-center gap-1 hover:gap-2 transition-all">
+                        <Link href="/dashboard/oneri" className="text-indigo-600 font-black text-sm flex items-center gap-1 hover:gap-2 transition-all">
                             Kurtarma Planına Geç <ArrowRight size={14} />
                         </Link>
                     </div>
