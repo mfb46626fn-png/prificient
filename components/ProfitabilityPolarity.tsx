@@ -13,9 +13,10 @@ interface Product {
 interface ProfitabilityPolarityProps {
     heroes: Product[]
     villains: Product[]
+    currency?: string
 }
 
-export default function ProfitabilityPolarity({ heroes, villains }: ProfitabilityPolarityProps) {
+export default function ProfitabilityPolarity({ heroes, villains, currency = 'TRY' }: ProfitabilityPolarityProps) {
 
     // Helper for Skeleton Rows
     const SkeletonRow = () => (
@@ -29,6 +30,13 @@ export default function ProfitabilityPolarity({ heroes, villains }: Profitabilit
     )
 
     const hasData = heroes.length > 0 || villains.length > 0
+    const formatMoney = (amount: number) => {
+        return new Intl.NumberFormat('tr-TR', {
+            style: 'currency',
+            currency: currency,
+            maximumFractionDigits: 0
+        }).format(amount)
+    }
 
     return (
         <div className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] p-4 md:p-8 border border-gray-100 shadow-sm relative overflow-hidden h-full">
@@ -61,9 +69,9 @@ export default function ProfitabilityPolarity({ heroes, villains }: Profitabilit
                                 <div key={product.variant_id} className="flex justify-between items-center text-sm group">
                                     <div className="flex items-center gap-2 min-w-0">
                                         <span className="font-mono text-emerald-300 text-xs">#{i + 1}</span>
-                                        <span className="font-bold text-gray-700 truncate group-hover:text-emerald-700 transition-colors">{product.title}</span>
+                                        <span className="font-bold text-gray-700 truncate group-hover:text-emerald-700 transition-colors" title={product.title}>{product.title}</span>
                                     </div>
-                                    <span className="font-mono font-bold text-emerald-600">+{(product.net_sales || 0).toLocaleString()}₺</span>
+                                    <span className="font-mono font-bold text-emerald-600">+{formatMoney(product.net_sales || 0)}</span>
                                 </div>
                             ))
                     )}
@@ -85,9 +93,9 @@ export default function ProfitabilityPolarity({ heroes, villains }: Profitabilit
                                 <div key={product.variant_id} className="flex justify-between items-center text-sm group">
                                     <div className="flex items-center gap-2 min-w-0">
                                         <span className="font-mono text-red-300 text-xs">#{i + 1}</span>
-                                        <span className="font-bold text-gray-700 truncate group-hover:text-red-700 transition-colors">{product.title}</span>
+                                        <span className="font-bold text-gray-700 truncate group-hover:text-red-700 transition-colors" title={product.title}>{product.title}</span>
                                     </div>
-                                    <span className="font-mono font-bold text-red-500">{(product.net_sales || 0).toLocaleString()}₺</span>
+                                    <span className="font-mono font-bold text-red-500">{product.net_sales < 0 ? '' : '-'}{formatMoney(Math.abs(product.net_sales || 0))}</span>
                                 </div>
                             ))
                     )}

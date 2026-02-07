@@ -58,9 +58,18 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         // Map Analysis to Diagnosis using Helper
         diagnosis = diagnoseFromAnalysis(analysis);
 
+        // Analysis top/danger products
+        const top = analysis.topProducts || [];
+        const danger = analysis.dangerProducts || [];
+
+        // Filter out any product that is in danger list from top list to avoid overlap
+        // (A product can be high revenue but also toxic)
+        const dangerIds = new Set(danger.map((p: any) => p.variant_id));
+        const heroes = top.filter((p: any) => !dangerIds.has(p.variant_id));
+
         polarity = {
-            heroes: analysis.topProducts,
-            villains: analysis.dangerProducts
+            heroes: heroes,
+            villains: danger
         };
 
         // Autopsy: Use Average Daily Stats from Analysis
@@ -150,7 +159,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
                             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                                 <div className="xl:col-span-2">
-                                    <ProfitabilityPolarity heroes={polarity.heroes} villains={polarity.villains} />
+                                    <ProfitabilityPolarity
+                                        heroes={polarity.heroes}
+                                        villains={polarity.villains}
+                                        currency={analysis.currency}
+                                    />
                                 </div>
                                 <div className="xl:col-span-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-4">
                                     <DailyAutopsy data={autopsy} />
