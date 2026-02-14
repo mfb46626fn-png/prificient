@@ -1,93 +1,109 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(req: NextRequest) {
-  const url = req.nextUrl
-  let hostname = req.headers.get('host') || ''
-
-  // Localhost support: Handle port numbers
-  hostname = hostname.split(':')[0]
+export async function middleware(request: NextRequest) {
+  let hostname = request.headers.get('host') || ''
+  hostname = hostname.split(':')[0] // Handle localhost:3000
 
   // Define Subdomains
   const isApp = hostname.startsWith('app')
   const isTools = hostname.startsWith('tools')
-
-  // Root domain (prificient.com or localhost or www.prificient.com)
-  // If not app and not tools, it's root/www.
   const isMarketing = !isApp && !isTools
 
-  // 1. App Subdomain Logic (Protected + Dashboard)
+  let supabaseResponse = NextResponse.next({
+    request,
+  })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({
+            request,
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  // IMPORTANT: You *must* run `getUser()` or `getSession()` to refresh the auth token
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+
+  // --- ROUTING LOGIC ---
+
+  const url = request.nextUrl;
+  const path = url.pathname;
+
+  // 1. App Subdomain
   if (isApp) {
-    const res = NextResponse.next()
-    const supabase = createMiddlewareClient({ req, res })
-    const { data: { session } } = await supabase.auth.getSession()
-
     // Auth Guard
-    // Allow public routes on app subdomain (login, signup, etc.)
-    // Also allow api routes
     const isPublicRoute =
-      url.pathname.startsWith('/login') ||
-      url.pathname.startsWith('/signup') ||
-      url.pathname.startsWith('/auth') ||
-      url.pathname.startsWith('/forgot-password') ||
-      url.pathname.startsWith('/new-password') || // Fix: new-password was missing
-      url.pathname.startsWith('/update-password') ||
-      url.pathname.startsWith('/api') ||
-      url.pathname.startsWith('/_next') ||
-      url.pathname.includes('.') || // static files
-      url.pathname === '/legal/privacy' || // legal pages might be needed on app too?
-      url.pathname === '/legal/terms';
+      path.startsWith('/login') ||
+      path.startsWith('/signup') ||
+      path.startsWith('/auth') ||
+      path.startsWith('/forgot-password') ||
+      path.startsWith('/new-password') ||
+      path.startsWith('/update-password') ||
+      path.startsWith('/api') ||
+      path.startsWith('/_next') ||
+      path.includes('.') ||
+      path === '/legal/privacy' ||
+      path === '/legal/terms';
 
-    if (!session && !isPublicRoute && url.pathname !== '/') {
-      // Redirect to Login
-      const loginUrl = new URL('/login', req.url)
-      loginUrl.searchParams.set('redirectedFrom', url.pathname)
+    if (!user && !isPublicRoute && path !== '/') {
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('redirectedFrom', path)
+      // We must return the response that sets cookies!
+      // But redirects are a new Response. 
+      // So we generally can't set cookies *and* redirect in same middleware step easily for auth refresh
+      // WITH Supabase SSR, usually we don't block refresh.
       return NextResponse.redirect(loginUrl)
     }
 
-    if (url.pathname === '/') {
-      // Root of app.prificient.com
-      if (session) {
-        return NextResponse.rewrite(new URL('/(app)/dashboard', req.url))
+    if (path === '/') {
+      if (user) {
+        return NextResponse.rewrite(new URL('/(app)/dashboard', request.url))
       }
-      return NextResponse.rewrite(new URL('/(app)/login', req.url)) // Or redirect to login page path
+      return NextResponse.rewrite(new URL('/(app)/login', request.url))
     }
 
-    // Default Rewrite to (app) folder
-    // E.g. /dashboard -> /(app)/dashboard
-    return NextResponse.rewrite(new URL(`/(app)${url.pathname}`, req.url))
+    // Rewrite to (app)
+    return NextResponse.rewrite(new URL(`/(app)${path}`, request.url))
   }
 
-  // 2. Tools Subdomain Logic
+  // 2. Tools Subdomain
   if (isTools) {
-    if (url.pathname === '/') {
-      return NextResponse.rewrite(new URL('/(tools)', req.url))
+    if (path === '/') {
+      return NextResponse.rewrite(new URL('/(tools)', request.url))
     }
-    return NextResponse.rewrite(new URL(`/(tools)${url.pathname}`, req.url))
+    return NextResponse.rewrite(new URL(`/(tools)${path}`, request.url))
   }
 
-  // 3. Marketing (Root) Logic
+  // 3. Marketing (Root)
   if (isMarketing) {
-    if (url.pathname === '/') {
-      return NextResponse.rewrite(new URL('/(marketing)', req.url))
+    if (path === '/') {
+      return NextResponse.rewrite(new URL('/(marketing)', request.url))
     }
-    // Rewrites for other marketing pages if they exist
-    return NextResponse.rewrite(new URL(`/(marketing)${url.pathname}`, req.url))
+    return NextResponse.rewrite(new URL(`/(marketing)${path}`, request.url))
   }
 
-  return NextResponse.next()
+  return supabaseResponse
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public files (images, etc)
-     */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
