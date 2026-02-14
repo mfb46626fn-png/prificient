@@ -3,16 +3,13 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
   let hostname = request.headers.get('host') || ''
-  hostname = hostname.split(':')[0] // Handle localhost:3000
+  hostname = hostname.split(':')[0]
 
-  // Define Subdomains
   const isApp = hostname.startsWith('app')
   const isTools = hostname.startsWith('tools')
   const isMarketing = !isApp && !isTools
 
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
+  let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,10 +20,8 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
-          })
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           )
@@ -35,20 +30,12 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // IMPORTANT: You *must* run `getUser()` or `getSession()` to refresh the auth token
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
 
+  const path = request.nextUrl.pathname
 
-  // --- ROUTING LOGIC ---
-
-  const url = request.nextUrl;
-  const path = url.pathname;
-
-  // 1. App Subdomain
+  // 1. App Subdomain (Protected)
   if (isApp) {
-    // Auth Guard
     const isPublicRoute =
       path.startsWith('/login') ||
       path.startsWith('/signup') ||
@@ -58,9 +45,7 @@ export async function middleware(request: NextRequest) {
       path.startsWith('/update-password') ||
       path.startsWith('/api') ||
       path.startsWith('/_next') ||
-      path.includes('.') ||
-      path === '/legal/privacy' ||
-      path === '/legal/terms';
+      path.includes('.')
 
     if (!user && !isPublicRoute && path !== '/') {
       const loginUrl = new URL('/login', request.url)
@@ -69,30 +54,28 @@ export async function middleware(request: NextRequest) {
     }
 
     if (path === '/') {
-      if (user) {
-        return NextResponse.rewrite(new URL('/(app)/dashboard', request.url))
-      }
-      return NextResponse.rewrite(new URL('/(app)/login', request.url))
+      if (user) return NextResponse.redirect(new URL('/dashboard', request.url))
+      return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    // Rewrite to (app)
-    return NextResponse.rewrite(new URL(`/(app)${path}`, request.url))
+    // No rewrite needed — route groups don't affect URLs
+    return supabaseResponse
   }
 
-  // 2. Tools Subdomain
+  // 2. Tools Subdomain (Public)
   if (isTools) {
     if (path === '/') {
-      return NextResponse.rewrite(new URL('/(tools)/tools-home', request.url))
+      return NextResponse.rewrite(new URL('/tools-home', request.url))
     }
-    return NextResponse.rewrite(new URL(`/(tools)${path}`, request.url))
+    return supabaseResponse
   }
 
-  // 3. Marketing (Root)
+  // 3. Marketing / Root (Public)
   if (isMarketing) {
     if (path === '/') {
-      return NextResponse.rewrite(new URL('/(marketing)/marketing-home', request.url))
+      return NextResponse.rewrite(new URL('/marketing-home', request.url))
     }
-    return NextResponse.rewrite(new URL(`/(marketing)${path}`, request.url))
+    return supabaseResponse
   }
 
   return supabaseResponse
