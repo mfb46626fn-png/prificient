@@ -9,6 +9,25 @@ export async function middleware(request: NextRequest) {
   const isTools = hostname.startsWith('tools')
   const isMarketing = !isApp && !isTools
 
+  const path = request.nextUrl.pathname
+
+  // ─── TOOLS SUBDOMAIN (Fully Public, No Auth) ───
+  if (isTools) {
+    if (path === '/') {
+      return NextResponse.rewrite(new URL('/tools-home', request.url))
+    }
+    return NextResponse.next()
+  }
+
+  // ─── MARKETING / ROOT DOMAIN (Fully Public, No Auth) ───
+  if (isMarketing) {
+    if (path === '/') {
+      return NextResponse.rewrite(new URL('/marketing-home', request.url))
+    }
+    return NextResponse.next()
+  }
+
+  // ─── APP SUBDOMAIN (Auth Required) ───
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -32,50 +51,26 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const path = request.nextUrl.pathname
+  const isPublicRoute =
+    path.startsWith('/login') ||
+    path.startsWith('/signup') ||
+    path.startsWith('/auth') ||
+    path.startsWith('/forgot-password') ||
+    path.startsWith('/new-password') ||
+    path.startsWith('/update-password') ||
+    path.startsWith('/api') ||
+    path.startsWith('/_next') ||
+    path.includes('.')
 
-  // 1. App Subdomain (Protected)
-  if (isApp) {
-    const isPublicRoute =
-      path.startsWith('/login') ||
-      path.startsWith('/signup') ||
-      path.startsWith('/auth') ||
-      path.startsWith('/forgot-password') ||
-      path.startsWith('/new-password') ||
-      path.startsWith('/update-password') ||
-      path.startsWith('/api') ||
-      path.startsWith('/_next') ||
-      path.includes('.')
-
-    if (!user && !isPublicRoute && path !== '/') {
-      const loginUrl = new URL('/login', request.url)
-      loginUrl.searchParams.set('redirectedFrom', path)
-      return NextResponse.redirect(loginUrl)
-    }
-
-    if (path === '/') {
-      if (user) return NextResponse.redirect(new URL('/dashboard', request.url))
-      return NextResponse.redirect(new URL('/login', request.url))
-    }
-
-    // No rewrite needed — route groups don't affect URLs
-    return supabaseResponse
+  if (!user && !isPublicRoute && path !== '/') {
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('redirectedFrom', path)
+    return NextResponse.redirect(loginUrl)
   }
 
-  // 2. Tools Subdomain (Public)
-  if (isTools) {
-    if (path === '/') {
-      return NextResponse.rewrite(new URL('/tools-home', request.url))
-    }
-    return supabaseResponse
-  }
-
-  // 3. Marketing / Root (Public)
-  if (isMarketing) {
-    if (path === '/') {
-      return NextResponse.rewrite(new URL('/marketing-home', request.url))
-    }
-    return supabaseResponse
+  if (path === '/') {
+    if (user) return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 
   return supabaseResponse
