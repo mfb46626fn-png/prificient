@@ -22,7 +22,20 @@ export default function BreakevenCalculatorPage() {
         contributionMarginPercent: number; profitAt100: number; profitAt500: number
     } | null>(null)
 
-    useEffect(() => { supabase.auth.getUser().then(({ data }) => setUser(data.user)) }, [])
+    useEffect(() => {
+        supabase.auth.getUser().then(({ data }) => setUser(data.user))
+        const saved = localStorage.getItem('prf_breakeven_state')
+        if (saved) {
+            try {
+                const s = JSON.parse(saved)
+                setSellingPrice(s.sellingPrice || ''); setProductCost(s.productCost || '')
+                setFixedCosts(s.fixedCosts || ''); setShippingPerUnit(s.shippingPerUnit || '')
+                setAdSpendMonthly(s.adSpendMonthly || '')
+                if (s.results) { setResults(s.results); setCalculated(true) }
+            } catch { /* ignore */ }
+            localStorage.removeItem('prf_breakeven_state')
+        }
+    }, [])
 
     const handleCalculate = () => {
         const price = parseFloat(sellingPrice) || 0
@@ -42,13 +55,21 @@ export default function BreakevenCalculatorPage() {
         setCalculated(true)
     }
 
+    const saveState = () => {
+        localStorage.setItem('prf_breakeven_state', JSON.stringify({
+            sellingPrice, productCost, fixedCosts, shippingPerUnit, adSpendMonthly, results,
+        }))
+    }
+
     const authGoogle = async () => {
         setAuthLoading(true)
+        saveState()
         await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } })
         setAuthLoading(false)
     }
     const authEmail = async (email: string) => {
         setAuthLoading(true)
+        saveState()
         await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: window.location.href, data: { source: 'tools', tool_used: 'breakeven_calculator' } } })
         setAuthLoading(false)
         alert('E-postanıza giriş linki gönderildi!')

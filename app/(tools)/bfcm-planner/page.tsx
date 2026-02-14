@@ -26,7 +26,20 @@ export default function BfcmPlannerPage() {
         revenuePerOrder: number
     } | null>(null)
 
-    useEffect(() => { supabase.auth.getUser().then(({ data }) => setUser(data.user)) }, [])
+    useEffect(() => {
+        supabase.auth.getUser().then(({ data }) => setUser(data.user))
+        const saved = localStorage.getItem('prf_bfcm_state')
+        if (saved) {
+            try {
+                const s = JSON.parse(saved)
+                setAvgOrderValue(s.avgOrderValue || ''); setDiscountPercent(s.discountPercent || '')
+                setExpectedOrders(s.expectedOrders || ''); setProductCostPercent(s.productCostPercent || '')
+                setAdBudget(s.adBudget || ''); setReturnRate(s.returnRate || '')
+                if (s.results) { setResults(s.results); setCalculated(true) }
+            } catch { /* ignore */ }
+            localStorage.removeItem('prf_bfcm_state')
+        }
+    }, [])
 
     const handleCalculate = () => {
         const aov = parseFloat(avgOrderValue) || 0
@@ -62,13 +75,21 @@ export default function BfcmPlannerPage() {
         setCalculated(true)
     }
 
+    const saveState = () => {
+        localStorage.setItem('prf_bfcm_state', JSON.stringify({
+            avgOrderValue, discountPercent, expectedOrders, productCostPercent, adBudget, returnRate, results,
+        }))
+    }
+
     const authGoogle = async () => {
         setAuthLoading(true)
+        saveState()
         await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } })
         setAuthLoading(false)
     }
     const authEmail = async (email: string) => {
         setAuthLoading(true)
+        saveState()
         await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: window.location.href, data: { source: 'tools', tool_used: 'bfcm_planner' } } })
         setAuthLoading(false)
         alert('E-postanıza giriş linki gönderildi!')

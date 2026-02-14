@@ -29,10 +29,28 @@ export default function RoasCalculatorPage() {
         effectiveRevenue: number
     } | null>(null)
 
+    // Restore saved state from localStorage (survives Magic Link redirect)
     useEffect(() => {
         supabase.auth.getUser().then(({ data }) => {
             setUser(data.user)
         })
+        const saved = localStorage.getItem('prf_roas_state')
+        if (saved) {
+            try {
+                const s = JSON.parse(saved)
+                setAdSpend(s.adSpend || '')
+                setRevenue(s.revenue || '')
+                setCogs(s.cogs || '')
+                setShippingCost(s.shippingCost || '')
+                setReturnRate(s.returnRate || '')
+                setCommissionRate(s.commissionRate || '')
+                if (s.results) {
+                    setResults(s.results)
+                    setCalculated(true)
+                }
+            } catch { /* ignore */ }
+            localStorage.removeItem('prf_roas_state')
+        }
     }, [])
 
     const handleCalculate = () => {
@@ -66,8 +84,15 @@ export default function RoasCalculatorPage() {
         setCalculated(true)
     }
 
+    const saveStateBeforeAuth = () => {
+        localStorage.setItem('prf_roas_state', JSON.stringify({
+            adSpend, revenue, cogs, shippingCost, returnRate, commissionRate, results,
+        }))
+    }
+
     const handleSoftGateAuth = async (provider: 'google' | 'email') => {
         setAuthLoading(true)
+        saveStateBeforeAuth()
         if (provider === 'google') {
             await supabase.auth.signInWithOAuth({
                 provider: 'google',
@@ -82,6 +107,7 @@ export default function RoasCalculatorPage() {
 
     const handleEmailAuth = async (email: string) => {
         setAuthLoading(true)
+        saveStateBeforeAuth()
         await supabase.auth.signInWithOtp({
             email,
             options: {
