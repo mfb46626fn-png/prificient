@@ -1,9 +1,9 @@
 import { Inter } from 'next/font/google';
-import { PreferencesProvider } from './contexts/PreferencesContext';
-import { CurrencyProvider } from './contexts/CurrencyContext';
-import "./globals.css";
+import { PreferencesProvider } from '@/app/contexts/PreferencesContext';
+import { CurrencyProvider } from '@/app/contexts/CurrencyContext';
+import "@/app/globals.css";
 import AutoLogoutProvider from '@/components/AutoLogoutProvider'
-import { ProfileProvider } from './contexts/ProfileContext'
+import { ProfileProvider } from '@/app/contexts/ProfileContext'
 import { FinancialConfigProvider } from '@/app/contexts/FinancialConfigContext'
 import AIChatInterface from '@/components/AIChatInterface'
 import { ToastProvider } from '@/components/ui/toast'

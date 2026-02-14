@@ -65,10 +65,6 @@ export async function middleware(request: NextRequest) {
     if (!user && !isPublicRoute && path !== '/') {
       const loginUrl = new URL('/login', request.url)
       loginUrl.searchParams.set('redirectedFrom', path)
-      // We must return the response that sets cookies!
-      // But redirects are a new Response. 
-      // So we generally can't set cookies *and* redirect in same middleware step easily for auth refresh
-      // WITH Supabase SSR, usually we don't block refresh.
       return NextResponse.redirect(loginUrl)
     }
 
@@ -86,7 +82,7 @@ export async function middleware(request: NextRequest) {
   // 2. Tools Subdomain
   if (isTools) {
     if (path === '/') {
-      return NextResponse.rewrite(new URL('/(tools)', request.url))
+      return NextResponse.rewrite(new URL('/(tools)/tools-home', request.url))
     }
     return NextResponse.rewrite(new URL(`/(tools)${path}`, request.url))
   }
@@ -94,7 +90,7 @@ export async function middleware(request: NextRequest) {
   // 3. Marketing (Root)
   if (isMarketing) {
     if (path === '/') {
-      return NextResponse.rewrite(new URL('/(marketing)', request.url))
+      return NextResponse.rewrite(new URL('/(marketing)/marketing-home', request.url))
     }
     return NextResponse.rewrite(new URL(`/(marketing)${path}`, request.url))
   }
