@@ -17,7 +17,7 @@ export interface ToolResult {
     id: string
     label: string
     type: ResultType
-    formula: (inputs: Record<string, number>, textInputs?: Record<string, string>) => number | string
+    formula: (inputs: Record<string, number>, rawInputs?: Record<string, string>) => number | string
     isLocked?: boolean
     /** Optional description shown below the result */
     description?: string

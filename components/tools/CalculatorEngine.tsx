@@ -74,27 +74,23 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 
     // ─── Calculate ─────────────────────────
     const handleCalculate = () => {
-        // Parse numeric values
+        // Parse input values (text stays as string, numbers get parsed)
         const numericInputs: Record<string, number> = {}
+        const rawInputs: Record<string, string> = {}
         config.inputs.forEach((input) => {
             if (input.type === 'text') {
-                numericInputs[input.id] = 0 // text inputs not used in numeric calculations
+                rawInputs[input.id] = inputValues[input.id] || (input.defaultValue as string) || ''
+                numericInputs[input.id] = 0 // placeholder for text fields
             } else {
-                numericInputs[input.id] = parseFloat(inputValues[input.id]) || (typeof input.defaultValue === 'number' ? input.defaultValue : 0)
-            }
-        })
-        // Collect text input values
-        const textInputs: Record<string, string> = {}
-        config.inputs.forEach((input) => {
-            if (input.type === 'text') {
-                textInputs[input.id] = inputValues[input.id] || String(input.defaultValue)
+                numericInputs[input.id] = parseFloat(inputValues[input.id]) || (input.defaultValue as number)
+                rawInputs[input.id] = inputValues[input.id] || String(input.defaultValue)
             }
         })
 
         // Compute results
         const results: Record<string, number | string> = {}
         config.results.forEach((result) => {
-            results[result.id] = result.formula(numericInputs, textInputs)
+            results[result.id] = result.formula(numericInputs, rawInputs)
         })
         setComputedResults(results)
         setCalculated(true)
@@ -212,28 +208,16 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                             {input.type === 'currency' && (
                                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">₺</span>
                                             )}
-                                            {input.type === 'text' ? (
-                                                <input
-                                                    type="text"
-                                                    value={inputValues[input.id]}
-                                                    onChange={(e) => updateInput(input.id, e.target.value)}
-                                                    placeholder={input.placeholder || String(input.defaultValue)}
-                                                    className={`w-full py-2.5 px-4 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 ${c.ring} transition-all`}
-                                                />
-                                            ) : (
-                                                <>
-                                                    <input
-                                                        type="number"
-                                                        value={inputValues[input.id]}
-                                                        onChange={(e) => updateInput(input.id, e.target.value)}
-                                                        placeholder={input.placeholder || String(input.defaultValue)}
-                                                        className={`w-full py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 ${c.ring} transition-all ${input.type === 'currency' ? 'pl-8 pr-4' : input.type === 'percent' ? 'pl-4 pr-8' : 'px-4'
-                                                            }`}
-                                                    />
-                                                    {input.type === 'percent' && (
-                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">%</span>
-                                                    )}
-                                                </>
+                                            <input
+                                                type={input.type === 'text' ? 'text' : 'number'}
+                                                value={inputValues[input.id]}
+                                                onChange={(e) => updateInput(input.id, e.target.value)}
+                                                placeholder={input.placeholder || String(input.defaultValue)}
+                                                className={`w-full py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 ${c.ring} transition-all ${input.type === 'currency' ? 'pl-8 pr-4' : input.type === 'percent' ? 'pl-4 pr-8' : 'px-4'
+                                                    }`}
+                                            />
+                                            {input.type === 'percent' && (
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">%</span>
                                             )}
                                         </div>
                                     </div>
@@ -449,8 +433,6 @@ function FAQItem({ question, answer, color }: { question: string; answer: string
 // ─── Simple Markdown to HTML ──────────────────
 function markdownToHtml(md: string): string {
     return md
-        // Normalize literal \n to real newlines (from template literals)
-        .replace(/\\n/g, '\n')
         .replace(/^### (.*$)/gm, '<h3 class="text-base font-semibold text-gray-800 mt-6 mb-2">$1</h3>')
         .replace(/^## (.*$)/gm, '<h2 class="text-lg font-bold text-gray-900 mt-8 mb-3">$1</h2>')
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
