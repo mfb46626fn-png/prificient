@@ -25,6 +25,11 @@ export interface ToolResult {
     sentiment?: (value: number | string) => 'positive' | 'negative' | 'neutral'
 }
 
+export interface ToolFAQ {
+    question: string
+    answer: string
+}
+
 export interface ToolConfig {
     slug: string
     title: string
@@ -36,6 +41,8 @@ export interface ToolConfig {
     results: ToolResult[]
     content: {
         intro: string
+        howItWorks: string // What the tool does and how to use it
         details: string
+        faq: ToolFAQ[]
     }
 }

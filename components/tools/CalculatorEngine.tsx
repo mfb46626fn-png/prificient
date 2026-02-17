@@ -347,13 +347,66 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                     </div>
                 </div>
 
+                {/* How It Works */}
+                {config.content.howItWorks && (
+                    <div className="mt-16 max-w-3xl">
+                        <div className={`rounded-2xl border ${c.border} ${c.bg} p-6 sm:p-8`}>
+                            <div className="flex items-center gap-2 mb-4">
+                                <svg className={`w-5 h-5 ${c.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M12 18.75h.008v.008H12v-.008z" />
+                                </svg>
+                                <h2 className="text-lg font-bold text-gray-900">Bu Araç Ne İşe Yarar?</h2>
+                            </div>
+                            <p className="text-sm text-gray-600 leading-relaxed">{config.content.howItWorks}</p>
+                        </div>
+                    </div>
+                )}
+
                 {/* SEO Content */}
-                <div className="mt-16 max-w-3xl">
+                <div className="mt-8 max-w-3xl">
                     <div className="prose prose-sm prose-gray">
                         <div dangerouslySetInnerHTML={{ __html: markdownToHtml(config.content.details) }} />
                     </div>
                 </div>
+
+                {/* FAQ */}
+                {config.content.faq && config.content.faq.length > 0 && (
+                    <div className="mt-12 max-w-3xl">
+                        <h2 className="text-lg font-bold text-gray-900 mb-6">Sıkça Sorulan Sorular</h2>
+                        <div className="space-y-3">
+                            {config.content.faq.map((item, idx) => (
+                                <FAQItem key={idx} question={item.question} answer={item.answer} color={c} />
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
+        </div>
+    )
+}
+
+// ─── FAQ Accordion Item ───────────────────────
+function FAQItem({ question, answer, color }: { question: string; answer: string; color: { bg: string; border: string; text: string } }) {
+    const [open, setOpen] = useState(false)
+    return (
+        <div className={`rounded-xl border ${open ? color.border : 'border-gray-200/80'} bg-white overflow-hidden transition-colors`}>
+            <button
+                onClick={() => setOpen(!open)}
+                className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50/50 transition-colors"
+            >
+                <span className="text-sm font-medium text-gray-800 pr-4">{question}</span>
+                <svg
+                    className={`w-4 h-4 flex-shrink-0 text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+            {open && (
+                <div className="px-5 pb-4 pt-0">
+                    <p className="text-sm text-gray-600 leading-relaxed">{answer}</p>
+                </div>
+            )}
         </div>
     )
 }

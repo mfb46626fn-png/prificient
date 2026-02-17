@@ -56,19 +56,14 @@ const roasCalculator: ToolConfig = {
     ],
     content: {
         intro: 'Reklam harcamalarınızın gerçekten ne kadar geri döndüğünü anlayın. ROAS (Return on Ad Spend), e-ticarette en kritik performans metriklerinden biridir.',
-        details: `## ROAS Nedir?
-
-ROAS (Return on Ad Spend), reklam harcamalarınızın geri dönüş oranıdır. **Ciro ÷ Reklam Harcaması** formülü ile hesaplanır.
-
-### Neden Önemli?
-
-- **ROAS 1.0** = Harcadığınız kadar kazanıyorsunuz (kâr yok)
-- **ROAS 2.0** = Her 1₺ için 2₺ ciro (başa baş noktası genellikle burasıdır)
-- **ROAS 3.0+** = Sağlıklı bir geri dönüş
-
-### Dikkat Edilmesi Gerekenler
-
-ROAS tek başına yeterli bir metrik değildir. Ürün maliyeti, kargo ve iade oranları gibi faktörleri de hesaba katmanız gerekir. Gerçek kârlılığınız için **Kâr Simülatörümüzü** kullanın.`,
+        howItWorks: 'Bu araç, toplam reklam harcamanızı ve bu reklamlardan elde ettiğiniz ciroyu karşılaştırarak ROAS değerinizi hesaplar. Ayrıca net getirinizi ve ciro başına reklam maliyetinizi gösterir. Giriş yaparak kârlı olmak için gereken minimum dönüşüm oranını da görebilirsiniz.',
+        details: `## ROAS Nedir?\n\nROAS (Return on Ad Spend), reklam harcamalarınızın geri dönüş oranıdır. **Ciro ÷ Reklam Harcaması** formülü ile hesaplanır.\n\n### Neden Önemli?\n\n- **ROAS 1.0** = Harcadığınız kadar kazanıyorsunuz (kâr yok)\n- **ROAS 2.0** = Her 1₺ için 2₺ ciro (başa baş noktası genellikle burasıdır)\n- **ROAS 3.0+** = Sağlıklı bir geri dönüş\n\n### Dikkat Edilmesi Gerekenler\n\nROAS tek başına yeterli bir metrik değildir. Ürün maliyeti, kargo ve iade oranları gibi faktörleri de hesaba katmanız gerekir.`,
+        faq: [
+            { question: 'İyi bir ROAS değeri nedir?', answer: 'Sektöre göre değişir ama genel olarak 3.0 ve üzeri sağlıklı kabul edilir. Ancak düşük marjlı ürünlerde 4-5x gerekebilir. Break-Even ROAS hesaplayıcımızla kesin değerinizi bulabilirsiniz.' },
+            { question: 'ROAS ile ROI arasındaki fark nedir?', answer: 'ROAS sadece reklam harcamasına karşı ciroyu ölçer. ROI ise tüm maliyetleri (ürün, kargo, operasyon) dahil ederek gerçek kârlılığı gösterir. ROAS yüksek ama ROI düşük olabilir.' },
+            { question: 'ROAS nasıl artırılır?', answer: 'Hedeflemeyi daraltmak, reklam metinlerini A/B test etmek, dönüşüm oranını artırmak (ürün sayfası optimizasyonu) ve ortalama sipariş tutarını yükseltmek en etkili yöntemlerdir.' },
+            { question: 'ROAS 1.0 altına düşerse ne olur?', answer: 'Bu, reklama harcadığınızdan daha az ciro elde ettiğiniz anlamına gelir. Reklam kampanyasını durdurup hedefleme, kreatif ve landing page stratejinizi gözden geçirmelisiniz.' },
+        ],
     },
 }
 
@@ -136,21 +131,14 @@ const breakEvenRoas: ToolConfig = {
     ],
     content: {
         intro: 'Reklam verirken zarar etmemek için minimum kaç ROAS yapmanız gerektiğini bilin. Çoğu e-ticaret markası bu değeri bilmeden reklam verir.',
-        details: `## Break-Even ROAS Nedir?
-
-Break-Even ROAS, reklam harcamanızın tam olarak geri dönme noktasıdır. Bu değerin altında her reklam harcaması zarardır.
-
-### Nasıl Hesaplanır?
-
-**Break-Even ROAS = Satış Fiyatı ÷ Net Marj**
-
-Örneğin satış fiyatınız 300₺, marjınız 150₺ ise: BE-ROAS = 300 / 150 = **2.0**
-
-### Pratikte Ne Anlama Gelir?
-
-- **BE-ROAS 2.0**: Her 1₺ reklam harcaması için minimum 2₺ ciro yapmalısınız
-- **BE-ROAS 3.0+**: Marjlarınız dar, reklam maliyetlerinize dikkat edin
-- **BE-ROAS 5.0+**: Tehlike bölgesi! Ürün fiyatlamanızı gözden geçirin`,
+        howItWorks: 'Satış fiyatınızdan ürün maliyeti, kargo ve platform kesintilerini çıkararak net marjınızı bulur. Ardından satış fiyatını net marja bölerek zarar etmeyeceğiniz minimum ROAS değerini hesaplar. Giriş yaparak güvenlik payı eklenmiş hedef ROAS önerisini de görebilirsiniz.',
+        details: `## Break-Even ROAS Nedir?\n\nBreak-Even ROAS, reklam harcamanızın tam olarak geri dönme noktasıdır. **Satış Fiyatı ÷ Net Marj** formülü ile hesaplanır.\n\n### Pratikte Ne Anlama Gelir?\n\n- **BE-ROAS 2.0**: Her 1₺ reklam harcaması için minimum 2₺ ciro yapmalısınız\n- **BE-ROAS 3.0+**: Marjlarınız dar, dikkat edin\n- **BE-ROAS 5.0+**: Tehlike bölgesi! Fiyatlamanızı gözden geçirin`,
+        faq: [
+            { question: 'Break-Even ROAS ile normal ROAS farkı nedir?', answer: 'Normal ROAS mevcut performansınızdır. Break-Even ROAS ise zarar etmemek için gereken minimum eşiktir. Gerçek ROAS, Break-Even ROAS\'ın üstünde olmalıdır.' },
+            { question: 'Platform kesintisini nasıl hesaplamalıyım?', answer: 'Trendyol için %12-18, Hepsiburada için %8-15, kendi e-ticaret siteniz için ödeme komisyonları (%1.5-3) dahil edilmelidir. Tam oranlar sözleşmenize göre değişir.' },
+            { question: 'BE-ROAS çok yüksek çıkıyorsa ne yapmalıyım?', answer: 'Bu düşük marj anlamına gelir. Seçenekleriniz: (1) Ürün maliyetini düşürmek, (2) Satış fiyatını artırmak, (3) Kargo anlaşmanızı iyileştirmek, (4) Platform komisyonu düşük kanal aramak.' },
+            { question: 'Kargo bedava sunuyorsam nasıl hesaplarım?', answer: 'Kargo bedava olsa da maliyet size aittir. Kargo giderinizi tam olarak girin, çünkü bu sizin gerçek marjınızı etkiler.' },
+        ],
     },
 }
 
@@ -228,22 +216,15 @@ const profitSimulator: ToolConfig = {
     ],
     content: {
         intro: 'Ciro, kâr değildir. Tüm maliyetleri dahil ederek gerçekte ne kadar kazandığınızı hesaplayın.',
-        details: `## Neden "Gerçek" Kâr?
-
-Çoğu e-ticaret girişimci sadece ciro ve ürün maliyetine bakarak kâr hesaplar. Oysa gerçek resim çok farklı olabilir.
-
-### Gizli Maliyetler
-
-1. **Platform Komisyonları**: Trendyol, Hepsiburada gibi platformlarda %8-15 komisyon
-2. **Ödeme Komisyonları**: Kredi kartı, kapıda ödeme vb. %1.5-3
-3. **İade Maliyetleri**: Sadece ürün değil, kargo ve operasyonel maliyet
-4. **Paketleme**: Kutu, dolgu, etiket maliyetleri
-
-### Kâr Marjı Benchmark
-
-- **%5 altı**: Tehlike bölgesi, sürdürülebilir değil
-- **%10-20**: Orta, büyüme için yatırım kapasitesi sınırlı
-- **%20+**: Sağlıklı, ölçeklendirme potansiyeli yüksek`,
+        howItWorks: 'Aylık cironuzdan ürün maliyeti, reklam harcaması, kargo ve diğer giderleri çıkararak gerçek brüt ve net kârınızı hesaplar. Kâr marjınızı gösterir ve giriş yaparak yıllık projeksiyon ile yatırım getirisi (ROI) analizini görebilirsiniz.',
+        details: `## Neden "Gerçek" Kâr?\n\nÇoğu e-ticaret girişimci sadece ciro ve ürün maliyetine bakarak kâr hesaplar.\n\n### Gizli Maliyetler\n\n1. **Platform Komisyonları**: %8-15 komisyon\n2. **Ödeme Komisyonları**: %1.5-3\n3. **İade Maliyetleri**: Kargo ve operasyonel maliyet\n4. **Paketleme**: Kutu, dolgu, etiket\n\n### Kâr Marjı Benchmark\n\n- **%5 altı**: Tehlike bölgesi\n- **%10-20**: Orta, büyüme kapasitesi sınırlı\n- **%20+**: Sağlıklı, ölçeklendirme potansiyeli yüksek`,
+        faq: [
+            { question: 'Bu araç ile gerçek muhasebe arasında fark var mı?', answer: 'Evet, bu araç hızlı bir tahmin sunar. Gerçek muhasebede KDV, vergi, amortisman gibi kalemler de dahil edilir. Ancak operasyonel kârlılığınızı anlamak için güçlü bir başlangıçtır.' },
+            { question: 'Ürün maliyeti yüzdesini nasıl hesaplarım?', answer: 'Toplam ürün alış maliyetinizi toplam satış tutarına bölün ve 100 ile çarpın. Örn: 40.000₺ maliyet / 100.000₺ satış = %40.' },
+            { question: 'Diğer giderler kısmına neleri yazmalıyım?', answer: 'Platform komisyonları, ödeme gateway komisyonları, paketleme maliyetleri, depo kirası, personel giderleri gibi ciro dışı kalemleri yazabilirsiniz.' },
+            { question: 'Kâr marjım negatif çıkıyorsa ne olur?', answer: 'Bu, sattıkça zarar ettiğiniz anlamına gelir. Acilen fiyatlandırma stratejinizi, maliyet yapınızı ve reklam bütçenizi gözden geçirmelisiniz.' },
+            { question: 'Yıllık projeksiyon ne kadar güvenilir?', answer: 'Projeksiyon mevcut aylık verilerin 12 ile çarpılmasıyla oluşur. Mevsimsellik ve büyüme dahil değildir. Yön gösterici olarak kullanın.' },
+        ],
     },
 }
 
@@ -314,23 +295,14 @@ const returnCostCalculator: ToolConfig = {
     ],
     content: {
         intro: 'İadeler sadece kayıp ciro değildir. Kargo, operasyon ve fırsat maliyetleriyle birlikte düşünülmeli.',
-        details: `## İadenin Gerçek Maliyeti
-
-Bir iade, sadece satış kaybı değildir. İşte rakamların ardındaki gerçek:
-
-### İade Maliyeti Bileşenleri
-
-1. **Çift Yönlü Kargo**: Müşteriye gidiş + müşteriden dönüş
-2. **Operasyonel Maliyet**: İnceleme, kontrol, yeniden paketleme
-3. **Fırsat Maliyeti**: O ürün satışta değilken kaçırılan gelir
-4. **Değer Kaybı**: Ürün hasarı, yeniden satılamama riski
-
-### Türkiye'de Sektör Ortalamaları
-
-- **Giyim / Moda**: %20-35 iade oranı
-- **Elektronik**: %5-10 iade oranı
-- **Kozmetik**: %8-15 iade oranı
-- **Ev & Dekorasyon**: %10-15 iade oranı`,
+        howItWorks: 'Aylık sipariş sayınızı ve iade oranınızı kullanarak kaç iade olduğunu hesaplar. Her iade için çift yönlü kargo + operasyonel maliyet toplayarak aylık toplam iade maliyetinizi gösterir. Giriş yaparak iade oranını %5 düşürmenin ne kadar tasarruf sağlayacağını görebilirsiniz.',
+        details: `## İadenin Gerçek Maliyeti\n\nBir iade, sadece satış kaybı değildir:\n\n1. **Çift Yönlü Kargo**: Gidiş + dönüş\n2. **Operasyonel Maliyet**: İnceleme, paketleme\n3. **Fırsat Maliyeti**: Satışta olmayan ürün\n4. **Değer Kaybı**: Hasar riski\n\n### Türkiye Sektör Ortalamaları\n\n- **Giyim**: %20-35\n- **Elektronik**: %5-10\n- **Kozmetik**: %8-15\n- **Ev & Dekorasyon**: %10-15`,
+        faq: [
+            { question: 'İade oranımı nasıl hesaplarım?', answer: 'İade edilen sipariş sayısını toplam sipariş sayısına bölüp 100 ile çarpın. Örn: 60 iade / 400 sipariş = %15 iade oranı.' },
+            { question: 'Operasyonel maliyet neleri kapsar?', answer: 'İade paketini teslim alma, ürünü kontrol etme, yeniden paketleme, stoka geri ekleme ve kalite kontrolü süreçlerini kapsar. İnsan gücü ve zaman maliyetini de dahil edin.' },
+            { question: 'İade oranını nasıl düşürebilirim?', answer: 'Beden tabloları ve detaylı ürün açıklamaları ekleyin, ürün fotoğraflarını gerçekçi yapın, sipariş öncesi canlı destek sunun ve müşteri yorumlarını ön plana çıkarın.' },
+            { question: 'Ücretsiz iade sunmak zorunda mıyım?', answer: 'Yasal olarak ayıplı ürünlerde iade kargo ücretsiz olmalıdır. Cayma hakkı kullanımlarında ise taşıma maliyetini müşteriye yansıtabilirsiniz (satış koşullarınızda belirtilmişse).' },
+        ],
     },
 }
 
@@ -388,27 +360,14 @@ const cltvCalculator: ToolConfig = {
     ],
     content: {
         intro: 'Müşterilerinizin değerini bilin, daha akıllı reklam kararları verin. CLTV, sürdürülebilir büyümenin temelidir.',
-        details: `## CLTV Nedir?
-
-Customer Lifetime Value (Müşteri Ömür Boyu Değeri), bir müşterinin sizden toplam ne kadar alışveriş yapacağının tahminidir.
-
-### Basit Formül
-
-**CLTV = Ortalama Sipariş × Yıllık Sıklık × Müşteri Ömrü**
-
-### Neden Bu Kadar Önemli?
-
-CLTV bilmek, **tam olarak ne kadar reklam harcaması yapabileceğinizi** söyler:
-
-- **CLTV > CAC**: Müşteri kazanmak kârlı
-- **CLTV < CAC**: Her yeni müşteri zarar demek
-- **Kural**: CAC, CLTV'nin **%30'undan** fazla olmamalı
-
-### CLTV Artırma Stratejileri
-
-1. **Cross-sell & Upsell**: Ortalama sipariş tutarını artırın
-2. **Sadakat Programları**: Satın alma sıklığını artırın
-3. **Mükemmel Deneyim**: Müşteri ömrünü uzatın`,
+        howItWorks: 'Ortalama sipariş tutarı, yıllık satın alma sıklığı ve müşteri ömrünü çarparak bir müşterinin size toplam getireceği değeri hesaplar. Kâr marjınızı uygulayarak net CLTV bulur. Giriş yaparak ödeyebileceğiniz maksimum müşteri edinme maliyetini (CAC) görebilirsiniz.',
+        details: `## CLTV Nedir?\n\nCustomer Lifetime Value, bir müşterinin sizden toplam ne kadar alışveriş yapacağının tahminidir.\n\n### Formül\n\n**CLTV = Ortalama Sipariş × Yıllık Sıklık × Müşteri Ömrü**\n\n### Neden Önemli?\n\n- **CLTV > CAC**: Müşteri kazanmak kârlı\n- **CLTV < CAC**: Her yeni müşteri zarar\n- **Kural**: CAC, CLTV'nin %30'undan fazla olmamalı\n\n### CLTV Artırma\n\n1. **Cross-sell & Upsell**: Sipariş tutarını artırın\n2. **Sadakat Programları**: Sıklığı artırın\n3. **Mükemmel Deneyim**: Ömrü uzatın`,
+        faq: [
+            { question: 'CLTV ile CAC ilişkisi nasıl olmalıdır?', answer: 'Genel kural: CAC, CLTV\'nin %30\'undan az olmalıdır. Yani CLTV 3.000₺ ise müşteri edinme maliyetiniz 900₺\'yi geçmemelidir. Bu oran sağlıklı büyüme için kritiktir.' },
+            { question: 'Müşteri ömrünü nasıl tahmin ederim?', answer: 'Son 2-3 yılın churn (terk) oranını bakın. Aylık churn %5 ise ortalama müşteri ömrü = 1 / 0.05 = 20 ay ≈ 1.7 yıl. İlk müşterilerinizin ne kadar süre aktif kaldığı da iyi bir referanstır.' },
+            { question: 'Yeni açılan mağaza CLTV nasıl hesaplar?', answer: 'Henüz verisi yoksa sektör ortalamalarını kullanın: e-ticaret genelinde yıllık 2-3 sipariş, 1.5-2 yıl müşteri ömrü. 6 ay sonra kendi verinizle güncelleyin.' },
+            { question: 'CLTV artırmak için en etkili yöntem nedir?', answer: 'En hızlı etki: e-posta ile cross-sell kampanyaları (sipariş sonrası tamamlayıcı ürün önerileri). Orta vadede: sadakat programı. Uzun vadede: müşteri deneyimi iyileştirme.' },
+        ],
     },
 }
 
@@ -495,21 +454,14 @@ const breakEvenCalculator: ToolConfig = {
     ],
     content: {
         intro: 'Ürününüzün başa baş noktasını bulun. Ayda kaç adet satmanız gerektiğini ve farklı senaryolarda ne kadar kâr edeceğinizi hesaplayın.',
-        details: `## Başa Baş Noktası Nedir?
-
-Başa baş noktası (Break-Even Point), toplam gelirinizin toplam giderlerinize eşit olduğu satış adedidir. Bu noktanın altında zarar, üstünde kâr edersiniz.
-
-### Formül
-
-**Başa Baş = Sabit Giderler ÷ Katkı Payı**
-
-Katkı Payı = Satış Fiyatı - Değişken Maliyetler (ürün + kargo)
-
-### Neden Önemli?
-
-- Minimum satış hedefini belirler
-- Fiyat değişikliğinin etkisini önceden görmenizi sağlar
-- Reklam bütçesi planlamasında kritik referans noktasıdır`,
+        howItWorks: 'Satış fiyatınızdan ürün maliyetini ve kargo giderini çıkararak birim katkı payınızı bulur. Sabit giderlerinizi (kira, maaş, reklam) katkı payına bölerek ayda minimum kaç adet satmanız gerektiğini hesaplar. Giriş yaparak 100 ve 500 adet senaryolarındaki kâr tahminlerini görebilirsiniz.',
+        details: `## Başa Baş Noktası Nedir?\n\nBaşa baş noktası, gelirinizin giderlerinize eşit olduğu satış adedidir. Altında zarar, üstünde kâr edersiniz.\n\n### Formül\n\n**Başa Baş = Sabit Giderler ÷ Katkı Payı**\n\nKatkı Payı = Satış Fiyatı - Değişken Maliyetler\n\n### Neden Önemli?\n\n- Minimum satış hedefini belirler\n- Fiyat değişikliğinin etkisini gösterir\n- Reklam bütçesi planlamasında kritiktir`,
+        faq: [
+            { question: 'Sabit giderler ile değişken giderler arasındaki fark nedir?', answer: 'Sabit giderler satış olsun olmasın ödenir: kira, maaş, yazılım abonelikleri. Değişken giderler ise her satışla birlikte artar: ürün maliyeti, kargo, paketleme.' },
+            { question: 'Reklam bütçesi sabit mi değişken mi gider?', answer: 'Teknik olarak yarı-değişken bir giderdir. Ancak çoğu e-ticaret markası aylık sabit bir reklam bütçesi belirler, bu yüzden bu araçta sabit gider olarak ele alınır.' },
+            { question: 'Katkı payı negatif çıkıyorsa ne anlama gelir?', answer: 'Satış fiyatınız, ürün + kargo maliyetinizden düşük demektir. Her satışta zarar ediyorsunuz. Acilen fiyat artırmalı veya maliyet düşürmelisiniz.' },
+            { question: 'Birden fazla ürün satıyorsam nasıl hesaplarım?', answer: 'En çok satan veya ortalama ürününüzün değerlerini girin. Detaylı analiz için her ürün grubunu ayrı ayrı hesaplayıp toplam başa baş adedini bulabilirsiniz.' },
+        ],
     },
 }
 
@@ -606,23 +558,15 @@ const bfcmPlanner: ToolConfig = {
     ],
     content: {
         intro: 'Black Friday ve Cyber Monday kampanyalarınızın gerçekten kârlı olup olmadığını önceden test edin. İndirim, iade ve reklam maliyetlerini dahil ederek gerçek resmi görün.',
-        details: `## BFCM Kampanyası Neden Riskli?
-
-Yüksek indirimler + artan reklam maliyetleri + yüksek iade oranları = beklenmeyen zarar riski.
-
-### Dikkat Edilmesi Gerekenler
-
-1. **İndirim Oranı**: %30+ indirimler marjı ciddi şekilde eritir
-2. **İade Artışı**: BFCM döneminde iade oranları %50-100 artar
-3. **CPC Artışı**: Reklam tıklama maliyetleri 2-3x artar
-4. **Stok Riski**: Fazla stok = nakit akışı sorunu
-
-### Başarılı BFCM Stratejisi
-
-- İndirim yerine **bundle (paket)** teklifleri sunun
-- **Önceden müşteri listesi** oluşturun (düşük CPC)
-- İade oranını düşürecek **detaylı ürün içerikleri** hazırlayın
-- Marjı yüksek ürünlere odaklanın`,
+        howItWorks: 'Kampanya indirim oranı, beklenen sipariş sayısı ve reklam bütçesini kullanarak brüt ciro, indirim kaybı, iade kaybı ve net kârınızı hesaplar. Giriş yaparak kampanya kâr marjını ve kârlı olabilmek için gereken minimum ROAS değerini görebilirsiniz.',
+        details: `## BFCM Kampanyası Neden Riskli?\n\nYüksek indirimler + artan reklam maliyetleri + yüksek iade oranları = zarar riski.\n\n### Dikkat Noktaları\n\n1. **İndirim Oranı**: %30+ marjı eritir\n2. **İade Artışı**: %50-100 artış\n3. **CPC Artışı**: 2-3x artış\n4. **Stok Riski**: Fazla stok = nakit sorunu\n\n### Başarılı Strateji\n\n- Bundle teklifleri sunun\n- Önceden müşteri listesi oluşturun\n- Detaylı ürün içerikleri hazırlayın\n- Yüksek marjlı ürünlere odaklanın`,
+        faq: [
+            { question: 'BFCM kampanyasında ideal indirim oranı nedir?', answer: 'Marjınıza bağlı. %40 marjlı bir üründe %20 indirim güvenlidir. %25+ indirimde iade ve reklam maliyetlerini mutlaka dahil edin. Bu araçla test ederek kendi ideal oranınızı bulun.' },
+            { question: 'BFCM döneminde iade oranı neden artar?', answer: 'Müşteriler dürtüsel alışveriş yapar, indirim baskısıyla düşünmeden satın alır. Ayrıca hediye amaçlı alımlar ve beden hataları artar. Bazı müşteriler birden fazla beden alıp beğenmediğini iade eder.' },
+            { question: 'Kampanya reklam bütçesini nasıl belirlemeliyim?', answer: 'Normal aylık bütçenizin 2-3 katını BFCM haftasına yoğunlaştırın. Ancak CPC artışını hesaba katın — aynı bütçe daha az tıklama getirecektir. Bu araçla farklı bütçe senaryolarını test edin.' },
+            { question: 'İndirim yerine ne tür kampanyalar yapabilirim?', answer: 'Bundle (paket) teklifleri, belirli tutarın üstüne ücretsiz kargo, hediye ürün, sadakat puanı çarpanı veya erken erişim kampanyaları marjınızı koruyan alternatiflerdir.' },
+            { question: 'Kampanyayı ne zaman başlatmalıyım?', answer: 'Black Friday\'dan 1-2 hafta önce teaser kampanyası başlatın. "Erken erişim" listeye kayıt toplamak CPC artmadan önce trafik çekmenizi sağlar.' },
+        ],
     },
 }
 
