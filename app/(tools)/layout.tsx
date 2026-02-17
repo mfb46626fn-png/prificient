@@ -25,21 +25,10 @@ export default function ToolsLayout({
               <Image src="/logo.png" alt="Prificient" width={24} height={24} className="object-contain" />
             </div>
             <span className="text-sm font-semibold text-gray-800 group-hover:text-gray-600 transition-colors">
-              Prificient <span className="text-gray-400 font-normal">/ Araçlar</span>
+              Prificient Araçlar
             </span>
           </a>
-          <div className="flex items-center gap-4">
-            <a href="/" className="text-xs font-medium text-gray-500 hover:text-gray-800 transition-colors">
-              Tüm Araçlar
-            </a>
-            <a
-              href="https://prificient.com"
-              className="text-xs font-medium text-violet-600 hover:text-violet-700 transition-colors"
-            >
-              Ana Sayfa →
-            </a>
-            <ToolsUserMenu />
-          </div>
+          <ToolsUserMenu />
         </div>
       </header>
 
