@@ -255,7 +255,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 
                                 {/* Locked Results */}
                                 {lockedResults.length > 0 && (
-                                    <div className="relative rounded-2xl border border-gray-200/80 bg-white p-6 sm:p-8 overflow-hidden">
+                                    <div className={`relative rounded-2xl border border-gray-200/80 bg-white p-6 sm:p-8 overflow-hidden ${!user ? 'min-h-[420px]' : ''}`}>
                                         <div className="flex items-center gap-2 mb-5">
                                             <h2 className="text-lg font-semibold text-gray-900">Detaylı Analiz</h2>
                                             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${c.light}`}>PRO</span>
