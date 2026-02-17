@@ -3,15 +3,16 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
-import type { ToolConfig } from '@/lib/tools/types'
+import { getToolBySlug } from '@/lib/tools/registry'
 import { saveCalculation } from '@/lib/tools/calculations'
 import CalculationHistory from './CalculationHistory'
 
 interface CalculatorEngineProps {
-    config: ToolConfig
+    slug: string
 }
 
-export default function CalculatorEngine({ config }: CalculatorEngineProps) {
+export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
+    const config = getToolBySlug(slug)!
     const supabase = createClient()
     const [user, setUser] = useState<User | null>(null)
     const [authLoading, setAuthLoading] = useState(false)
@@ -111,6 +112,8 @@ export default function CalculatorEngine({ config }: CalculatorEngineProps) {
         emerald: { primary: 'bg-emerald-600 hover:bg-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200/60', ring: 'focus:ring-emerald-500/20 focus:border-emerald-400', text: 'text-emerald-600', light: 'bg-emerald-100 text-emerald-700' },
         amber: { primary: 'bg-amber-600 hover:bg-amber-700', bg: 'bg-amber-50', border: 'border-amber-200/60', ring: 'focus:ring-amber-500/20 focus:border-amber-400', text: 'text-amber-600', light: 'bg-amber-100 text-amber-700' },
         rose: { primary: 'bg-rose-600 hover:bg-rose-700', bg: 'bg-rose-50', border: 'border-rose-200/60', ring: 'focus:ring-rose-500/20 focus:border-rose-400', text: 'text-rose-600', light: 'bg-rose-100 text-rose-700' },
+        sky: { primary: 'bg-sky-600 hover:bg-sky-700', bg: 'bg-sky-50', border: 'border-sky-200/60', ring: 'focus:ring-sky-500/20 focus:border-sky-400', text: 'text-sky-600', light: 'bg-sky-100 text-sky-700' },
+        orange: { primary: 'bg-orange-600 hover:bg-orange-700', bg: 'bg-orange-50', border: 'border-orange-200/60', ring: 'focus:ring-orange-500/20 focus:border-orange-400', text: 'text-orange-600', light: 'bg-orange-100 text-orange-700' },
     }
     const c = colorMap[config.color] || colorMap.violet
 

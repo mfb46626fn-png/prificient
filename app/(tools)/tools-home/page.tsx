@@ -13,6 +13,8 @@ const colorMap: Record<string, { bg: string; border: string; text: string; badge
     blue: { bg: 'bg-blue-50', border: 'border-blue-200/60', text: 'text-blue-600', badge: 'bg-blue-100 text-blue-700' },
     amber: { bg: 'bg-amber-50', border: 'border-amber-200/60', text: 'text-amber-600', badge: 'bg-amber-100 text-amber-700' },
     rose: { bg: 'bg-rose-50', border: 'border-rose-200/60', text: 'text-rose-600', badge: 'bg-rose-100 text-rose-700' },
+    sky: { bg: 'bg-sky-50', border: 'border-sky-200/60', text: 'text-sky-600', badge: 'bg-sky-100 text-sky-700' },
+    orange: { bg: 'bg-orange-50', border: 'border-orange-200/60', text: 'text-orange-600', badge: 'bg-orange-100 text-orange-700' },
 }
 
 const categoryLabels: Record<string, string> = {

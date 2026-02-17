@@ -28,7 +28,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ToolPage({ params }: PageProps) {
     const { slug } = await params
+    // Validate slug exists — only pass the slug string to client, not the config
+    // (ToolConfig contains functions which can't be serialized to client components)
     const tool = getToolBySlug(slug)
     if (!tool) notFound()
-    return <CalculatorEngine config={tool} />
+    return <CalculatorEngine slug={slug} />
 }

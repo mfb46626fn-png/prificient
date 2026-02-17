@@ -412,14 +412,230 @@ CLTV bilmek, **tam olarak ne kadar reklam harcaması yapabileceğinizi** söyler
     },
 }
 
+const breakEvenCalculator: ToolConfig = {
+    slug: 'breakeven-calculator',
+    title: 'Başa Baş Hesaplayıcı',
+    description: 'Ürününüzün başa baş noktasını bulun. Ayda kaç adet satmalısınız?',
+    category: 'finance',
+    color: 'sky',
+    icon: 'M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5',
+    inputs: [
+        { id: 'selling_price', label: 'Satış Fiyatı (₺)', type: 'currency', defaultValue: 300, placeholder: '300' },
+        { id: 'product_cost', label: 'Ürün Maliyeti (₺)', type: 'currency', defaultValue: 120, placeholder: '120' },
+        { id: 'fixed_costs', label: 'Aylık Sabit Giderler (₺)', type: 'currency', defaultValue: 10000, placeholder: '10.000', tooltip: 'Kira, maaş, yazılım abonelikleri vb.' },
+        { id: 'shipping_per_unit', label: 'Birim Kargo Gideri (₺)', type: 'currency', defaultValue: 25, placeholder: '25' },
+        { id: 'ad_spend_monthly', label: 'Aylık Reklam Bütçesi (₺)', type: 'currency', defaultValue: 5000, placeholder: '5.000' },
+    ],
+    results: [
+        {
+            id: 'contribution_margin',
+            label: 'Katkı Payı (Birim)',
+            type: 'currency',
+            formula: (i) => Math.round((i.selling_price - i.product_cost - i.shipping_per_unit) * 100) / 100,
+            description: 'Her birim satıştan sabit giderlere katkı',
+            sentiment: (v) => (v as number) > 0 ? 'positive' : 'negative',
+        },
+        {
+            id: 'contribution_margin_pct',
+            label: 'Katkı Payı Marjı',
+            type: 'percent',
+            formula: (i) => {
+                const cm = i.selling_price - i.product_cost - i.shipping_per_unit
+                return i.selling_price > 0 ? Math.round((cm / i.selling_price) * 1000) / 10 : 0
+            },
+            sentiment: (v) => (v as number) >= 40 ? 'positive' : (v as number) >= 20 ? 'neutral' : 'negative',
+        },
+        {
+            id: 'breakeven_units',
+            label: 'Başa Baş Noktası (Adet/Ay)',
+            type: 'number',
+            formula: (i) => {
+                const cm = i.selling_price - i.product_cost - i.shipping_per_unit
+                const totalFixed = i.fixed_costs + i.ad_spend_monthly
+                return cm > 0 ? Math.ceil(totalFixed / cm) : 0
+            },
+            description: 'Bu kadar satmalısınız ki zarar etmeyesiniz',
+        },
+        {
+            id: 'breakeven_revenue',
+            label: 'Başa Baş Cirosu',
+            type: 'currency',
+            formula: (i) => {
+                const cm = i.selling_price - i.product_cost - i.shipping_per_unit
+                const totalFixed = i.fixed_costs + i.ad_spend_monthly
+                const beu = cm > 0 ? Math.ceil(totalFixed / cm) : 0
+                return Math.round(beu * i.selling_price)
+            },
+            description: 'Başa baş için gereken minimum aylık ciro',
+        },
+        {
+            id: 'profit_at_100',
+            label: '100 Adet Satarsanız Kâr',
+            type: 'currency',
+            formula: (i) => {
+                const cm = i.selling_price - i.product_cost - i.shipping_per_unit
+                const totalFixed = i.fixed_costs + i.ad_spend_monthly
+                return Math.round(100 * cm - totalFixed)
+            },
+            isLocked: true,
+            sentiment: (v) => (v as number) > 0 ? 'positive' : 'negative',
+        },
+        {
+            id: 'profit_at_500',
+            label: '500 Adet Satarsanız Kâr',
+            type: 'currency',
+            formula: (i) => {
+                const cm = i.selling_price - i.product_cost - i.shipping_per_unit
+                const totalFixed = i.fixed_costs + i.ad_spend_monthly
+                return Math.round(500 * cm - totalFixed)
+            },
+            isLocked: true,
+            sentiment: (v) => (v as number) > 0 ? 'positive' : 'negative',
+        },
+    ],
+    content: {
+        intro: 'Ürününüzün başa baş noktasını bulun. Ayda kaç adet satmanız gerektiğini ve farklı senaryolarda ne kadar kâr edeceğinizi hesaplayın.',
+        details: `## Başa Baş Noktası Nedir?
+
+Başa baş noktası (Break-Even Point), toplam gelirinizin toplam giderlerinize eşit olduğu satış adedidir. Bu noktanın altında zarar, üstünde kâr edersiniz.
+
+### Formül
+
+**Başa Baş = Sabit Giderler ÷ Katkı Payı**
+
+Katkı Payı = Satış Fiyatı - Değişken Maliyetler (ürün + kargo)
+
+### Neden Önemli?
+
+- Minimum satış hedefini belirler
+- Fiyat değişikliğinin etkisini önceden görmenizi sağlar
+- Reklam bütçesi planlamasında kritik referans noktasıdır`,
+    },
+}
+
+const bfcmPlanner: ToolConfig = {
+    slug: 'bfcm-planner',
+    title: 'BFCM Kâr Planlayıcı',
+    description: 'Black Friday ve Cyber Monday kampanyalarınızın gerçek kârlılığını önceden simüle edin.',
+    category: 'marketing',
+    color: 'orange',
+    icon: 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5',
+    inputs: [
+        { id: 'avg_order_value', label: 'Ortalama Sipariş Tutarı (₺)', type: 'currency', defaultValue: 350, placeholder: '350' },
+        { id: 'discount_percent', label: 'İndirim Oranı (%)', type: 'percent', defaultValue: 25, placeholder: '25' },
+        { id: 'expected_orders', label: 'Beklenen Sipariş Sayısı', type: 'number', defaultValue: 500, placeholder: '500' },
+        { id: 'product_cost_percent', label: 'Ürün Maliyeti (%)', type: 'percent', defaultValue: 40, placeholder: '40' },
+        { id: 'ad_budget', label: 'Kampanya Reklam Bütçesi (₺)', type: 'currency', defaultValue: 20000, placeholder: '20.000' },
+        { id: 'return_rate', label: 'Tahmini İade Oranı (%)', type: 'percent', defaultValue: 12, placeholder: '12' },
+    ],
+    results: [
+        {
+            id: 'gross_revenue',
+            label: 'Brüt Ciro',
+            type: 'currency',
+            formula: (i) => Math.round(i.avg_order_value * i.expected_orders),
+        },
+        {
+            id: 'discount_loss',
+            label: 'İndirim Kaybı',
+            type: 'currency',
+            formula: (i) => Math.round(i.avg_order_value * i.expected_orders * (i.discount_percent / 100)),
+            sentiment: () => 'negative',
+        },
+        {
+            id: 'net_revenue',
+            label: 'Net Gelir',
+            type: 'currency',
+            formula: (i) => {
+                const gross = i.avg_order_value * i.expected_orders
+                const disc = gross * (i.discount_percent / 100)
+                const discounted = gross - disc
+                const retLoss = discounted * (i.return_rate / 100)
+                return Math.round(discounted - retLoss)
+            },
+        },
+        {
+            id: 'net_profit',
+            label: 'Net Kâr',
+            type: 'currency',
+            formula: (i) => {
+                const gross = i.avg_order_value * i.expected_orders
+                const disc = gross * (i.discount_percent / 100)
+                const discounted = gross - disc
+                const retLoss = discounted * (i.return_rate / 100)
+                const netRev = discounted - retLoss
+                const prodCost = netRev * (i.product_cost_percent / 100)
+                return Math.round(netRev - prodCost - i.ad_budget)
+            },
+            sentiment: (v) => (v as number) > 0 ? 'positive' : 'negative',
+        },
+        {
+            id: 'profit_margin',
+            label: 'Kampanya Kâr Marjı',
+            type: 'percent',
+            formula: (i) => {
+                const gross = i.avg_order_value * i.expected_orders
+                const disc = gross * (i.discount_percent / 100)
+                const discounted = gross - disc
+                const retLoss = discounted * (i.return_rate / 100)
+                const netRev = discounted - retLoss
+                const prodCost = netRev * (i.product_cost_percent / 100)
+                const net = netRev - prodCost - i.ad_budget
+                return netRev > 0 ? Math.round((net / netRev) * 1000) / 10 : 0
+            },
+            isLocked: true,
+            sentiment: (v) => (v as number) >= 15 ? 'positive' : (v as number) >= 0 ? 'neutral' : 'negative',
+        },
+        {
+            id: 'roas_needed',
+            label: 'Gereken Minimum ROAS',
+            type: 'number',
+            formula: (i) => {
+                const gross = i.avg_order_value * i.expected_orders
+                const disc = gross * (i.discount_percent / 100)
+                const discounted = gross - disc
+                const retLoss = discounted * (i.return_rate / 100)
+                const netRev = discounted - retLoss
+                const prodCost = netRev * (i.product_cost_percent / 100)
+                const totalCosts = prodCost + i.ad_budget + retLoss
+                return i.ad_budget > 0 ? Math.round((totalCosts / i.ad_budget) * 100) / 100 : 0
+            },
+            isLocked: true,
+            description: 'Bu ROAS altında kampanya zarardadır',
+        },
+    ],
+    content: {
+        intro: 'Black Friday ve Cyber Monday kampanyalarınızın gerçekten kârlı olup olmadığını önceden test edin. İndirim, iade ve reklam maliyetlerini dahil ederek gerçek resmi görün.',
+        details: `## BFCM Kampanyası Neden Riskli?
+
+Yüksek indirimler + artan reklam maliyetleri + yüksek iade oranları = beklenmeyen zarar riski.
+
+### Dikkat Edilmesi Gerekenler
+
+1. **İndirim Oranı**: %30+ indirimler marjı ciddi şekilde eritir
+2. **İade Artışı**: BFCM döneminde iade oranları %50-100 artar
+3. **CPC Artışı**: Reklam tıklama maliyetleri 2-3x artar
+4. **Stok Riski**: Fazla stok = nakit akışı sorunu
+
+### Başarılı BFCM Stratejisi
+
+- İndirim yerine **bundle (paket)** teklifleri sunun
+- **Önceden müşteri listesi** oluşturun (düşük CPC)
+- İade oranını düşürecek **detaylı ürün içerikleri** hazırlayın
+- Marjı yüksek ürünlere odaklanın`,
+    },
+}
+
 // ─── Registry ──────────────────────────────────────
 
 export const toolRegistry: ToolConfig[] = [
     profitSimulator,
     roasCalculator,
     breakEvenRoas,
+    breakEvenCalculator,
     returnCostCalculator,
     cltvCalculator,
+    bfcmPlanner,
 ]
 
 export function getToolBySlug(slug: string): ToolConfig | undefined {
