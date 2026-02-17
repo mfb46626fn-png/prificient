@@ -3,12 +3,15 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
+import { saveCalculation } from '@/lib/tools/calculations'
+import CalculationHistory from '@/components/tools/CalculationHistory'
 
 export default function BreakevenCalculatorPage() {
     const supabase = createClient()
     const [user, setUser] = useState<User | null>(null)
     const [authLoading, setAuthLoading] = useState(false)
     const [calculated, setCalculated] = useState(false)
+    const [historyRefresh, setHistoryRefresh] = useState(0)
     const [authMode, setAuthMode] = useState<'idle' | 'email-input' | 'otp-verify' | 'google-waiting'>('idle')
     const [emailInput, setEmailInput] = useState('')
     const [otpCode, setOtpCode] = useState('')
@@ -49,12 +52,27 @@ export default function BreakevenCalculatorPage() {
         const cm = price - cost - ship
         const totalFixed = fixed + ad
         const beu = cm > 0 ? Math.ceil(totalFixed / cm) : 0
-        setResults({
+        const newResults = {
             breakevenUnits: beu, breakevenRevenue: Math.round(beu * price),
             contributionMargin: Math.round(cm * 100) / 100,
             contributionMarginPercent: price > 0 ? Math.round((cm / price) * 1000) / 10 : 0,
             profitAt100: Math.round(100 * cm - totalFixed), profitAt500: Math.round(500 * cm - totalFixed),
-        })
+        }
+        setResults(newResults)
+        setCalculated(true)
+        if (user) {
+            saveCalculation(supabase, 'breakeven_calculator',
+                { sellingPrice, productCost, fixedCosts, shippingPerUnit, adSpendMonthly },
+                newResults
+            ).then(() => setHistoryRefresh(p => p + 1))
+        }
+    }
+
+    const loadFromHistory = (inputs: Record<string, string>, histResults: Record<string, number>) => {
+        setSellingPrice(inputs.sellingPrice || ''); setProductCost(inputs.productCost || '')
+        setFixedCosts(inputs.fixedCosts || ''); setShippingPerUnit(inputs.shippingPerUnit || '')
+        setAdSpendMonthly(inputs.adSpendMonthly || '')
+        setResults(histResults as typeof results)
         setCalculated(true)
     }
 
@@ -126,6 +144,17 @@ export default function BreakevenCalculatorPage() {
                     {!user && <SoftGate color="blue" title="Farklı Senaryolarda Ne Kazanırsınız?" desc="Kâr senaryolarını görmek için ücretsiz giriş yapın." authMode={authMode} authLoading={authLoading} emailInput={emailInput} setEmailInput={setEmailInput} otpCode={otpCode} setOtpCode={setOtpCode} authEmail={authEmail} onGoogle={handleGoogleAuth} onEmailSubmit={handleEmailSubmit} onOtpVerify={handleOtpVerify} setAuthMode={setAuthMode} />}
                 </div>
             </>)}
+
+            {/* History Panel */}
+            {user && (
+                <CalculationHistory
+                    supabase={supabase}
+                    toolName="breakeven_calculator"
+                    onLoad={loadFromHistory}
+                    refreshKey={historyRefresh}
+                    formatSummary={(r) => `Başa Baş: ${r.breakevenUnits} adet — Ciro: ₺${r.breakevenRevenue?.toLocaleString('tr-TR')}`}
+                />
+            )}
         </div></div>
     )
 }

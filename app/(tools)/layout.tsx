@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import type { Metadata } from 'next'
+import ToolsUserMenu from '@/components/tools/ToolsUserMenu'
 
 export const metadata: Metadata = {
   title: {
@@ -37,6 +38,7 @@ export default function ToolsLayout({
             >
               Ana Sayfa →
             </a>
+            <ToolsUserMenu />
           </div>
         </div>
       </header>

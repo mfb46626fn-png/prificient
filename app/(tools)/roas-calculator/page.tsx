@@ -3,12 +3,15 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
+import { saveCalculation } from '@/lib/tools/calculations'
+import CalculationHistory from '@/components/tools/CalculationHistory'
 
 export default function RoasCalculatorPage() {
     const supabase = createClient()
     const [user, setUser] = useState<User | null>(null)
     const [authLoading, setAuthLoading] = useState(false)
     const [calculated, setCalculated] = useState(false)
+    const [historyRefresh, setHistoryRefresh] = useState(0)
 
     // Auth UI state
     const [authMode, setAuthMode] = useState<'idle' | 'email-input' | 'otp-verify' | 'google-waiting'>('idle')
@@ -77,7 +80,7 @@ export default function RoasCalculatorPage() {
         const realRoas = ad > 0 ? effectiveRevenue / (ad + commissionCost) : 0
         const profitMargin = effectiveRevenue > 0 ? (netProfit / effectiveRevenue) * 100 : 0
 
-        setResults({
+        const newResults = {
             standardRoas: Math.round(standardRoas * 100) / 100,
             realRoas: Math.round(realRoas * 100) / 100,
             netProfit: Math.round(netProfit),
@@ -85,7 +88,24 @@ export default function RoasCalculatorPage() {
             costPerOrder: Math.round(totalCosts),
             returnLoss: Math.round(returnLoss),
             effectiveRevenue: Math.round(effectiveRevenue),
-        })
+        }
+        setResults(newResults)
+        setCalculated(true)
+
+        // Save to history if logged in
+        if (user) {
+            saveCalculation(supabase, 'roas_calculator',
+                { adSpend, revenue, cogs, shippingCost, returnRate, commissionRate },
+                newResults
+            ).then(() => setHistoryRefresh(p => p + 1))
+        }
+    }
+
+    const loadFromHistory = (inputs: Record<string, string>, histResults: Record<string, number>) => {
+        setAdSpend(inputs.adSpend || ''); setRevenue(inputs.revenue || '')
+        setCogs(inputs.cogs || ''); setShippingCost(inputs.shippingCost || '')
+        setReturnRate(inputs.returnRate || ''); setCommissionRate(inputs.commissionRate || '')
+        setResults(histResults as typeof results)
         setCalculated(true)
     }
 
@@ -265,6 +285,17 @@ export default function RoasCalculatorPage() {
                         )}
                     </div>
                 </>)}
+
+                {/* History Panel */}
+                {user && (
+                    <CalculationHistory
+                        supabase={supabase}
+                        toolName="roas_calculator"
+                        onLoad={loadFromHistory}
+                        refreshKey={historyRefresh}
+                        formatSummary={(r) => `ROAS: ${r.realRoas}x — Net Kâr: ₺${r.netProfit?.toLocaleString('tr-TR')}`}
+                    />
+                )}
             </div>
         </div>
     )

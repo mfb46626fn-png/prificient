@@ -3,12 +3,15 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
+import { saveCalculation } from '@/lib/tools/calculations'
+import CalculationHistory from '@/components/tools/CalculationHistory'
 
 export default function BfcmPlannerPage() {
     const supabase = createClient()
     const [user, setUser] = useState<User | null>(null)
     const [authLoading, setAuthLoading] = useState(false)
     const [calculated, setCalculated] = useState(false)
+    const [historyRefresh, setHistoryRefresh] = useState(0)
     const [authMode, setAuthMode] = useState<'idle' | 'email-input' | 'otp-verify' | 'google-waiting'>('idle')
     const [emailInput, setEmailInput] = useState('')
     const [otpCode, setOtpCode] = useState('')
@@ -60,14 +63,29 @@ export default function BfcmPlannerPage() {
         const netProfit = netRevenue - productCost - ad
         const profitMargin = netRevenue > 0 ? (netProfit / netRevenue) * 100 : 0
         const roasNeeded = ad > 0 ? totalCosts / ad : 0
-        setResults({
+        const newResults = {
             grossRevenue: Math.round(grossRevenue), discountLoss: Math.round(discountLoss),
             netRevenue: Math.round(netRevenue), productCost: Math.round(productCost),
             returnLoss: Math.round(returnLoss), totalCosts: Math.round(totalCosts),
             netProfit: Math.round(netProfit), profitMargin: Math.round(profitMargin * 10) / 10,
             roasNeeded: Math.round(roasNeeded * 100) / 100,
             revenuePerOrder: Math.round((aov * (1 - disc)) * 100) / 100,
-        })
+        }
+        setResults(newResults)
+        setCalculated(true)
+        if (user) {
+            saveCalculation(supabase, 'bfcm_planner',
+                { avgOrderValue, discountPercent, expectedOrders, productCostPercent, adBudget, returnRate },
+                newResults
+            ).then(() => setHistoryRefresh(p => p + 1))
+        }
+    }
+
+    const loadFromHistory = (inputs: Record<string, string>, histResults: Record<string, number>) => {
+        setAvgOrderValue(inputs.avgOrderValue || ''); setDiscountPercent(inputs.discountPercent || '')
+        setExpectedOrders(inputs.expectedOrders || ''); setProductCostPercent(inputs.productCostPercent || '')
+        setAdBudget(inputs.adBudget || ''); setReturnRate(inputs.returnRate || '')
+        setResults(histResults as typeof results)
         setCalculated(true)
     }
 
@@ -168,6 +186,17 @@ export default function BfcmPlannerPage() {
                     )}
                 </div>
             </>)}
+
+            {/* History Panel */}
+            {user && (
+                <CalculationHistory
+                    supabase={supabase}
+                    toolName="bfcm_planner"
+                    onLoad={loadFromHistory}
+                    refreshKey={historyRefresh}
+                    formatSummary={(r) => `Net Kâr: ₺${r.netProfit?.toLocaleString('tr-TR')} — ROAS: ${r.roasNeeded}x`}
+                />
+            )}
         </div></div>
     )
 }
