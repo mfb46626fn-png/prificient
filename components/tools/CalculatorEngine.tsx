@@ -114,6 +114,18 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
         rose: { primary: 'bg-rose-600 hover:bg-rose-700', bg: 'bg-rose-50', border: 'border-rose-200/60', ring: 'focus:ring-rose-500/20 focus:border-rose-400', text: 'text-rose-600', light: 'bg-rose-100 text-rose-700' },
         sky: { primary: 'bg-sky-600 hover:bg-sky-700', bg: 'bg-sky-50', border: 'border-sky-200/60', ring: 'focus:ring-sky-500/20 focus:border-sky-400', text: 'text-sky-600', light: 'bg-sky-100 text-sky-700' },
         orange: { primary: 'bg-orange-600 hover:bg-orange-700', bg: 'bg-orange-50', border: 'border-orange-200/60', ring: 'focus:ring-orange-500/20 focus:border-orange-400', text: 'text-orange-600', light: 'bg-orange-100 text-orange-700' },
+        indigo: { primary: 'bg-indigo-600 hover:bg-indigo-700', bg: 'bg-indigo-50', border: 'border-indigo-200/60', ring: 'focus:ring-indigo-500/20 focus:border-indigo-400', text: 'text-indigo-600', light: 'bg-indigo-100 text-indigo-700' },
+        pink: { primary: 'bg-pink-600 hover:bg-pink-700', bg: 'bg-pink-50', border: 'border-pink-200/60', ring: 'focus:ring-pink-500/20 focus:border-pink-400', text: 'text-pink-600', light: 'bg-pink-100 text-pink-700' },
+        teal: { primary: 'bg-teal-600 hover:bg-teal-700', bg: 'bg-teal-50', border: 'border-teal-200/60', ring: 'focus:ring-teal-500/20 focus:border-teal-400', text: 'text-teal-600', light: 'bg-teal-100 text-teal-700' },
+        cyan: { primary: 'bg-cyan-600 hover:bg-cyan-700', bg: 'bg-cyan-50', border: 'border-cyan-200/60', ring: 'focus:ring-cyan-500/20 focus:border-cyan-400', text: 'text-cyan-600', light: 'bg-cyan-100 text-cyan-700' },
+        fuchsia: { primary: 'bg-fuchsia-600 hover:bg-fuchsia-700', bg: 'bg-fuchsia-50', border: 'border-fuchsia-200/60', ring: 'focus:ring-fuchsia-500/20 focus:border-fuchsia-400', text: 'text-fuchsia-600', light: 'bg-fuchsia-100 text-fuchsia-700' },
+        slate: { primary: 'bg-slate-600 hover:bg-slate-700', bg: 'bg-slate-50', border: 'border-slate-200/60', ring: 'focus:ring-slate-500/20 focus:border-slate-400', text: 'text-slate-600', light: 'bg-slate-100 text-slate-700' },
+        lime: { primary: 'bg-lime-600 hover:bg-lime-700', bg: 'bg-lime-50', border: 'border-lime-200/60', ring: 'focus:ring-lime-500/20 focus:border-lime-400', text: 'text-lime-600', light: 'bg-lime-100 text-lime-700' },
+        purple: { primary: 'bg-purple-600 hover:bg-purple-700', bg: 'bg-purple-50', border: 'border-purple-200/60', ring: 'focus:ring-purple-500/20 focus:border-purple-400', text: 'text-purple-600', light: 'bg-purple-100 text-purple-700' },
+        red: { primary: 'bg-red-600 hover:bg-red-700', bg: 'bg-red-50', border: 'border-red-200/60', ring: 'focus:ring-red-500/20 focus:border-red-400', text: 'text-red-600', light: 'bg-red-100 text-red-700' },
+        yellow: { primary: 'bg-yellow-600 hover:bg-yellow-700', bg: 'bg-yellow-50', border: 'border-yellow-200/60', ring: 'focus:ring-yellow-500/20 focus:border-yellow-400', text: 'text-yellow-600', light: 'bg-yellow-100 text-yellow-700' },
+        zinc: { primary: 'bg-zinc-600 hover:bg-zinc-700', bg: 'bg-zinc-50', border: 'border-zinc-200/60', ring: 'focus:ring-zinc-500/20 focus:border-zinc-400', text: 'text-zinc-600', light: 'bg-zinc-100 text-zinc-700' },
+        stone: { primary: 'bg-stone-600 hover:bg-stone-700', bg: 'bg-stone-50', border: 'border-stone-200/60', ring: 'focus:ring-stone-500/20 focus:border-stone-400', text: 'text-stone-600', light: 'bg-stone-100 text-stone-700' },
     }
     const c = colorMap[config.color] || colorMap.violet
 

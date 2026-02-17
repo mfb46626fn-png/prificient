@@ -1,4 +1,6 @@
 import type { ToolConfig } from './types'
+import { cpmCpcCalculator, influencerRoiCalculator, emailMarketingRoi, conversionRateImpact, tiktokVsMetaCost } from './marketing-tools'
+import { stripePaypalFeeCalculator, productPricingCalculator, bundleProfitCalculator, dropshippingProfitCalc, inventoryHoldingCost, utmBuilder, bfcmDiscountPlanner } from './ops-tools'
 
 // ─── Tool Configurations ────────────────────────────────
 
@@ -573,6 +575,7 @@ const bfcmPlanner: ToolConfig = {
 // ─── Registry ──────────────────────────────────────
 
 export const toolRegistry: ToolConfig[] = [
+    // Kategori 1: Çekirdek Finansal
     profitSimulator,
     roasCalculator,
     breakEvenRoas,
@@ -580,6 +583,21 @@ export const toolRegistry: ToolConfig[] = [
     returnCostCalculator,
     cltvCalculator,
     bfcmPlanner,
+    // Kategori 2: Pazarlama Matematiği
+    cpmCpcCalculator,
+    influencerRoiCalculator,
+    emailMarketingRoi,
+    conversionRateImpact,
+    tiktokVsMetaCost,
+    // Kategori 3: Operasyon & Fiyatlandırma
+    stripePaypalFeeCalculator,
+    productPricingCalculator,
+    bundleProfitCalculator,
+    dropshippingProfitCalc,
+    inventoryHoldingCost,
+    // Kategori 4: Pratik Araçlar
+    utmBuilder,
+    bfcmDiscountPlanner,
 ]
 
 export function getToolBySlug(slug: string): ToolConfig | undefined {

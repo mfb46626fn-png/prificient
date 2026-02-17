@@ -15,6 +15,18 @@ const colorMap: Record<string, { bg: string; border: string; text: string; badge
     rose: { bg: 'bg-rose-50', border: 'border-rose-200/60', text: 'text-rose-600', badge: 'bg-rose-100 text-rose-700' },
     sky: { bg: 'bg-sky-50', border: 'border-sky-200/60', text: 'text-sky-600', badge: 'bg-sky-100 text-sky-700' },
     orange: { bg: 'bg-orange-50', border: 'border-orange-200/60', text: 'text-orange-600', badge: 'bg-orange-100 text-orange-700' },
+    indigo: { bg: 'bg-indigo-50', border: 'border-indigo-200/60', text: 'text-indigo-600', badge: 'bg-indigo-100 text-indigo-700' },
+    pink: { bg: 'bg-pink-50', border: 'border-pink-200/60', text: 'text-pink-600', badge: 'bg-pink-100 text-pink-700' },
+    teal: { bg: 'bg-teal-50', border: 'border-teal-200/60', text: 'text-teal-600', badge: 'bg-teal-100 text-teal-700' },
+    cyan: { bg: 'bg-cyan-50', border: 'border-cyan-200/60', text: 'text-cyan-600', badge: 'bg-cyan-100 text-cyan-700' },
+    fuchsia: { bg: 'bg-fuchsia-50', border: 'border-fuchsia-200/60', text: 'text-fuchsia-600', badge: 'bg-fuchsia-100 text-fuchsia-700' },
+    slate: { bg: 'bg-slate-50', border: 'border-slate-200/60', text: 'text-slate-600', badge: 'bg-slate-100 text-slate-700' },
+    lime: { bg: 'bg-lime-50', border: 'border-lime-200/60', text: 'text-lime-600', badge: 'bg-lime-100 text-lime-700' },
+    purple: { bg: 'bg-purple-50', border: 'border-purple-200/60', text: 'text-purple-600', badge: 'bg-purple-100 text-purple-700' },
+    red: { bg: 'bg-red-50', border: 'border-red-200/60', text: 'text-red-600', badge: 'bg-red-100 text-red-700' },
+    yellow: { bg: 'bg-yellow-50', border: 'border-yellow-200/60', text: 'text-yellow-600', badge: 'bg-yellow-100 text-yellow-700' },
+    zinc: { bg: 'bg-zinc-50', border: 'border-zinc-200/60', text: 'text-zinc-600', badge: 'bg-zinc-100 text-zinc-700' },
+    stone: { bg: 'bg-stone-50', border: 'border-stone-200/60', text: 'text-stone-600', badge: 'bg-stone-100 text-stone-700' },
 }
 
 const categoryLabels: Record<string, string> = {
