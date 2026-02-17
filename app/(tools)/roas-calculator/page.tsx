@@ -147,7 +147,7 @@ export default function RoasCalculatorPage() {
 
     // Verify OTP code
     const handleOtpVerify = async () => {
-        if (!otpCode || otpCode.length < 6) return
+        if (!otpCode || otpCode.length < 8) return
         setAuthLoading(true)
         const { data, error } = await supabase.auth.verifyOtp({
             email: authEmail,
@@ -270,10 +270,10 @@ export default function RoasCalculatorPage() {
                                     {/* Email: step 2 — enter 6-digit OTP */}
                                     {authMode === 'otp-verify' && (
                                         <div>
-                                            <p className="text-xs text-gray-500 mb-3"><strong>{authEmail}</strong> adresine 6 haneli kod gönderildi.</p>
+                                            <p className="text-xs text-gray-500 mb-3"><strong>{authEmail}</strong> adresine 8 haneli kod gönderildi.</p>
                                             <div className="flex gap-2">
-                                                <input type="text" maxLength={6} placeholder="000000" value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))} onKeyDown={e => e.key === 'Enter' && handleOtpVerify()} className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm text-center tracking-[0.3em] font-mono focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
-                                                <button onClick={handleOtpVerify} disabled={authLoading || otpCode.length < 6} className="px-4 py-3 rounded-xl bg-violet-600 text-white text-sm font-semibold disabled:opacity-50">Doğrula</button>
+                                                <input type="text" maxLength={8} placeholder="00000000" value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))} onKeyDown={e => e.key === 'Enter' && handleOtpVerify()} className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm text-center tracking-[0.3em] font-mono focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
+                                                <button onClick={handleOtpVerify} disabled={authLoading || otpCode.length < 8} className="px-4 py-3 rounded-xl bg-violet-600 text-white text-sm font-semibold disabled:opacity-50">Doğrula</button>
                                             </div>
                                             <button onClick={() => { setAuthMode('email-input'); setOtpCode('') }} className="text-xs text-gray-400 hover:text-gray-600 mt-2">Farklı e-posta kullan</button>
                                         </div>

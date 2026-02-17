@@ -92,7 +92,7 @@ export default function BreakevenCalculatorPage() {
         setAuthLoading(false); setAuthMode('otp-verify')
     }
     const handleOtpVerify = async () => {
-        if (!otpCode || otpCode.length < 6) return
+        if (!otpCode || otpCode.length < 8) return
         setAuthLoading(true)
         const { data, error } = await supabase.auth.verifyOtp({ email: authEmail, token: otpCode, type: 'email' })
         setAuthLoading(false)
@@ -182,7 +182,7 @@ function SoftGate({ color, title, desc, authMode, authLoading, emailInput, setEm
         {authMode === 'google-waiting' && <p className="text-xs text-blue-600 mb-3 animate-pulse">Yeni sekmede giriş yapın, bu sayfa otomatik güncellenecek...</p>}
         {authMode === 'idle' && <button onClick={() => setAuthMode('email-input')} className={`w-full py-3 rounded-xl bg-${color}-600 text-white text-sm font-semibold hover:bg-${color}-700 transition-colors`}>E-posta ile Giriş Yap</button>}
         {authMode === 'email-input' && <div className="flex gap-2"><input type="email" placeholder="ornek@email.com" value={emailInput} onChange={e => setEmailInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && onEmailSubmit()} className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" /><button onClick={onEmailSubmit} disabled={authLoading || !emailInput} className={`px-4 py-3 rounded-xl bg-${color}-600 text-white text-sm font-semibold disabled:opacity-50`}>Gönder</button></div>}
-        {authMode === 'otp-verify' && <div><p className="text-xs text-gray-500 mb-3"><strong>{authEmail}</strong> adresine 6 haneli kod gönderildi.</p><div className="flex gap-2"><input type="text" maxLength={6} placeholder="000000" value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))} onKeyDown={e => e.key === 'Enter' && onOtpVerify()} className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm text-center tracking-[0.3em] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/30" /><button onClick={onOtpVerify} disabled={authLoading || otpCode.length < 6} className={`px-4 py-3 rounded-xl bg-${color}-600 text-white text-sm font-semibold disabled:opacity-50`}>Doğrula</button></div><button onClick={() => { setAuthMode('email-input'); setOtpCode('') }} className="text-xs text-gray-400 hover:text-gray-600 mt-2">Farklı e-posta kullan</button></div>}
+        {authMode === 'otp-verify' && <div><p className="text-xs text-gray-500 mb-3"><strong>{authEmail}</strong> adresine 8 haneli kod gönderildi.</p><div className="flex gap-2"><input type="text" maxLength={8} placeholder="00000000" value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))} onKeyDown={e => e.key === 'Enter' && onOtpVerify()} className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm text-center tracking-[0.3em] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/30" /><button onClick={onOtpVerify} disabled={authLoading || otpCode.length < 8} className={`px-4 py-3 rounded-xl bg-${color}-600 text-white text-sm font-semibold disabled:opacity-50`}>Doğrula</button></div><button onClick={() => { setAuthMode('email-input'); setOtpCode('') }} className="text-xs text-gray-400 hover:text-gray-600 mt-2">Farklı e-posta kullan</button></div>}
         <p className="text-[11px] text-gray-400 mt-4">Ücretsiz. Ana uygulamaya yönlendirilmezsiniz.</p>
     </div></div>)
 }
