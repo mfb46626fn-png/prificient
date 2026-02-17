@@ -61,7 +61,15 @@ export const stripePaypalFeeCalculator: ToolConfig = {
     content: {
         intro: 'Stripe, PayPal ve benzeri ödeme altyapılarının kestiği komisyonu hesaplayın.',
         howItWorks: 'Satış tutarınıza Stripe standart komisyon formülünü (%2.9 + $0.30) uygulayarak her işlemde ne kadar komisyon kesildiğini hesaplar. Uluslararası işlemlerde %3.9 uygulanır. Giriş yaparak 1000 siparişte toplam kaybı görebilirsiniz.',
-        details: `## Ödeme Komisyonu Neden Önemli?\\n\\nHer işlemde %3 civarı komisyon, yıl sonunda ciddi tutarlara ulaşır.\\n\\n### Standart Oranlar\\n\\n- **Stripe Yurtiçi**: %2.9 + $0.30\\n- **Stripe Uluslararası**: %3.9 + $0.30\\n- **PayPal**: %2.99 + sabit ücret`,
+        details: `## Ödeme Komisyonu Neden Önemli?
+
+Her işlemde %3 civarı komisyon, yıl sonunda ciddi tutarlara ulaşır.
+
+### Standart Oranlar
+
+- **Stripe Yurtiçi**: %2.9 + $0.30
+- **Stripe Uluslararası**: %3.9 + $0.30
+- **PayPal**: %2.99 + sabit ücret`,
         faq: [
             { question: 'Stripe ile PayPal arasında fark var mı?', answer: 'Yaklaşık aynı oranlarda çalışırlar. Stripe teknik entegrasyon için daha esnektir, PayPal ise müşteri güveni ve hızlı checkout avantajı sunar.' },
             { question: 'Komisyonu müşteriye yansıtabilir miyim?', answer: 'Teknik olarak fiyata dahil edebilirsiniz ama ayrı bir "işlem ücreti" olarak yansıtmak çoğu ülkede sözleşmeye aykırıdır.' },
@@ -127,7 +135,14 @@ export const productPricingCalculator: ToolConfig = {
     content: {
         intro: 'Ürün maliyetinize istediğiniz kâr marjını ekleyerek ideal satış fiyatını hesaplayın.',
         howItWorks: 'Toplam maliyetinizi (ürün + kargo) hedef marj formülüyle bölerek ideal satış fiyatını bulur. Ayrıca markup oranını ve birim kârı gösterir. Giriş yaparak psikolojik fiyatlandırma önerisini görebilirsiniz.',
-        details: `## Margin vs Markup Farkı\\n\\n- **Margin**: Satış fiyatının yüzdesi (Kâr / Satış Fiyatı)\\n- **Markup**: Maliyetin yüzdesi (Kâr / Maliyet)\\n\\n### Psikolojik Fiyatlandırma\\n\\n199₺ ile 200₺ arasında algı farkı büyüktür. Araç bunu otomatik önerir.`,
+        details: `## Margin vs Markup Farkı
+
+- **Margin**: Satış fiyatının yüzdesi (Kâr / Satış Fiyatı)
+- **Markup**: Maliyetin yüzdesi (Kâr / Maliyet)
+
+### Psikolojik Fiyatlandırma
+
+199₺ ile 200₺ arasında algı farkı büyüktür. Araç bunu otomatik önerir.`,
         faq: [
             { question: 'Margin ile markup aynı şey mi?', answer: '%40 margin ile %40 markup farklıdır. 100₺ maliyette %40 margin = 167₺, %40 markup = 140₺. Margin her zaman daha yüksek fiyat verir.' },
             { question: 'Kargo maliyetini dahil etmeli miyim?', answer: 'Eğer ücretsiz kargo sunuyorsanız evet. Kargo müşteriye yansıtılıyorsa dahil etmenize gerek yok.' },
@@ -195,7 +210,13 @@ export const bundleProfitCalculator: ToolConfig = {
     content: {
         intro: 'Paket kampanyalarının gerçekten kârlı olup olmadığını test edin.',
         howItWorks: 'Tekli fiyat ve maliyetinize paket indirimi uygulayarak paket kârını ve marjını hesaplar. Tekli satış ile karşılaştırarak marj değişimini gösterir. Giriş yaparak marj erime riskini görebilirsiniz.',
-        details: `## Bundle Stratejisi\\n\\nPaket kampanyaları ortalama sipariş tutarını artırır ama dikkat edilmezse marjı eritir.\\n\\n### Altın Kural\\n\\nPaket indirimi, tekli marjınızın yarısını geçmemelidir. %60 marjlı üründe en fazla %30 paket indirimi.`,
+        details: `## Bundle Stratejisi
+
+Paket kampanyaları ortalama sipariş tutarını artırır ama dikkat edilmezse marjı eritir.
+
+### Altın Kural
+
+Paket indirimi, tekli marjınızın yarısını geçmemelidir. %60 marjlı üründe en fazla %30 paket indirimi.`,
         faq: [
             { question: '"3 Al 2 Öde" ne kadar indirim demek?', answer: '3 al 2 öde = %33 indirim. 2 al 1 öde = %50 indirim. Bu oranları hesaplayıcıya girin ve marj etkisini görün.' },
             { question: 'Paket indirimi ne zaman mantıklı?', answer: 'Stok eritme, ortalama sipariş tutarı artırma veya tekrar satın alma alışkanlığı yaratma amacıyla kullanılır.' },
@@ -250,7 +271,15 @@ export const dropshippingProfitCalc: ToolConfig = {
     content: {
         intro: 'Dropshipping modelinde gerçekten ne kadar kazanacağınızı hesaplayın.',
         howItWorks: 'Satış fiyatınızdan tedarikçi maliyeti, kargo ve reklam giderini çıkararak sipariş başı net kârınızı hesaplar. Giriş yaparak günde 10 siparişle aylık kazancınızı görebilirsiniz.',
-        details: `## Dropshipping Kâr Gerçeği\\n\\nÇoğu dropshipper marjı olduğundan yüksek hesaplar çünkü reklam maliyetini unutur.\\n\\n### Dikkat\\n\\n- Reklam CPA yükselince marj sıfıra iner\\n- İade oranı %10-20 arası ekstra maliyet yaratır\\n- Platform komisyonları dahil edilmeli`,
+        details: `## Dropshipping Kâr Gerçeği
+
+Çoğu dropshipper marjı olduğundan yüksek hesaplar çünkü reklam maliyetini unutur.
+
+### Dikkat
+
+- Reklam CPA yükselince marj sıfıra iner
+- İade oranı %10-20 arası ekstra maliyet yaratır
+- Platform komisyonları dahil edilmeli`,
         faq: [
             { question: 'Gerçekçi bir CPA ne kadar?', answer: 'Ürüne ve platforma göre değişir. Türkiye\'de ₺20-80 arası yaygındır. Niş ürünlerde ₺15, rekabetçi ürünlerde ₺100+ olabilir.' },
             { question: 'İade maliyetini dahil etmeli miyim?', answer: 'Evet, ortalama iade oranınızı biliyorsanız (genelde %10-15), CPA\'ya ekleyerek daha gerçekçi bir hesap yapabilirsiniz.' },
@@ -308,7 +337,16 @@ export const inventoryHoldingCost: ToolConfig = {
     content: {
         intro: 'Depodaki ürünlerin gizli maliyetini hesaplayın. Stok para demektir ve para beklerse erir.',
         howItWorks: 'Stok değerinize sermaye maliyetini (faiz oranı) ve depo kirasını ekleyerek stoğun aylık gerçek maliyetini hesaplar. Giriş yaparak stok devir hızını artırmanın tasarruf etkisini görebilirsiniz.',
-        details: `## Stok Neden Maliyet?\\n\\nDepoda duran ürün = bağlı sermaye.\\n\\n### Gizli Maliyetler\\n\\n1. **Sermaye fırsat maliyeti** (faiz)\\n2. **Depo/kira gideri**\\n3. **Sigorta ve fire**\\n4. **Değer kaybı** (modası geçme)`,
+        details: `## Stok Neden Maliyet?
+
+Depoda duran ürün = bağlı sermaye.
+
+### Gizli Maliyetler
+
+1. **Sermaye fırsat maliyeti** (faiz)
+2. **Depo/kira gideri**
+3. **Sigorta ve fire**
+4. **Değer kaybı** (modası geçme)`,
         faq: [
             { question: 'Sermaye faiz oranı olarak ne girmeliyim?', answer: 'Alternatif yatırım getirinizi girin. Türkiye\'de mevduat faizi %40-50 civarındaysa, bu oranı kullanın.' },
             { question: 'Stok devir hızı nedir?', answer: 'Yılda stoğunuzu kaç kez satıp yenilediğiniz. Yıllık satış / ortalama stok = devir hızı. E-ticarette 4-8 arası sağlıklıdır.' },
@@ -369,7 +407,15 @@ export const utmBuilder: ToolConfig = {
     content: {
         intro: 'Reklam ve pazarlama kampanyalarınız için UTM parametreli linkler oluşturun.',
         howItWorks: 'URL\'nize utm_source, utm_medium ve utm_campaign parametreleri ekleyerek Google Analytics\'te kampanya performansını ayrı ayrı takip etmenizi sağlar.',
-        details: `## UTM Parametreleri Nedir?\\n\\n- **utm_source**: Trafik kaynağı (facebook, google)\\n- **utm_medium**: Reklam türü (cpc, email)\\n- **utm_campaign**: Kampanya adı\\n\\n### Neden Önemli?\\n\\nUTM olmadan hangi reklamdan satış geldiğini bilemezsiniz.`,
+        details: `## UTM Parametreleri Nedir?
+
+- **utm_source**: Trafik kaynağı (facebook, google)
+- **utm_medium**: Reklam türü (cpc, email)
+- **utm_campaign**: Kampanya adı
+
+### Neden Önemli?
+
+UTM olmadan hangi reklamdan satış geldiğini bilemezsiniz.`,
         faq: [
             { question: 'UTM parametreleri SEO\'yu etkiler mi?', answer: 'Hayır, UTM parametreleri yalnızca analitik takibi içindir ve arama motoru sıralamalarını etkilemez.' },
             { question: 'Kaç UTM parametresi kullanabilirim?', answer: 'source, medium ve campaign zorunlu. İsteğe bağlı: utm_term (anahtar kelime) ve utm_content (A/B test varyasyonu).' },
@@ -429,7 +475,13 @@ export const bfcmDiscountPlanner: ToolConfig = {
     content: {
         intro: 'İndirim kampanyalarında aynı kârı korumak için ne kadar daha fazla satmanız gerektiğini hesaplayın.',
         howItWorks: 'Mevcut marjınızdan indirim oranını çıkararak yeni marjı bulur. Eski kârı korumak için gereken hacim artışını hesaplar. Giriş yaparak ihtiyacınız olan ekstra satış adedini görebilirsiniz.',
-        details: `## İndirim Tuzağı\\n\\n%25 indirim, %25 daha fazla satmak anlamına GELMEZ.\\n\\n### Örnek\\n\\n%50 marj + %25 indirim = Önceki kârı korumak için **%100 daha fazla** satış gerekir.`,
+        details: `## İndirim Tuzağı
+
+%25 indirim, %25 daha fazla satmak anlamına GELMEZ.
+
+### Örnek
+
+%50 marj + %25 indirim = Önceki kârı korumak için **%100 daha fazla** satış gerekir.`,
         faq: [
             { question: 'Neden bu kadar çok ekstra satış gerekiyor?', answer: 'İndirim, marjınızdan düşer. %50 marjda %25 indirim verirseniz yeni marj %25 olur — yani her satıştan yarısı kadar kâr edersiniz. Aynı toplam kâr için 2 kat satmalısınız.' },
             { question: 'Hangi indirim oranı güvenli?', answer: 'Marjınızın yarısından fazla indirim vermeyin. %40 marj varsa en fazla %15-20 indirim. Bu araçla farklı senaryoları test edin.' },

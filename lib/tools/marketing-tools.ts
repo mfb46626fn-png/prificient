@@ -54,7 +54,17 @@ export const cpmCpcCalculator: ToolConfig = {
     content: {
         intro: 'Dijital reklamlarınızın birim maliyetlerini öğrenin. CPM, CPC ve CTR metriklerini tek bir yerden hesaplayın.',
         howItWorks: 'Toplam bütçenizi gösterim ve tıklama sayılarına bölerek birim maliyetlerinizi hesaplar. CTR oranınızı gösterir. Giriş yaparak kampanyanızın sektör ortalamasına göre puanını görebilirsiniz.',
-        details: `## CPM ve CPC Nedir?\\n\\n- **CPC** (Cost Per Click): Her tıklama için ödediğiniz tutar\\n- **CPM** (Cost Per Mille): 1000 gösterim için ödediğiniz tutar\\n- **CTR** (Click-Through Rate): Gösterime karşı tıklama oranı\\n\\n### Sektör Ortalamaları (Türkiye)\\n\\n- E-ticaret CPC: ₺1.50-4.00\\n- E-ticaret CPM: ₺15-40\\n- Ortalama CTR: %1-3`,
+        details: `## CPM ve CPC Nedir?
+
+- **CPC** (Cost Per Click): Her tıklama için ödediğiniz tutar
+- **CPM** (Cost Per Mille): 1000 gösterim için ödediğiniz tutar
+- **CTR** (Click-Through Rate): Gösterime karşı tıklama oranı
+
+### Sektör Ortalamaları (Türkiye)
+
+- E-ticaret CPC: ₺1.50-4.00
+- E-ticaret CPM: ₺15-40
+- Ortalama CTR: %1-3`,
         faq: [
             { question: 'CPC mi CPM mi kullanmalıyım?', answer: 'Satış odaklı kampanyalarda CPC, marka bilinirliği kampanyalarında CPM daha anlamlıdır. CPC ile dönüşüm maliyetinizi doğrudan kontrol edersiniz.' },
             { question: 'CTR düşükse ne yapmalıyım?', answer: 'Reklam görsellerinizi ve metinlerinizi A/B test edin, hedeflemeyi daraltın, ve landing page ile reklam mesajı uyumunu kontrol edin.' },
@@ -102,7 +112,15 @@ export const influencerRoiCalculator: ToolConfig = {
     content: {
         intro: 'Influencer işbirliklerinin gerçek getirisini ölçün. Ödediğiniz ücretin karşılığını alıyor musunuz?',
         howItWorks: 'Influencer\'a ödenen ücreti ve ürün maliyetini gelen cirodan çıkararak net kârınızı ve ROI oranınızı hesaplar. Giriş yaparak zarar etmemek için gereken minimum satış tutarını görebilirsiniz.',
-        details: `## Influencer ROI Neden Önemli?\\n\\nInfluencer pazarlaması ölçülmezse para çöpe gider.\\n\\n### ROI Benchmark\\n\\n- **%0 altı**: Zarar — işbirliğini tekrarlamayın\\n- **%0-100**: Başa baş civarı — koşulları iyileştirin\\n- **%100+**: Kârlı — tekrar edin ve ölçeklendirin`,
+        details: `## Influencer ROI Neden Önemli?
+
+Influencer pazarlaması ölçülmezse para çöpe gider.
+
+### ROI Benchmark
+
+- **%0 altı**: Zarar — işbirliğini tekrarlamayın
+- **%0-100**: Başa baş civarı — koşulları iyileştirin
+- **%100+**: Kârlı — tekrar edin ve ölçeklendirin`,
         faq: [
             { question: 'Influencer seçerken neye dikkat etmeliyim?', answer: 'Takipçi sayısından çok etkileşim oranına bakın. %3+ etkileşim oranı iyi kabul edilir. Ayrıca hedef kitlenizle uyumu kontrol edin.' },
             { question: 'Gelen ciroyu nasıl takip ederim?', answer: 'Influencer\'a özel indirim kodu veya UTM parametreli link verin. Google Analytics veya platform analitiğinden takip edin.' },
@@ -151,7 +169,15 @@ export const emailMarketingRoi: ToolConfig = {
     content: {
         intro: 'E-posta pazarlamasının gerçek getirisini hesaplayın. Liste büyüklüğünüzün değerini somut rakamlarla görün.',
         howItWorks: 'E-posta kampanyalarınızın toplam maliyetini (yazılım + tasarım) gelen cirodan çıkararak net katkıyı ve ROI oranını hesaplar. Giriş yaparak e-posta başına kazancınızı (RPE) görebilirsiniz.',
-        details: `## E-Posta Pazarlaması Neden Güçlü?\\n\\nE-posta, ortalama **36:1 ROI** ile en yüksek getirili dijital pazarlama kanalıdır.\\n\\n### Benchmark\\n\\n- Açılma oranı: %20-30\\n- Tıklama oranı: %2-5\\n- Dönüşüm oranı: %1-3`,
+        details: `## E-Posta Pazarlaması Neden Güçlü?
+
+E-posta, ortalama **36:1 ROI** ile en yüksek getirili dijital pazarlama kanalıdır.
+
+### Benchmark
+
+- Açılma oranı: %20-30
+- Tıklama oranı: %2-5
+- Dönüşüm oranı: %1-3`,
         faq: [
             { question: 'İyi bir e-posta ROI oranı nedir?', answer: 'Sektör ortalaması 36:1\'dir (yani harcanan her 1₺ için 36₺ gelir). %500+ ROI başarılı kabul edilir.' },
             { question: 'Gönderim yazılımı maliyetini nasıl dahil edeyim?', answer: 'Aylık abonelik ücretinizi (Mailchimp, Klaviyo vb.) + varsa tasarım/içerik üretim maliyetini toplayın.' },
@@ -205,7 +231,15 @@ export const conversionRateImpact: ToolConfig = {
     content: {
         intro: 'Dönüşüm oranındaki küçük bir artışın cironuza olan büyük etkisini simüle edin.',
         howItWorks: 'Mevcut ve hedef dönüşüm oranlarınız arasındaki farkı ziyaretçi sayısı ve ortalama sepet tutarıyla çarparak aylık ekstra ciroyu hesaplar. Giriş yaparak yıllık kümülatif etkiyi görebilirsiniz.',
-        details: `## Dönüşüm Optimizasyonu Neden Kritik?\\n\\nTrafiğinizi artırmak pahalıdır. Mevcut trafikten daha fazla satış almak çok daha kârlıdır.\\n\\n### Sektör Ortalamaları\\n\\n- E-ticaret genel: %1-3\\n- Moda: %1-2\\n- Elektronik: %2-4`,
+        details: `## Dönüşüm Optimizasyonu Neden Kritik?
+
+Trafiğinizi artırmak pahalıdır. Mevcut trafikten daha fazla satış almak çok daha kârlıdır.
+
+### Sektör Ortalamaları
+
+- E-ticaret genel: %1-3
+- Moda: %1-2
+- Elektronik: %2-4`,
         faq: [
             { question: 'Dönüşüm oranımı nasıl artırırım?', answer: 'Ürün sayfası iyileştirme, güven sinyalleri (yorumlar, güvenlik rozetleri), checkout basitleştirme ve site hızı optimizasyonu en etkili yöntemlerdir.' },
             { question: '%1 artış gerçekçi mi?', answer: 'Evet, doğru A/B testleriyle 3-6 ayda %0.5-1 artış sağlamak mümkündür. Özellikle checkout optimizasyonu hızlı sonuç verir.' },
@@ -267,7 +301,14 @@ export const tiktokVsMetaCost: ToolConfig = {
     content: {
         intro: 'Meta ve TikTok reklam maliyetlerinizi karşılaştırın. Hangisi sizin için daha verimli?',
         howItWorks: 'İki platformun CPM ve CTR değerlerini kullanarak efektif CPC\'lerini hesaplar ve karşılaştırır. Giriş yaparak hangi platformda daha yüksek ROAS beklenebileceğini görebilirsiniz.',
-        details: `## TikTok mu Meta mı?\\n\\nDoğru cevap: "ikisi de, ama farklı amaçlarla."\\n\\n### Genel Karşılaştırma\\n\\n- **Meta**: Retargeting, lookalike, detaylı demografi\\n- **TikTok**: Düşük CPM, organik reach, genç kitle`,
+        details: `## TikTok mu Meta mı?
+
+Doğru cevap: "ikisi de, ama farklı amaçlarla."
+
+### Genel Karşılaştırma
+
+- **Meta**: Retargeting, lookalike, detaylı demografi
+- **TikTok**: Düşük CPM, organik reach, genç kitle`,
         faq: [
             { question: 'TikTok neden genelde daha ucuz?', answer: 'Platform henüz doygunluğa ulaşmadığı için rekabet daha az ve CPM\'ler düşük. Ancak bu avantaj zamanla azalıyor.' },
             { question: 'Hangi platform daha iyi dönüşüm verir?', answer: 'Ürününe bağlı. Dürtüsel alımlarda TikTok, araştırma gerektiren ürünlerde Meta genellikle daha iyi performans gösterir.' },
