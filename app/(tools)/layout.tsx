@@ -20,7 +20,7 @@ export default function ToolsLayout({
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-gray-200/80 bg-white/80 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-          <a href="https://prificient.com" className="flex items-center gap-2.5 group">
+          <a href="https://tools.prificient.com" className="flex items-center gap-2.5 group">
             <div className="w-8 h-8 bg-white rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm">
               <Image src="/logo.png" alt="Prificient" width={24} height={24} className="object-contain" />
             </div>
