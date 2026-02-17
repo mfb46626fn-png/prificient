@@ -8,6 +8,18 @@ export const metadata: Metadata = {
 
 const tools = [
     {
+        title: 'E-Ticaret Kâr Simülatörü',
+        description: 'Hedef cironuzun gerçekte ne kadar kâr getireceğini, tüm gizli maliyetler dahil simüle edin.',
+        href: '/profit-simulator',
+        icon: (
+            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+            </svg>
+        ),
+        color: 'emerald',
+        badge: 'Yeni',
+    },
+    {
         title: 'ROAS Simülatörü',
         description: 'Reklam harcamalarınızın gerçek geri dönüşünü hesaplayın. Gizli maliyetler dahil.',
         href: '/roas-calculator',
@@ -46,6 +58,7 @@ const tools = [
 ]
 
 const colorMap: Record<string, { bg: string; border: string; text: string; badge: string }> = {
+    emerald: { bg: 'bg-emerald-50', border: 'border-emerald-200/60', text: 'text-emerald-600', badge: 'bg-emerald-100 text-emerald-700' },
     violet: { bg: 'bg-violet-50', border: 'border-violet-200/60', text: 'text-violet-600', badge: 'bg-violet-100 text-violet-700' },
     blue: { bg: 'bg-blue-50', border: 'border-blue-200/60', text: 'text-blue-600', badge: 'bg-blue-100 text-blue-700' },
     amber: { bg: 'bg-amber-50', border: 'border-amber-200/60', text: 'text-amber-600', badge: 'bg-amber-100 text-amber-700' },
@@ -70,7 +83,7 @@ export default function ToolsHomePage() {
                 </div>
 
                 {/* Tool Cards */}
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-6 sm:grid-cols-2">
                     {tools.map((tool) => {
                         const c = colorMap[tool.color]
                         return (
