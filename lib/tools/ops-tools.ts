@@ -327,24 +327,36 @@ export const utmBuilder: ToolConfig = {
     color: 'zinc',
     icon: 'M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244',
     inputs: [
-        { id: 'website_url', label: 'Web Sitesi URL', type: 'number', defaultValue: 0, placeholder: 'ornek.com/urun' },
-        { id: 'source', label: 'Kaynak (facebook, google, tiktok)', type: 'number', defaultValue: 0, placeholder: 'facebook' },
-        { id: 'medium', label: 'Ortam (cpc, email, social)', type: 'number', defaultValue: 0, placeholder: 'cpc' },
-        { id: 'campaign_name', label: 'Kampanya Adı', type: 'number', defaultValue: 0, placeholder: 'yaz_kampanyasi' },
+        { id: 'website_url', label: 'Web Sitesi URL', type: 'text', defaultValue: 'https://ornek.com/urun', placeholder: 'https://ornek.com/urun' },
+        { id: 'source', label: 'Kaynak (utm_source)', type: 'text', defaultValue: 'facebook', placeholder: 'facebook' },
+        { id: 'medium', label: 'Ortam (utm_medium)', type: 'text', defaultValue: 'cpc', placeholder: 'cpc' },
+        { id: 'campaign_name', label: 'Kampanya Adı (utm_campaign)', type: 'text', defaultValue: 'yaz_kampanyasi', placeholder: 'yaz_kampanyasi' },
     ],
     results: [
         {
             id: 'utm_url',
             label: 'UTM Etiketli Link',
             type: 'text',
-            formula: () => 'Bu araç için aşağıdaki özel alanları kullanın',
-            description: 'URL formu aşağıda — yakında interaktif oluşturucu eklenecek',
+            formula: (_i, t) => {
+                const url = t?.website_url || 'https://ornek.com/urun'
+                const source = t?.source || 'facebook'
+                const medium = t?.medium || 'cpc'
+                const campaign = t?.campaign_name || 'yaz_kampanyasi'
+                const separator = url.includes('?') ? '&' : '?'
+                return `${url}${separator}utm_source=${encodeURIComponent(source)}&utm_medium=${encodeURIComponent(medium)}&utm_campaign=${encodeURIComponent(campaign)}`
+            },
+            description: 'Bu linki kopyalayarak reklamlarınızda kullanabilirsiniz',
         },
         {
-            id: 'utm_preview',
-            label: 'Ön İzleme',
+            id: 'utm_breakdown',
+            label: 'Parametre Özeti',
             type: 'text',
-            formula: () => 'ornek.com/urun?utm_source=facebook&utm_medium=cpc&utm_campaign=yaz_kampanyasi',
+            formula: (_i, t) => {
+                const source = t?.source || 'facebook'
+                const medium = t?.medium || 'cpc'
+                const campaign = t?.campaign_name || 'yaz_kampanyasi'
+                return `source: ${source} | medium: ${medium} | campaign: ${campaign}`
+            },
         },
         {
             id: 'short_link',

@@ -1,6 +1,6 @@
 // ─── Tool Factory Type Definitions ──────────────────────
 
-export type InputType = 'number' | 'currency' | 'percent'
+export type InputType = 'number' | 'currency' | 'percent' | 'text'
 export type ResultType = 'currency' | 'percent' | 'number' | 'text'
 export type ToolCategory = 'finance' | 'marketing' | 'operations' | 'utility'
 
@@ -8,7 +8,7 @@ export interface ToolInput {
     id: string
     label: string
     type: InputType
-    defaultValue: number
+    defaultValue: number | string
     placeholder?: string
     tooltip?: string
 }
@@ -17,7 +17,7 @@ export interface ToolResult {
     id: string
     label: string
     type: ResultType
-    formula: (inputs: Record<string, number>) => number | string
+    formula: (inputs: Record<string, number>, textInputs?: Record<string, string>) => number | string
     isLocked?: boolean
     /** Optional description shown below the result */
     description?: string

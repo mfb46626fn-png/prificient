@@ -77,13 +77,24 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
         // Parse numeric values
         const numericInputs: Record<string, number> = {}
         config.inputs.forEach((input) => {
-            numericInputs[input.id] = parseFloat(inputValues[input.id]) || input.defaultValue
+            if (input.type === 'text') {
+                numericInputs[input.id] = 0 // text inputs not used in numeric calculations
+            } else {
+                numericInputs[input.id] = parseFloat(inputValues[input.id]) || (typeof input.defaultValue === 'number' ? input.defaultValue : 0)
+            }
+        })
+        // Collect text input values
+        const textInputs: Record<string, string> = {}
+        config.inputs.forEach((input) => {
+            if (input.type === 'text') {
+                textInputs[input.id] = inputValues[input.id] || String(input.defaultValue)
+            }
         })
 
         // Compute results
         const results: Record<string, number | string> = {}
         config.results.forEach((result) => {
-            results[result.id] = result.formula(numericInputs)
+            results[result.id] = result.formula(numericInputs, textInputs)
         })
         setComputedResults(results)
         setCalculated(true)
@@ -201,16 +212,28 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                             {input.type === 'currency' && (
                                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">₺</span>
                                             )}
-                                            <input
-                                                type="number"
-                                                value={inputValues[input.id]}
-                                                onChange={(e) => updateInput(input.id, e.target.value)}
-                                                placeholder={input.placeholder || String(input.defaultValue)}
-                                                className={`w-full py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 ${c.ring} transition-all ${input.type === 'currency' ? 'pl-8 pr-4' : input.type === 'percent' ? 'pl-4 pr-8' : 'px-4'
-                                                    }`}
-                                            />
-                                            {input.type === 'percent' && (
-                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">%</span>
+                                            {input.type === 'text' ? (
+                                                <input
+                                                    type="text"
+                                                    value={inputValues[input.id]}
+                                                    onChange={(e) => updateInput(input.id, e.target.value)}
+                                                    placeholder={input.placeholder || String(input.defaultValue)}
+                                                    className={`w-full py-2.5 px-4 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 ${c.ring} transition-all`}
+                                                />
+                                            ) : (
+                                                <>
+                                                    <input
+                                                        type="number"
+                                                        value={inputValues[input.id]}
+                                                        onChange={(e) => updateInput(input.id, e.target.value)}
+                                                        placeholder={input.placeholder || String(input.defaultValue)}
+                                                        className={`w-full py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 ${c.ring} transition-all ${input.type === 'currency' ? 'pl-8 pr-4' : input.type === 'percent' ? 'pl-4 pr-8' : 'px-4'
+                                                            }`}
+                                                    />
+                                                    {input.type === 'percent' && (
+                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">%</span>
+                                                    )}
+                                                </>
                                             )}
                                         </div>
                                     </div>
@@ -361,7 +384,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 
                 {/* How It Works */}
                 {config.content.howItWorks && (
-                    <div className="mt-16 max-w-3xl">
+                    <div className="mt-16 max-w-3xl mx-auto">
                         <div className={`rounded-2xl border ${c.border} ${c.bg} p-6 sm:p-8`}>
                             <div className="flex items-center gap-2 mb-4">
                                 <svg className={`w-5 h-5 ${c.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -375,7 +398,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                 )}
 
                 {/* SEO Content */}
-                <div className="mt-8 max-w-3xl">
+                <div className="mt-8 max-w-3xl mx-auto">
                     <div className="prose prose-sm prose-gray">
                         <div dangerouslySetInnerHTML={{ __html: markdownToHtml(config.content.details) }} />
                     </div>
@@ -383,7 +406,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 
                 {/* FAQ */}
                 {config.content.faq && config.content.faq.length > 0 && (
-                    <div className="mt-12 max-w-3xl">
+                    <div className="mt-12 max-w-3xl mx-auto">
                         <h2 className="text-lg font-bold text-gray-900 mb-6">Sıkça Sorulan Sorular</h2>
                         <div className="space-y-3">
                             {config.content.faq.map((item, idx) => (
@@ -426,6 +449,8 @@ function FAQItem({ question, answer, color }: { question: string; answer: string
 // ─── Simple Markdown to HTML ──────────────────
 function markdownToHtml(md: string): string {
     return md
+        // Normalize literal \n to real newlines (from template literals)
+        .replace(/\\n/g, '\n')
         .replace(/^### (.*$)/gm, '<h3 class="text-base font-semibold text-gray-800 mt-6 mb-2">$1</h3>')
         .replace(/^## (.*$)/gm, '<h2 class="text-lg font-bold text-gray-900 mt-8 mb-3">$1</h2>')
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
