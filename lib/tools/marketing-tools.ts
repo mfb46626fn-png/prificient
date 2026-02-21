@@ -49,6 +49,35 @@ export const cpmCpcCalculator: ToolConfig = {
                 return score >= 80 ? `${score}/100 — Mükemmel performans` : score >= 60 ? `${score}/100 — Ortalamanın üstünde` : `${score}/100 — İyileştirme gerekiyor`
             },
             isLocked: true,
+            insight: (i) => {
+                const ctr = i.impressions > 0 ? (i.clicks / i.impressions) * 100 : 0
+                const cpc = i.clicks > 0 ? i.budget / i.clicks : 0
+                if (ctr < 1 && cpc > 5) {
+                    return {
+                        value: `CTR %${ctr.toFixed(1)}`,
+                        level: 'danger',
+                        title: 'Reklamınız Görmezden Geliniyor',
+                        message: `CTR %${ctr.toFixed(1)} ve CPC ₺${cpc.toFixed(2)} — hem tıklanma oranınız çok düşük hem de her tık pahalı. Reklamınız hedef kitleye konuşmuyor.`,
+                        recommendation: 'Reklam görsellerini değiştirin — kareler yerine dikey video deneyin. Başlıkta fiyat veya indirim oranı verin. Hedef kitleyi daraltın: ilgi alanı + davranış kombinasyonu kullanın.',
+                    }
+                } else if (ctr < 2 || cpc > 3) {
+                    return {
+                        value: `CTR %${ctr.toFixed(1)}`,
+                        level: 'warning',
+                        title: 'Ortalamalarda — İyileştirme Fırsatı Var',
+                        message: `CTR %${ctr.toFixed(1)}, CPC ₺${cpc.toFixed(2)}. Sektör ortalamasında performans gösteriyorsunuz ama rakiplerinizden öne geçmek için optimize etmelisiniz.`,
+                        recommendation: '3-5 farklı reklam görseli ile A/B test başlatın. Hook (ilk 3 saniye) optimizasyonu yapın. "Sosyal kanıt" içeren başlıklar test edin ("50.000+ müşteri" gibi).',
+                    }
+                } else {
+                    return {
+                        value: `CTR %${ctr.toFixed(1)}`,
+                        level: 'success',
+                        title: 'Yüksek Performanslı Reklam',
+                        message: `CTR %${ctr.toFixed(1)} ve CPC ₺${cpc.toFixed(2)} — reklamınız hedef kitleyle mükemmel örtüşüyor.`,
+                        recommendation: 'Bu reklamı ölçeklendirin! Bütçeyi kademeli artırırken frekansı (frequency) izleyin. 3+ olduğunda yeni kreatif hazırlayın. Benzer formatta yeni reklamlar üretin.',
+                    }
+                }
+            },
         },
     ],
     content: {
@@ -107,6 +136,35 @@ export const influencerRoiCalculator: ToolConfig = {
             formula: (i) => Math.round(i.influencer_fee + i.product_cost),
             isLocked: true,
             description: 'Bu tutarın altında zarar edersiniz',
+            insight: (i) => {
+                const roi = i.influencer_fee > 0 ? ((i.sales_generated - i.influencer_fee - i.product_cost) / i.influencer_fee) * 100 : 0
+                const netProfit = i.sales_generated - i.influencer_fee - i.product_cost
+                if (roi < 0) {
+                    return {
+                        value: `%${Math.round(roi)} ROI`,
+                        level: 'danger',
+                        title: 'Bu İşbirliği Zarar Ettiriyor',
+                        message: `₺${i.influencer_fee.toLocaleString('tr-TR')} ödeyip ₺${i.sales_generated.toLocaleString('tr-TR')} satış elde ettiniz. Net zarar: ₺${Math.abs(Math.round(netProfit)).toLocaleString('tr-TR')}. Bu influencer size para kaybettiriyor.`,
+                        recommendation: 'İşbirliğini sonlandırın. Performans bazlı modele geçin (sabit ücret yerine komisyon). Mikro-influencer (​10K-50K takipçi) test edin — CPE genelde %60 daha düşük.',
+                    }
+                } else if (roi < 100) {
+                    return {
+                        value: `%${Math.round(roi)} ROI`,
+                        level: 'warning',
+                        title: 'Kârlı Ama Yeterli Değil',
+                        message: `ROI %${Math.round(roi)} — kâr ediyorsunuz ama Meta reklamları genelde daha iyi performans verir. Net kâr: ₺${Math.round(netProfit).toLocaleString('tr-TR')}.`,
+                        recommendation: 'Influencer içeriğini reklam olarak boost edin (Spark Ads / Partnership Ads). İçeriği organik olarak yeniden kullanın. Performansı artırmak için özel indirim kodu verin.',
+                    }
+                } else {
+                    return {
+                        value: `%${Math.round(roi)} ROI`,
+                        level: 'success',
+                        title: 'Mükemmel İşbirliği — Tekrarlayın!',
+                        message: `ROI %${Math.round(roi)} ile her ₺1 yatırım ₺${(roi / 100 + 1).toFixed(1)} geri dönüyor. Bu influencer altın madeni.`,
+                        recommendation: 'Uzun vadeli anlaşma teklif edin (ücret düşer). Aynı nişteki benzer profilleri bulun ve test edin. Bu içeriği tüm kanallarda (story, post, reels) yaygınlaştırın.',
+                    }
+                }
+            },
         },
     ],
     content: {
@@ -164,6 +222,35 @@ export const emailMarketingRoi: ToolConfig = {
             formula: (i) => i.emails_sent > 0 ? Math.round(((i.total_revenue - i.cogs) / i.emails_sent) * 100) / 100 : 0,
             isLocked: true,
             description: 'Her gönderilen e-postanın size kazandırdığı tutar',
+            insight: (i) => {
+                const roi = i.campaign_cost > 0 ? ((i.total_revenue - i.campaign_cost - i.cogs) / i.campaign_cost) * 100 : 0
+                const rpe = i.emails_sent > 0 ? (i.total_revenue - i.cogs) / i.emails_sent : 0
+                if (roi < 100) {
+                    return {
+                        value: `₺${rpe.toFixed(2)}/mail`,
+                        level: 'danger',
+                        title: 'E-posta Kanalınız Verimsiz',
+                        message: `ROI %${Math.round(roi)}, her e-posta sadece ₺${rpe.toFixed(2)} kazanıyor. Sektör ortalaması 36:1 ROI — siz bunun çok gerisinde.`,
+                        recommendation: 'Segmentasyon yapın: tüm listeye göndermek yerine son 90 günde alışveriş yapanları hedefleyin. Konu satırını A/B test edin. Gönderim sıklığını haftada 2-3\'e düşürün.',
+                    }
+                } else if (roi < 500) {
+                    return {
+                        value: `₺${rpe.toFixed(2)}/mail`,
+                        level: 'warning',
+                        title: 'Potansiyel Var — Optimize Edin',
+                        message: `ROI %${Math.round(roi)}, her mail ₺${rpe.toFixed(2)} kazanıyor. İyi ama en yüksek ROI kanalı olarak daha fazlasını beklemelisiniz.`,
+                        recommendation: 'Otomasyon kurun: Sepet terk, hoşgeldin serisi, win-back. Bu otomasyonlar manuel kampanyalardan 3-5x daha etkilidir. Dinamik ürün önerileri ekleyin.',
+                    }
+                } else {
+                    return {
+                        value: `₺${rpe.toFixed(2)}/mail`,
+                        level: 'success',
+                        title: 'E-posta Makineniz Çalışıyor!',
+                        message: `ROI %${Math.round(roi)} — her ₺1 harcama ₺${(roi / 100 + 1).toFixed(0)} getiriyor. E-posta en kârlı kanalınız.`,
+                        recommendation: 'Liste büyütmeye yatırım yapın: pop-up\'lar, quiz funnel, lead magnet. Her 1000 yeni abone ≈ ₺${Math.round(rpe * 1000).toLocaleString("tr-TR")} ek gelir demek.',
+                    }
+                }
+            },
         },
     ],
     content: {

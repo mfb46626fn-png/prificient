@@ -56,6 +56,37 @@ export const stripePaypalFeeCalculator: ToolConfig = {
             },
             isLocked: true,
             sentiment: () => 'negative',
+            insight: (i) => {
+                const rate = i.is_international >= 1 ? 0.039 : 0.029
+                const fee = (i.transaction_amount * rate) + 0.30
+                const yearlyLoss = Math.round(fee * 1000 * 12)
+                const feePct = i.transaction_amount > 0 ? (fee / i.transaction_amount) * 100 : 0
+                if (feePct > 4) {
+                    return {
+                        value: `₺${yearlyLoss.toLocaleString('tr-TR')}/yıl`,
+                        level: 'danger',
+                        title: 'Komisyon Oranı Çok Yüksek',
+                        message: `Her işlemde %${feePct.toFixed(1)} komisyon ödüyorsunuz. Yıllık projeksiyon: ₺${yearlyLoss.toLocaleString('tr-TR')} sadece komisyona gidiyor. Bu bir çalışan maaşı.`,
+                        recommendation: 'Yerel ödeme altyapılarına geçiş değerlendirin (iyzico, Param). Yüsek tutarlı işlemler için banka havalesi opsiyonu sunun. Komisyon dahil fiyatlandırma yapın.',
+                    }
+                } else if (feePct > 2.5) {
+                    return {
+                        value: `₺${yearlyLoss.toLocaleString('tr-TR')}/yıl`,
+                        level: 'warning',
+                        title: 'Standart Oran — Ama Optimize Edilebilir',
+                        message: `%${feePct.toFixed(1)} komisyon sektör standardında. Yılda ₺${yearlyLoss.toLocaleString('tr-TR')} ödeyeceksiniz. Hacim arttıkça bu rakam büyüyecek.`,
+                        recommendation: 'Ödeme sağlayıcınızla hacim indirimi görüşün. Aylık 1000+ işlem = pazarlık gücü. Abonelik modeli varsa otomatik ödeme ile komisyonu düşürebilirsiniz.',
+                    }
+                } else {
+                    return {
+                        value: `₺${yearlyLoss.toLocaleString('tr-TR')}/yıl`,
+                        level: 'success',
+                        title: 'Sağlıklı Komisyon Oranı',
+                        message: `%${feePct.toFixed(1)} komisyon oranı optimize. Yıllık ₺${yearlyLoss.toLocaleString('tr-TR')} makul bir gider.`,
+                        recommendation: 'Mevcut oranınız iyi. Odak noktanızı sipariş sayısını ve AOV\'yi artırmaya çevirin. Komisyon optimizasyonu yerine gelir optimizasyonu yapın.',
+                    }
+                }
+            },
         },
     ],
     content: {
@@ -266,6 +297,36 @@ export const dropshippingProfitCalc: ToolConfig = {
             },
             isLocked: true,
             sentiment: (v) => (v as number) > 0 ? 'positive' : 'negative',
+            insight: (i) => {
+                const profit = i.selling_price - i.supplier_cost - i.shipping_cost - i.ad_cpa
+                const marginPct = i.selling_price > 0 ? (profit / i.selling_price) * 100 : 0
+                const monthlyNet = Math.round(profit * 10 * 30)
+                if (profit <= 0) {
+                    return {
+                        value: `₺${profit.toFixed(0)}/sipariş`,
+                        level: 'danger',
+                        title: 'Sipariş Başına Zarar Ediyorsunuz!',
+                        message: `Her satışta ₺${Math.abs(profit).toFixed(0)} kaybediyorsunuz. Daha çok satış = daha çok zarar. Bu model sürdürülemez.`,
+                        recommendation: 'Acil: Satış fiyatını artırın veya tedarikçi değiştirin. Reklam CPA\'sını düşürmek için retargeting ağırlıklı çalışın. Bu ürün kâr getirmiyorsa kataloğdan çıkarın.',
+                    }
+                } else if (marginPct < 15) {
+                    return {
+                        value: `%${marginPct.toFixed(0)} marj`,
+                        level: 'warning',
+                        title: 'Marj Çok Dar — Risk Altındasınız',
+                        message: `Sipariş başı ₺${profit.toFixed(0)} kâr, marj %${marginPct.toFixed(0)}. Aylık (10 sipariş/gün): ₺${monthlyNet.toLocaleString('tr-TR')}. CPA artışı veya kur değişimi sizi zarara sokar.`,
+                        recommendation: 'Ürün fiyatını %10-15 artırın (değer algısını görsel iyileştirmeyle destekleyin). 2+ ürün sattırarak kargo maliyetini düşürün. Organik içerike yatırım yapın.',
+                    }
+                } else {
+                    return {
+                        value: `%${marginPct.toFixed(0)} marj`,
+                        level: 'success',
+                        title: 'Kârlı Model — Ölçeklendirmeye Hazır',
+                        message: `Sipariş başı ₺${profit.toFixed(0)} kâr (%${marginPct.toFixed(0)} marj). Aylık potansiyel: ₺${monthlyNet.toLocaleString('tr-TR')}. Sağlıklı bir dropshipping modeli.`,
+                        recommendation: 'Bütçeyi artırın ve yeni ürünler test edin. Benzer marjlı ürünlerle kataloğu genişletin. Müşteri memnuniyetine odaklanarak tekrar satış oranını yükseltin.',
+                    }
+                }
+            },
         },
     ],
     content: {

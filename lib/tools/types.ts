@@ -4,6 +4,20 @@ export type InputType = 'number' | 'currency' | 'percent' | 'text'
 export type ResultType = 'currency' | 'percent' | 'number' | 'text'
 export type ToolCategory = 'finance' | 'marketing' | 'operations' | 'utility'
 
+// ─── Insight Engine ─────────────────────────────────────
+
+export type InsightLevel = 'success' | 'warning' | 'danger'
+
+export interface ToolInsight {
+    value: string           // Hesaplanan değer (Örn: "3.2x", "%15")
+    level: InsightLevel     // Kart rengi (yeşil, sarı, kırmızı)
+    title: string           // Başlık (Örn: "Nakit Yakıyorsunuz!")
+    message: string         // Durum açıklaması
+    recommendation: string  // Prificient tavsiyesi
+}
+
+// ─── Tool Input / Result ────────────────────────────────
+
 export interface ToolInput {
     id: string
     label: string
@@ -23,7 +37,11 @@ export interface ToolResult {
     description?: string
     /** Optional: positive = good, negative = bad (for color coding) */
     sentiment?: (value: number | string) => 'positive' | 'negative' | 'neutral'
+    /** Locked insight analysis — returns a rich intelligence card */
+    insight?: (inputs: Record<string, number>) => ToolInsight
 }
+
+// ─── Tool Config ────────────────────────────────────────
 
 export interface ToolFAQ {
     question: string

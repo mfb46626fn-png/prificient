@@ -54,6 +54,34 @@ const roasCalculator: ToolConfig = {
             },
             isLocked: true,
             description: 'Minimum %2 ROAS ile kârlı olmak için gerekli dönüşüm oranı',
+            insight: (i) => {
+                const roas = i.ad_spend > 0 ? i.revenue / i.ad_spend : 0
+                if (roas < 2.0) {
+                    return {
+                        value: `${roas.toFixed(1)}x`,
+                        level: 'danger',
+                        title: 'Nakit Yakıyorsunuz! (Danger Zone)',
+                        message: `ROAS ${roas.toFixed(1)}x ile şu an Meta/Google için çalışıyorsunuz, kendiniz için değil. Harcadığınız her ₺${Math.round(i.ad_spend / 30)} günlük bütçeden sadece ₺${Math.round(i.revenue / 30)} geri dönüyor.`,
+                        recommendation: 'Reklamları durdurun veya AOV artırmak için "3 Al 2 Öde" kurgusuna geçin. Ürün sayfasındaki görselleri A/B test edin. Retargeting bütçesini soğuk kitleden çekin.',
+                    }
+                } else if (roas < 4.0) {
+                    return {
+                        value: `${roas.toFixed(1)}x`,
+                        level: 'warning',
+                        title: 'Bıçak Sırtı (Break-Even Yakın)',
+                        message: `ROAS ${roas.toFixed(1)}x — kârlısınız ama bir iade dalgası veya CPC artışı sizi zarara sokabilir. Güvenlik marjınız çok dar.`,
+                        recommendation: 'Retargeting bütçesini %10 artırın, soğuk kitleyi kısın. E-posta pazarlamaya ağırlık vererek organik satışları yükseltin.',
+                    }
+                } else {
+                    return {
+                        value: `${roas.toFixed(1)}x`,
+                        level: 'success',
+                        title: 'Ölçeklenebilir Sistem (Scalable)',
+                        message: `ROAS ${roas.toFixed(1)}x — sisteminiz para basıyor. Şimdi gaza basma zamanı.`,
+                        recommendation: 'Bütçeyi %20 artırın (Scaling). Lookalike oranlarını %1\'den %3\'e çıkararak yeni kitlelere ulaşın. Benzer ürünlerle katalog reklamlarını test edin.',
+                    }
+                }
+            },
         },
     ],
     content: {
@@ -129,6 +157,36 @@ const breakEvenRoas: ToolConfig = {
             },
             isLocked: true,
             description: '%50 güvenlik payı ile hedeflemeniz gereken ROAS',
+            insight: (i) => {
+                const fees = i.selling_price * (i.fees / 100)
+                const margin = i.selling_price - i.cogs - i.shipping - fees
+                const beRoas = margin > 0 ? i.selling_price / margin : 0
+                if (beRoas >= 5) {
+                    return {
+                        value: `${beRoas.toFixed(1)}x`,
+                        level: 'danger',
+                        title: 'Tehlike Bölgesi — Fiyatlamayı Gözden Geçirin',
+                        message: `BE-ROAS ${beRoas.toFixed(1)}x çok yüksek. Net marjınız sadece ₺${Math.round(margin)} (${i.selling_price > 0 ? Math.round((margin / i.selling_price) * 100) : 0}%). Bu değerle kârlı reklam vermek neredeyse imkansız.`,
+                        recommendation: 'Acilen fiyatı artırın veya tedarikçi maliyetini düşürün. Platform komisyonu düşük kanal arayın. Ürün maliyeti > satış fiyatının %60\'ı ise bu ürünü reklama sokmayın.',
+                    }
+                } else if (beRoas >= 3) {
+                    return {
+                        value: `${beRoas.toFixed(1)}x`,
+                        level: 'warning',
+                        title: 'Dikkatli Olun — Marj Dar',
+                        message: `BE-ROAS ${beRoas.toFixed(1)}x — reklam verebilirsiniz ama hata payınız az. CPC artışı veya iade dalgası sizi zarara sokabilir.`,
+                        recommendation: 'Kargo anlaşmanızı iyileştirin (₺${Math.round(i.shipping)} → paket anlaşma ile ₺${Math.max(10, Math.round(i.shipping * 0.7))} mümkün). Bundle satışıyla AOV artırarak BE-ROAS\'ı düşürün.',
+                    }
+                } else {
+                    return {
+                        value: `${beRoas.toFixed(1)}x`,
+                        level: 'success',
+                        title: 'Sağlıklı Marj — Ölçeklendirmeye Hazır',
+                        message: `BE-ROAS sadece ${beRoas.toFixed(1)}x. Net marjınız ₺${Math.round(margin)} (${i.selling_price > 0 ? Math.round((margin / i.selling_price) * 100) : 0}%) ile rahat bir şekilde reklam verebilirsiniz.`,
+                        recommendation: 'Bu ürünü reklam bütçesinde ön plana çıkarın. Düşük BE-ROAS avantajınızla rakipleri outbid edin. Scaling kampanyaları başlatın.',
+                    }
+                }
+            },
         },
     ],
     content: {
@@ -214,6 +272,35 @@ const profitSimulator: ToolConfig = {
             isLocked: true,
             description: 'Toplam yatırımınıza oranla getiriniz',
             sentiment: (v) => (v as number) >= 30 ? 'positive' : (v as number) >= 0 ? 'neutral' : 'negative',
+            insight: (i) => {
+                const net = i.revenue - (i.revenue * i.cogs_percent / 100) - i.ad_spend - i.shipping_total - i.misc_fees
+                const marginPct = i.revenue > 0 ? (net / i.revenue) * 100 : 0
+                if (marginPct < 5) {
+                    return {
+                        value: `%${marginPct.toFixed(1)}`,
+                        level: 'danger',
+                        title: 'Kâr Marjınız Kritik Seviyede',
+                        message: `Aylık ₺${i.revenue.toLocaleString('tr-TR')} ciroya karşın sadece ₺${Math.round(net).toLocaleString('tr-TR')} net kâr. Marjınız %${marginPct.toFixed(1)} — tek bir beklenmedik gider sizi zarara sokar.`,
+                        recommendation: 'Acil eylem: (1) Reklam bütçesini %20 kısın ve performansı koruyacak retargeting\'e odaklanın. (2) COGS oranını %5 düşürecek alternatif tedarikçi arayın. (3) Kargo anlaşmanızı toplu gönderimle optimize edin.',
+                    }
+                } else if (marginPct < 20) {
+                    return {
+                        value: `%${marginPct.toFixed(1)}`,
+                        level: 'warning',
+                        title: 'Orta Seviye — Büyüme Kapasitesi Sınırlı',
+                        message: `Kâr marjınız %${marginPct.toFixed(1)}. İşletmeniz ayakta ama agresif büyüme için yeterli değil. Aylık ₺${Math.round(net).toLocaleString('tr-TR')} net kâr.`,
+                        recommendation: 'AOV artırmak için cross-sell/upsell stratejisi kurun. E-posta otomasyonuyla reklam maliyeti olmadan tekrar satış yapın. Hedef: marjı %25+ seviyeye çıkarmak.',
+                    }
+                } else {
+                    return {
+                        value: `%${marginPct.toFixed(1)}`,
+                        level: 'success',
+                        title: 'Güçlü Kârlılık — Ölçeklendirin',
+                        message: `%${marginPct.toFixed(1)} kâr marjı ile aylık ₺${Math.round(net).toLocaleString('tr-TR')} net kazanıyorsunuz. Yıllık projeksiyon: ₺${Math.round(net * 12).toLocaleString('tr-TR')}.`,
+                        recommendation: 'Bu sağlıklı marjla büyüme zamanı. Reklam bütçesini kademeli (%10-15/hafta) artırın. Yeni ürün kategorileri test edin. Mevcut müşterilere sadakat programı başlatın.',
+                    }
+                }
+            },
         },
     ],
     content: {
@@ -293,6 +380,37 @@ const returnCostCalculator: ToolConfig = {
             isLocked: true,
             description: 'Maliyet tasarrufu + kurtarılan kâr (aylık)',
             sentiment: (v) => (v as number) > 0 ? 'positive' : 'neutral',
+            insight: (i) => {
+                const returnRate = i.return_rate
+                const monthlyReturns = Math.round(i.monthly_orders * (returnRate / 100))
+                const costPerReturn = i.shipping_cost_one_way * 2 + i.handling_cost
+                const monthlyLoss = monthlyReturns * costPerReturn
+                if (returnRate > 20) {
+                    return {
+                        value: `%${returnRate}`,
+                        level: 'danger',
+                        title: 'Operasyonel Kan Kaybı',
+                        message: `Her 5 siparişten ${Math.round(returnRate / 20)} tanesi iade ediliyor. Aylık ₺${Math.round(monthlyLoss).toLocaleString('tr-TR')} doğrudan çöpe gidiyor. Kargo firması kazanıyor, siz kaybediyorsunuz.`,
+                        recommendation: 'Acil adımlar: (1) İade politikanızı "Mağaza Kredisi" olarak değiştirin. (2) Beden tablosu ve 360° ürün fotoğrafı ekleyin. (3) En çok iade alan ilk 5 ürünü tespit edip listing\'lerini iyileştirin.',
+                    }
+                } else if (returnRate > 10) {
+                    return {
+                        value: `%${returnRate}`,
+                        level: 'warning',
+                        title: 'Optimize Edilebilir — Gizli Fırsat',
+                        message: `İade oranınız %${returnRate} sektör ortalamasında. Aylık ₺${Math.round(monthlyLoss).toLocaleString('tr-TR')} iade maliyetiniz var. %5 düşüş bile ciddi tasarruf sağlar.`,
+                        recommendation: 'Ürün paketlemesine "Teşekkür Kartı" ekleyerek duygusal bağ kurun (iadeleri %2-3 azaltır). Sipariş onay mailinde ürün kullanım videosu paylaşın.',
+                    }
+                } else {
+                    return {
+                        value: `%${returnRate}`,
+                        level: 'success',
+                        title: 'İade Oranınız Mükemmel',
+                        message: `%${returnRate} iade oranı sektör ortalamasının çok altında. Aylık iade maliyetiniz sadece ₺${Math.round(monthlyLoss).toLocaleString('tr-TR')}.`,
+                        recommendation: 'Bu avantajı pazarlamada kullanın! "Müşterilerimizin %${100 - returnRate}\'i memnun" gibi sosyal kanıt mesajları reklamlarda dönüşümü artırır.',
+                    }
+                }
+            },
         },
     ],
     content: {
@@ -358,6 +476,36 @@ const cltvCalculator: ToolConfig = {
             isLocked: true,
             description: 'Bir müşteri kazanmak için harcayabileceğiniz üst limit',
             sentiment: () => 'positive',
+            insight: (i) => {
+                const cltv = i.avg_order_value * i.purchase_frequency * i.customer_lifespan
+                const ltvProfit = cltv * (i.profit_margin / 100)
+                const maxCac = Math.round(ltvProfit * 0.33)
+                if (maxCac < 50) {
+                    return {
+                        value: `₺${maxCac}`,
+                        level: 'danger',
+                        title: 'Müşteri Edinme Bütçeniz Çok Dar',
+                        message: `Bir müşteriye en fazla ₺${maxCac} harcayabilirsiniz. Bu bütçeyle Meta/Google'da kaliteli müşteri bulmak çok zor. CLTV: ₺${Math.round(cltv).toLocaleString('tr-TR')}.`,
+                        recommendation: 'CLTV artırma planı: (1) Sipariş sonrası cross-sell e-postaları kurun (sıklığı artırır). (2) Sadakat programı başlatın (ömrü uzatır). (3) Bundle/upsell ile AOV artırın.',
+                    }
+                } else if (maxCac < 150) {
+                    return {
+                        value: `₺${maxCac}`,
+                        level: 'warning',
+                        title: 'Dikkatli Harcayın — Sınırlı Bütçe',
+                        message: `Müşteri başına ₺${maxCac} bütçeniz var. CLTV ₺${Math.round(cltv).toLocaleString('tr-TR')}, toplam kâr potansiyeli ₺${Math.round(ltvProfit).toLocaleString('tr-TR')}. CPA'yı sıkı takip edin.`,
+                        recommendation: 'Retargeting ve lookalike kampanyalarına odaklanın (düşük CPA). Soğuk kitle için organik içerik (Reels/TikTok) ile awareness oluşturun. E-posta listesi büyütmeye yatırım yapın.',
+                    }
+                } else {
+                    return {
+                        value: `₺${maxCac}`,
+                        level: 'success',
+                        title: 'Güçlü CLTV — Agresif Büyüyebilirsiniz',
+                        message: `Müşteri başına ₺${maxCac} harcama kapasiteniz var. CLTV ₺${Math.round(cltv).toLocaleString('tr-TR')} ile rakiplerinizi outbid edebilirsiniz.`,
+                        recommendation: 'Agresif müşteri edinme stratejisi uygulayın. İlk satışta kâr etmeseniz bile LTV ile kazanırsınız. Influencer ve referral programlarına bütçe ayırın.',
+                    }
+                }
+            },
         },
     ],
     content: {

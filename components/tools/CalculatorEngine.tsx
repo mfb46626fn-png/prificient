@@ -6,6 +6,7 @@ import type { User } from '@supabase/supabase-js'
 import { getToolBySlug } from '@/lib/tools/registry'
 import { saveCalculation } from '@/lib/tools/calculations'
 import CalculationHistory from './CalculationHistory'
+import type { ToolInsight } from '@/lib/tools/types'
 
 interface CalculatorEngineProps {
     slug: string
@@ -31,6 +32,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
     })
 
     const [computedResults, setComputedResults] = useState<Record<string, number | string>>({})
+    const [computedInsight, setComputedInsight] = useState<ToolInsight | null>(null)
 
     // ─── Auth ──────────────────────────────
     const checkUser = useCallback(async () => {
@@ -93,6 +95,15 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
             results[result.id] = result.formula(numericInputs, rawInputs)
         })
         setComputedResults(results)
+
+        // Compute insight from the first result that has one
+        const insightResult = config.results.find((r) => r.insight)
+        if (insightResult?.insight) {
+            setComputedInsight(insightResult.insight(numericInputs))
+        } else {
+            setComputedInsight(null)
+        }
+
         setCalculated(true)
 
         // Save to history
@@ -272,8 +283,109 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                     </div>
                                 </div>
 
-                                {/* Locked Results */}
-                                {lockedResults.length > 0 && (
+                                {/* ─── Intelligence Card (Insight) ─── */}
+                                {computedInsight && (
+                                    <div className={`relative rounded-2xl border overflow-hidden ${!user ? 'min-h-[380px]' : ''} ${computedInsight.level === 'danger' ? 'border-red-200/80 bg-gradient-to-br from-red-50 to-white' :
+                                            computedInsight.level === 'warning' ? 'border-amber-200/80 bg-gradient-to-br from-amber-50 to-white' :
+                                                'border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-white'
+                                        }`}>
+                                        <div className={!user ? 'blur-md select-none pointer-events-none' : ''}>
+                                            {/* Card Header */}
+                                            <div className="px-6 pt-6 pb-4 sm:px-8 sm:pt-8">
+                                                <div className="flex items-start gap-3">
+                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${computedInsight.level === 'danger' ? 'bg-red-100' :
+                                                            computedInsight.level === 'warning' ? 'bg-amber-100' : 'bg-emerald-100'
+                                                        }`}>
+                                                        {computedInsight.level === 'danger' && (
+                                                            <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                                                        )}
+                                                        {computedInsight.level === 'warning' && (
+                                                            <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+                                                        )}
+                                                        {computedInsight.level === 'success' && (
+                                                            <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <p className={`text-[11px] font-semibold tracking-wider uppercase mb-1 ${computedInsight.level === 'danger' ? 'text-red-500' :
+                                                                computedInsight.level === 'warning' ? 'text-amber-500' : 'text-emerald-500'
+                                                            }`}>Prificient Analizi</p>
+                                                        <h3 className="text-lg font-bold text-gray-900">{computedInsight.title}</h3>
+                                                    </div>
+                                                </div>
+                                                <div className={`mt-4 text-3xl font-bold ${computedInsight.level === 'danger' ? 'text-red-700' :
+                                                        computedInsight.level === 'warning' ? 'text-amber-700' : 'text-emerald-700'
+                                                    }`}>
+                                                    {computedInsight.value}
+                                                </div>
+                                            </div>
+
+                                            {/* Card Body */}
+                                            <div className="px-6 pb-4 sm:px-8">
+                                                <p className="text-sm text-gray-600 leading-relaxed">{computedInsight.message}</p>
+                                            </div>
+
+                                            {/* Card Footer — Recommendation */}
+                                            <div className={`mx-4 mb-4 sm:mx-6 sm:mb-6 p-4 rounded-xl border ${computedInsight.level === 'danger' ? 'bg-red-50/50 border-red-100' :
+                                                    computedInsight.level === 'warning' ? 'bg-amber-50/50 border-amber-100' : 'bg-emerald-50/50 border-emerald-100'
+                                                }`}>
+                                                <div className="flex items-start gap-2">
+                                                    <span className="text-base mt-0.5">💡</span>
+                                                    <div>
+                                                        <p className="text-xs font-semibold text-gray-700 mb-1">Prificient Önerisi</p>
+                                                        <p className="text-sm text-gray-600 leading-relaxed">{computedInsight.recommendation}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Soft-Gate Overlay */}
+                                        {!user && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-[2px] rounded-2xl">
+                                                <div className="text-center max-w-sm px-6">
+                                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 ${computedInsight.level === 'danger' ? 'bg-red-100' :
+                                                            computedInsight.level === 'warning' ? 'bg-amber-100' : 'bg-emerald-100'
+                                                        }`}>
+                                                        {computedInsight.level === 'danger' && <svg className="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>}
+                                                        {computedInsight.level === 'warning' && <svg className="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>}
+                                                        {computedInsight.level === 'success' && <svg className="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+                                                    </div>
+                                                    <h3 className="text-lg font-bold text-gray-900 mb-2">Prificient Analizini Gör</h3>
+                                                    <p className="text-sm text-gray-500 mb-6">Size özel finansal analiz ve aksiyon tavsiyesi hazır. Ücretsiz giriş yapın.</p>
+
+                                                    {authMode !== 'otp-verify' && (
+                                                        <button onClick={handleGoogleAuth} disabled={authLoading} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors mb-3 shadow-sm">
+                                                            <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
+                                                            Google ile Giriş Yap
+                                                        </button>
+                                                    )}
+                                                    {authMode === 'google-waiting' && <p className={`text-xs ${c.text} mb-3 animate-pulse`}>Yeni sekmede giriş yapın, bu sayfa otomatik güncellenecek...</p>}
+                                                    {authMode === 'idle' && <button onClick={() => setAuthMode('email-input')} className={`w-full py-3 rounded-xl ${c.primary} text-white text-sm font-semibold transition-colors`}>E-posta ile Giriş Yap</button>}
+                                                    {authMode === 'email-input' && (
+                                                        <div className="flex gap-2">
+                                                            <input type="email" placeholder="ornek@email.com" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmit()} className={`flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 ${c.ring}`} />
+                                                            <button onClick={handleEmailSubmit} disabled={authLoading || !emailInput} className={`px-4 py-3 rounded-xl ${c.primary} text-white text-sm font-semibold disabled:opacity-50`}>Gönder</button>
+                                                        </div>
+                                                    )}
+                                                    {authMode === 'otp-verify' && (
+                                                        <div>
+                                                            <p className="text-xs text-gray-500 mb-3"><strong>{authEmail}</strong> adresine 8 haneli kod gönderildi.</p>
+                                                            <div className="flex gap-2">
+                                                                <input type="text" maxLength={8} placeholder="00000000" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} onKeyDown={(e) => e.key === 'Enter' && handleOtpVerify()} className={`flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm text-center tracking-[0.3em] font-mono focus:outline-none focus:ring-2 ${c.ring}`} />
+                                                                <button onClick={handleOtpVerify} disabled={authLoading || otpCode.length < 8} className={`px-4 py-3 rounded-xl ${c.primary} text-white text-sm font-semibold disabled:opacity-50`}>Doğrula</button>
+                                                            </div>
+                                                            <button onClick={() => { setAuthMode('email-input'); setOtpCode('') }} className="text-xs text-gray-400 hover:text-gray-600 mt-2">Farklı e-posta kullan</button>
+                                                        </div>
+                                                    )}
+                                                    <p className="text-[11px] text-gray-400 mt-4">Ücretsiz. Ana uygulamaya yönlendirilmezsiniz.</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Legacy Locked Results (tools without insight) */}
+                                {!computedInsight && lockedResults.length > 0 && (
                                     <div className={`relative rounded-2xl border border-gray-200/80 bg-white p-6 sm:p-8 overflow-hidden ${!user ? 'min-h-[420px]' : ''}`}>
                                         <div className="flex items-center gap-2 mb-5">
                                             <h2 className="text-lg font-semibold text-gray-900">Detaylı Analiz</h2>
