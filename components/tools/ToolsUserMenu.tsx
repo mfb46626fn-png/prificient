@@ -37,6 +37,12 @@ export default function ToolsUserMenu() {
                     {displayName}
                 </span>
             </div>
+            <a
+                href="/lobby"
+                className="text-xs font-medium text-violet-600 hover:text-violet-700 transition-colors"
+            >
+                Lobim
+            </a>
             <button
                 onClick={handleSignOut}
                 className="text-xs text-gray-400 hover:text-gray-600 transition-colors"

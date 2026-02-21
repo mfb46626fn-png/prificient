@@ -5,8 +5,11 @@ import { createClient } from '@/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { getToolBySlug } from '@/lib/tools/registry'
 import { saveCalculation } from '@/lib/tools/calculations'
+import { saveToolUsage, getLobbyProfile } from '@/lib/tools/lobby'
+import { triggerToast } from './Toast'
 import CalculationHistory from './CalculationHistory'
 import type { ToolInsight } from '@/lib/tools/types'
+import type { ToolConfig } from '@/lib/tools/types'
 
 interface CalculatorEngineProps {
     slug: string
@@ -44,10 +47,30 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
         checkUser()
         const handleVisibility = () => { if (document.visibilityState === 'visible') checkUser() }
         document.addEventListener('visibilitychange', handleVisibility)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            if (session?.user) { setUser(session.user); setAuthMode('idle') }
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            if (session?.user) {
+                const wasLoggedOut = !user
+                setUser(session.user); setAuthMode('idle')
+
+                // After-auth: show toast with waitlist position
+                if (wasLoggedOut) {
+                    const profile = await getLobbyProfile(supabase)
+                    const pos = profile?.waitlist_position ?? '?'
+                    triggerToast({
+                        message: `Aramıza hoş geldin! \nErken Erişim listesinde #${pos}. sıradasın.`,
+                        subtext: 'Lobinde seni bekleyen görevler var.',
+                        action: { label: 'Lobini Gör', href: '/lobby' },
+                    })
+
+                    // Save current calculation to tool usage history
+                    if (computedInsight) {
+                        saveToolUsage(supabase, config.slug, inputValues, computedInsight.level, computedInsight.title)
+                    }
+                }
+            }
         })
         return () => { document.removeEventListener('visibilitychange', handleVisibility); subscription.unsubscribe() }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [checkUser, supabase])
 
     const handleGoogleAuth = async () => {
@@ -110,6 +133,12 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
         if (user) {
             saveCalculation(supabase, config.slug, inputValues, results as Record<string, number>)
                 .then(() => setHistoryRefresh((p) => p + 1))
+
+            // Save to tool_usage_history (for Lobby dashboard)
+            const insightForSave = insightResult?.insight?.(numericInputs)
+            if (insightForSave) {
+                saveToolUsage(supabase, config.slug, inputValues, insightForSave.level, insightForSave.title)
+            }
         }
     }
 
@@ -286,15 +315,15 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                 {/* ─── Intelligence Card (Insight) ─── */}
                                 {computedInsight && (
                                     <div className={`relative rounded-2xl border overflow-hidden ${!user ? 'min-h-[380px]' : ''} ${computedInsight.level === 'danger' ? 'border-red-200/80 bg-gradient-to-br from-red-50 to-white' :
-                                            computedInsight.level === 'warning' ? 'border-amber-200/80 bg-gradient-to-br from-amber-50 to-white' :
-                                                'border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-white'
+                                        computedInsight.level === 'warning' ? 'border-amber-200/80 bg-gradient-to-br from-amber-50 to-white' :
+                                            'border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-white'
                                         }`}>
                                         <div className={!user ? 'blur-md select-none pointer-events-none' : ''}>
                                             {/* Card Header */}
                                             <div className="px-6 pt-6 pb-4 sm:px-8 sm:pt-8">
                                                 <div className="flex items-start gap-3">
                                                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${computedInsight.level === 'danger' ? 'bg-red-100' :
-                                                            computedInsight.level === 'warning' ? 'bg-amber-100' : 'bg-emerald-100'
+                                                        computedInsight.level === 'warning' ? 'bg-amber-100' : 'bg-emerald-100'
                                                         }`}>
                                                         {computedInsight.level === 'danger' && (
                                                             <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
@@ -308,13 +337,13 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                                     </div>
                                                     <div>
                                                         <p className={`text-[11px] font-semibold tracking-wider uppercase mb-1 ${computedInsight.level === 'danger' ? 'text-red-500' :
-                                                                computedInsight.level === 'warning' ? 'text-amber-500' : 'text-emerald-500'
+                                                            computedInsight.level === 'warning' ? 'text-amber-500' : 'text-emerald-500'
                                                             }`}>Prificient Analizi</p>
                                                         <h3 className="text-lg font-bold text-gray-900">{computedInsight.title}</h3>
                                                     </div>
                                                 </div>
                                                 <div className={`mt-4 text-3xl font-bold ${computedInsight.level === 'danger' ? 'text-red-700' :
-                                                        computedInsight.level === 'warning' ? 'text-amber-700' : 'text-emerald-700'
+                                                    computedInsight.level === 'warning' ? 'text-amber-700' : 'text-emerald-700'
                                                     }`}>
                                                     {computedInsight.value}
                                                 </div>
@@ -327,7 +356,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 
                                             {/* Card Footer — Recommendation */}
                                             <div className={`mx-4 mb-4 sm:mx-6 sm:mb-6 p-4 rounded-xl border ${computedInsight.level === 'danger' ? 'bg-red-50/50 border-red-100' :
-                                                    computedInsight.level === 'warning' ? 'bg-amber-50/50 border-amber-100' : 'bg-emerald-50/50 border-emerald-100'
+                                                computedInsight.level === 'warning' ? 'bg-amber-50/50 border-amber-100' : 'bg-emerald-50/50 border-emerald-100'
                                                 }`}>
                                                 <div className="flex items-start gap-2">
                                                     <span className="text-base mt-0.5">💡</span>
@@ -339,12 +368,35 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                             </div>
                                         </div>
 
+                                        {/* PDF Download — only for authenticated users */}
+                                        {user && (
+                                            <div className="px-6 pb-6 sm:px-8 sm:pb-8">
+                                                <button
+                                                    onClick={async () => {
+                                                        const { generateCFOReport } = await import('@/lib/tools/generateReport')
+                                                        generateCFOReport({
+                                                            config: config as ToolConfig,
+                                                            inputs: inputValues,
+                                                            results: computedResults,
+                                                            insight: computedInsight,
+                                                        })
+                                                    }}
+                                                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+                                                >
+                                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                                    </svg>
+                                                    CFO Raporu Olarak İndir (PDF)
+                                                </button>
+                                            </div>
+                                        )}
+
                                         {/* Soft-Gate Overlay */}
                                         {!user && (
                                             <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-[2px] rounded-2xl">
                                                 <div className="text-center max-w-sm px-6">
                                                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 ${computedInsight.level === 'danger' ? 'bg-red-100' :
-                                                            computedInsight.level === 'warning' ? 'bg-amber-100' : 'bg-emerald-100'
+                                                        computedInsight.level === 'warning' ? 'bg-amber-100' : 'bg-emerald-100'
                                                         }`}>
                                                         {computedInsight.level === 'danger' && <svg className="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>}
                                                         {computedInsight.level === 'warning' && <svg className="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>}

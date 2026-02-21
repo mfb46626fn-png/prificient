@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import ToolsUserMenu from '@/components/tools/ToolsUserMenu'
+import ToastContainer from '@/components/tools/Toast'
 
 export const metadata: Metadata = {
   title: {
@@ -29,6 +30,7 @@ export default function ToolsLayout({
 
       {/* Content */}
       <main className="flex-1">{children}</main>
+      <ToastContainer />
 
       {/* Footer */}
       <footer className="border-t border-gray-200/80 bg-white py-8 px-6">
