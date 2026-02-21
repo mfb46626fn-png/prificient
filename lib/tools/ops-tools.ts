@@ -161,6 +161,37 @@ export const productPricingCalculator: ToolConfig = {
             },
             isLocked: true,
             description: 'Müşteri algısını optimize eden fiyat',
+            insight: (i) => {
+                const total = i.product_cost + i.shipping_cost
+                const price = i.desired_margin < 100 ? total / (1 - (i.desired_margin / 100)) : 0
+                const marginPct = i.desired_margin
+                const markup = total > 0 ? ((price - total) / total) * 100 : 0
+                if (marginPct >= 50) {
+                    return {
+                        value: `%${marginPct} marj`,
+                        level: 'success',
+                        title: 'Yüksek Marj — Rekabet Avantajı',
+                        message: `%${marginPct} marjla ₺${Math.round(price)} fiyat hedefliyorsunuz. Markup: %${Math.round(markup)}. Bu marjla rahat reklam verebilirsiniz.`,
+                        recommendation: 'Bu marjı koruyun. Psikolojik fiyatlandırma (X9.90) ve ücretsiz kargo ile dönüşümü artırın. Premium ambalaj ekleyerek algılanan değeri yüksüeltin.',
+                    }
+                } else if (marginPct >= 25) {
+                    return {
+                        value: `%${marginPct} marj`,
+                        level: 'warning',
+                        title: 'Kabul Edilebilir Ama Dikkatlice Fiyatlayın',
+                        message: `%${marginPct} marjla ₺${Math.round(price)} fiyat hedefliyorsunuz. Reklam ve iade maliyetlerini kapsayacak tampon dar olabilir.`,
+                        recommendation: 'Ürün görsellerini ve açıklamaları iyileştirerek iade oranını düşürün. Toplu alımla ürün maliyetini düşürün. Paket kargo anlaşması yapın.',
+                    }
+                } else {
+                    return {
+                        value: `%${marginPct} marj`,
+                        level: 'danger',
+                        title: 'Marj Çok Düşük — Fiyat Artışı Şart',
+                        message: `%${marginPct} marjla satış yapmak riskli. ₺${Math.round(price)} fiyatıyla iade veya reklam maliyetlerini karşılayamazsınız.`,
+                        recommendation: 'Acil: Fiyatı artırın. Değer algısı için profesyonel ürün fotoğrafı ve detaylı açıklama ekleyin. Alternatif tedarikçi araştırın.',
+                    }
+                }
+            },
         },
     ],
     content: {
@@ -236,6 +267,38 @@ export const bundleProfitCalculator: ToolConfig = {
                 return delta >= 0 ? `+${delta} puan (Marj korunuyor)` : `${delta} puan (Marj erime riski!)`
             },
             isLocked: true,
+            insight: (i) => {
+                const singleMargin = i.single_unit_price > 0 ? ((i.single_unit_price - i.single_unit_cost) / i.single_unit_price) * 100 : 0
+                const bundleRevenue = i.single_unit_price * i.bundle_quantity * (1 - i.discount_percent / 100)
+                const bundleProfit = bundleRevenue - (i.single_unit_cost * i.bundle_quantity)
+                const bundleMargin = bundleRevenue > 0 ? (bundleProfit / bundleRevenue) * 100 : 0
+                const delta = bundleMargin - singleMargin
+                if (delta < -10) {
+                    return {
+                        value: `${delta.toFixed(1)} puan`,
+                        level: 'danger',
+                        title: 'Bundle Marjı Çok Eriyor!',
+                        message: `Tekli marj %${singleMargin.toFixed(1)} → Bundle marjı %${bundleMargin.toFixed(1)}. ${Math.abs(delta).toFixed(1)} puanlık düşüş. Bu indirim oranı sürdürülemez.`,
+                        recommendation: 'İndirim oranını %5 düşürün. Bundles\'a düşük maliyetli aksesuar ekleyerek algılanan değeri artırın. "3 Al 2 Öde" yerine "⁊149.90\'a 3 Adet" gibi sabit fiyat kullanın.',
+                    }
+                } else if (delta < 0) {
+                    return {
+                        value: `${delta.toFixed(1)} puan`,
+                        level: 'warning',
+                        title: 'Marj Düşüyor Ama Kontrol Altında',
+                        message: `Bundle marjı %${bundleMargin.toFixed(1)} (tekli: %${singleMargin.toFixed(1)}). ${Math.abs(delta).toFixed(1)} puanlık düşüş kabul edilebilir eğer hacim artışı varsa.`,
+                        recommendation: 'Bundle satışlarının toplam hacmi artırıp artırmadığını takip edin. Eğer AOV artışı marj kaybını karşılıyorsa devam edin.',
+                    }
+                } else {
+                    return {
+                        value: `+${delta.toFixed(1)} puan`,
+                        level: 'success',
+                        title: 'Mükemmel Bundle Stratejisi',
+                        message: `Bundle marjı %${bundleMargin.toFixed(1)} ≥ tekli marj %${singleMargin.toFixed(1)}. Marjınız korunuyor veya artıyor — ideal senaryo.`,
+                        recommendation: 'Bu bundle\'u tüm satiş kanallarında (site, pazaryeri, sosyal medya) öne çıkarın. Benzer marjlı ürünlerle yeni bundle\'lar oluşturun.',
+                    }
+                }
+            },
         },
     ],
     content: {
@@ -393,6 +456,36 @@ export const inventoryHoldingCost: ToolConfig = {
             isLocked: true,
             sentiment: () => 'positive',
             description: '6 aylık tasarruf potansiyeli',
+            insight: (i) => {
+                const monthlyCost = (i.inventory_value * (i.capital_interest / 100) / 12) + i.storage_monthly
+                const yearlyCost = monthlyCost * 12
+                const costPct = i.inventory_value > 0 ? (yearlyCost / i.inventory_value) * 100 : 0
+                if (costPct > 30) {
+                    return {
+                        value: `%${costPct.toFixed(0)} yıllık`,
+                        level: 'danger',
+                        title: 'Stoğunuz Para Yiyiyor!',
+                        message: `Stok değerinizin %${costPct.toFixed(0)}\'i yılda eriyecek. ₺${Math.round(yearlyCost).toLocaleString('tr-TR')} yıllık stok tutma maliyeti. Aylık ₺${Math.round(monthlyCost).toLocaleString('tr-TR')}.`,
+                        recommendation: 'Acil stok eritme kampanyası başlatın. Yavaş hareket eden ürünleri tespit edin ve indirimle elden çıkarın. JIT (Just-in-Time) sipariş modeline geçiş değerlendirin.',
+                    }
+                } else if (costPct > 15) {
+                    return {
+                        value: `%${costPct.toFixed(0)} yıllık`,
+                        level: 'warning',
+                        title: 'Optimize Edilebilir Stok Maliyeti',
+                        message: `Yıllık stok maliyeti ₺${Math.round(yearlyCost).toLocaleString('tr-TR')} (stok değerinin %${costPct.toFixed(0)}\'i). Devir hızını artırmak ciddi tasarruf sağlar.`,
+                        recommendation: 'Stok devir hızını 2x artırmak ₺${Math.round(monthlyCost * 6).toLocaleString("tr-TR")} tasarruf demek. A/B/C analizi yapın: A (çok satan) stoğunu artırın, C (yavaş satan) stoğunu azaltın.',
+                    }
+                } else {
+                    return {
+                        value: `%${costPct.toFixed(0)} yıllık`,
+                        level: 'success',
+                        title: 'Sağlıklı Stok Yönetimi',
+                        message: `Stok maliyetiniz kontrol altında: yıllık ₺${Math.round(yearlyCost).toLocaleString('tr-TR')} (değerin %${costPct.toFixed(0)}\'i). Verimli bir stok devir hızınız var.`,
+                        recommendation: 'Mevcut stok stratejinizi koruyun. Depo alanını optimize ederek alan başına geliri artırın. Talep tahmin modeli kurarak stok dışı kalmayı önleyin.',
+                    }
+                }
+            },
         },
     ],
     content: {
@@ -531,6 +624,35 @@ export const bfcmDiscountPlanner: ToolConfig = {
             },
             isLocked: true,
             description: 'İndirimli dönemde bu kadar ekstra satmalısınız',
+            insight: (i) => {
+                const newMargin = i.original_margin - i.discount_offered
+                const extraNeeded = newMargin > 0 ? (i.discount_offered / newMargin) * 100 : 999
+                if (newMargin <= 0) {
+                    return {
+                        value: `%${newMargin.toFixed(0)} marj`,
+                        level: 'danger',
+                        title: 'İndirim Marjınızı Sıfırladı!',
+                        message: `%${i.discount_offered} indirim, %${i.original_margin} marjınızı tamamen eritiyor. Her satışta zarar edeceksiniz — ne kadar satarsanız satın.`,
+                        recommendation: 'İndirim oranını marjınızın altına indirin. "%${Math.max(5, Math.round(i.original_margin * 0.4))} indirim" en güvenli oran. İndirim yerine hediye/kargo avantajı sunun.',
+                    }
+                } else if (extraNeeded > 100) {
+                    return {
+                        value: `%${Math.round(extraNeeded)} artış`,
+                        level: 'warning',
+                        title: 'Agresif İndirim — Hacim Riski Yüksek',
+                        message: `Aynı kârı korumak için satışlarınızı %${Math.round(extraNeeded)} artırmanız gerekiyor. Bu gerçekçi olmayabilir.`,
+                        recommendation: 'İndirim oranını %${Math.round(i.discount_offered / 2)}\'ye düşürün. Veya indirim yerine "Alışverişte +hediye" formatına geçin (algılanan değer yüksek, gerçek maliyet düşük).',
+                    }
+                } else {
+                    return {
+                        value: `%${Math.round(extraNeeded)} artış`,
+                        level: 'success',
+                        title: 'Kontrollü İndirim — Başarılabilir Hedef',
+                        message: `%${i.discount_offered} indirimle %${Math.round(extraNeeded)} hacim artışı yeterli. Yeni marj: %${newMargin.toFixed(0)}. Ulaşılabilir bir hedef.`,
+                        recommendation: 'İndirim döneminde retargeting bütçesini artırın. E-posta listesine özel erişim verin. Aciliyet oluşturun ("Son 48 saat" gibi).',
+                    }
+                }
+            },
         },
     ],
     content: {

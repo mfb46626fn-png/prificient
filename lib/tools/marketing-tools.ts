@@ -313,6 +313,36 @@ export const conversionRateImpact: ToolConfig = {
             formula: (i) => Math.round(i.monthly_visitors * ((i.projected_cr - i.current_cr) / 100) * i.aov * 12),
             isLocked: true,
             sentiment: (v) => (v as number) > 0 ? 'positive' : 'negative',
+            insight: (i) => {
+                const monthlyExtra = Math.round(i.monthly_visitors * ((i.projected_cr - i.current_cr) / 100) * i.aov)
+                const yearlyExtra = monthlyExtra * 12
+                const crDelta = i.projected_cr - i.current_cr
+                if (crDelta <= 0) {
+                    return {
+                        value: `%${i.current_cr} → %${i.projected_cr}`,
+                        level: 'danger',
+                        title: 'Hedef Dönüşüm Oranı Düşük',
+                        message: `Hedef dönüşüm oranınız (%${i.projected_cr}) mevcut orandan (%${i.current_cr}) düşük veya eşit. İyileştirme için daha yüksek bir hedef belirleyin.`,
+                        recommendation: 'Sektör ortalaması %1-3. Site hızını optimize edin, ürün sayfalarını iyileştirin ve checkout sürecini sadeleştirin.',
+                    }
+                } else if (yearlyExtra < 100000) {
+                    return {
+                        value: `₺${yearlyExtra.toLocaleString('tr-TR')}/yıl`,
+                        level: 'warning',
+                        title: 'Küçük Adımlar, Büyük Potansiyel',
+                        message: `%${crDelta.toFixed(1)} puanlık CR artışı yılda ₺${yearlyExtra.toLocaleString('tr-TR')} ekstra ciro demek. Aylık ₺${monthlyExtra.toLocaleString('tr-TR')} ek gelir.`,
+                        recommendation: 'A/B test başlatın: önce checkout sayfası, sonra ürün sayfası. Sepet terk e-postası kurun (CR\'yi %0.5-1 artırır). Ücretsiz kargo minimum tutarla AOV da artırın.',
+                    }
+                } else {
+                    return {
+                        value: `₺${yearlyExtra.toLocaleString('tr-TR')}/yıl`,
+                        level: 'success',
+                        title: 'Dönüşüm Optimizasyonu Altın Madeni',
+                        message: `%${crDelta.toFixed(1)} puanlık artış yılda ₺${yearlyExtra.toLocaleString('tr-TR')} demek — ve reklam harcamadan! Aylık ₺${monthlyExtra.toLocaleString('tr-TR')} ek ciro.`,
+                        recommendation: 'CRO uzmanı veya ajansıyla çalışın — bu dönüşüm kendini finanse eder. Heatmap aracı kurun (Hotjar/MS Clarity). En çok trafik alan 3 sayfayı optimize edin.',
+                    }
+                }
+            },
         },
     ],
     content: {
@@ -383,6 +413,38 @@ export const tiktokVsMetaCost: ToolConfig = {
                 return 'TikTok — Düşük CPC avantajı var. Meta\'da ise retargeting daha güçlü, bu yüzden iki platformu birlikte kullanmayı değerlendirin.'
             },
             isLocked: true,
+            insight: (i) => {
+                const metaCpc = i.meta_ctr > 0 ? i.meta_cpm / (i.meta_ctr / 100 * 1000) : 999
+                const tikCpc = i.tiktok_ctr > 0 ? i.tiktok_cpm / (i.tiktok_ctr / 100 * 1000) : 999
+                const diff = Math.abs(metaCpc - tikCpc)
+                const cheaperPlatform = metaCpc < tikCpc ? 'Meta' : 'TikTok'
+                const pctDiff = Math.min(metaCpc, tikCpc) > 0 ? (diff / Math.min(metaCpc, tikCpc)) * 100 : 0
+                if (pctDiff > 50) {
+                    return {
+                        value: `${cheaperPlatform} %${Math.round(pctDiff)} ucuz`,
+                        level: 'danger',
+                        title: `${cheaperPlatform === 'Meta' ? 'TikTok' : 'Meta'} Bütçesi İsraf Ediliyor`,
+                        message: `${cheaperPlatform} CPC'şi ₺${Math.min(metaCpc, tikCpc).toFixed(2)} iken diğeri ₺${Math.max(metaCpc, tikCpc).toFixed(2)}. %${Math.round(pctDiff)} fark ciddi bir bütçe kaybı.`,
+                        recommendation: `Bütçenin %70'ini ${cheaperPlatform}'a kaydırın. Diğer platformu sadece retargeting için kullanın. Organik içerik stratejisini güçlendirin.`,
+                    }
+                } else if (pctDiff > 20) {
+                    return {
+                        value: `${cheaperPlatform} %${Math.round(pctDiff)} ucuz`,
+                        level: 'warning',
+                        title: `${cheaperPlatform} Öne Çıkıyor — Test Edin`,
+                        message: `${cheaperPlatform} CPC avantajlı (₺${Math.min(metaCpc, tikCpc).toFixed(2)} vs ₺${Math.max(metaCpc, tikCpc).toFixed(2)}). Ancak dönüşüm oranları farklı olabilir.`,
+                        recommendation: `İki platformda da aynı ürünle A/B test yapın. CPA bazında karşılaştırın (CPC tek başına yetmez). ${cheaperPlatform}'da bütçeyi kademeli artırın.`,
+                    }
+                } else {
+                    return {
+                        value: `Fark %${Math.round(pctDiff)}`,
+                        level: 'success',
+                        title: 'Dengeli Performans — İkisini de Kullanın',
+                        message: `Meta CPC: ₺${metaCpc.toFixed(2)}, TikTok CPC: ₺${tikCpc.toFixed(2)}. Fark minimal (%${Math.round(pctDiff)}). İki platform da verimli.`,
+                        recommendation: 'Her iki platformu da aktif tutun. Meta\'da retargeting, TikTok\'ta awareness odaklı çalışın. İçerikleri platforma özel uyarlayın (TikTok: UGC, Meta: carousel).',
+                    }
+                }
+            },
         },
     ],
     content: {

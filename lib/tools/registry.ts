@@ -259,6 +259,36 @@ const profitSimulator: ToolConfig = {
             isLocked: true,
             description: '12 aylık projeksiyon (aynı performansla)',
             sentiment: (v) => (v as number) > 0 ? 'positive' : 'negative',
+            insight: (i) => {
+                const net = i.revenue - (i.revenue * i.cogs_percent / 100) - i.ad_spend - i.shipping_total - i.misc_fees
+                const yearly = Math.round(net * 12)
+                const monthlyMargin = i.revenue > 0 ? (net / i.revenue) * 100 : 0
+                if (yearly <= 0) {
+                    return {
+                        value: `₺${yearly.toLocaleString('tr-TR')}`,
+                        level: 'danger',
+                        title: 'Yıllık Projeksiyon Zararda',
+                        message: `Mevcut performansla 12 ay sonunda ₺${Math.abs(yearly).toLocaleString('tr-TR')} zarar edeceksiniz. Aylık net marj %${monthlyMargin.toFixed(1)}.`,
+                        recommendation: 'Acil maliyet analizi yapın. En büyük gider kalemini tespit edin ve %15 kısın. COGS oranını düşürmek için toplu alım veya alternatif tedarikçi araştırın.',
+                    }
+                } else if (yearly < net * 15) {
+                    return {
+                        value: `₺${yearly.toLocaleString('tr-TR')}`,
+                        level: 'warning',
+                        title: 'Büyüme Potansiyeli Sınırlı',
+                        message: `Yıllık projeksiyon: ₺${yearly.toLocaleString('tr-TR')}. Marj %${monthlyMargin.toFixed(1)} ile işletme ayakta ama agresif büyüme kapasitesi yok.`,
+                        recommendation: 'Organik kanalları güçlendirin (e-posta, SEO). Reklam bütçesini daha verimli kullanmak için retargeting oranını artırın. AOV artışı için cross-sell kurun.',
+                    }
+                } else {
+                    return {
+                        value: `₺${yearly.toLocaleString('tr-TR')}`,
+                        level: 'success',
+                        title: 'Güçlü Yıllık Projeksiyon',
+                        message: `₺${yearly.toLocaleString('tr-TR')} yıllık net kâr projeksiyonu. %${monthlyMargin.toFixed(1)} marj ile sağlıklı bir büyüme yolundasınız.`,
+                        recommendation: 'Bu performansı koruyarak ölçeklendirin. Aylık kâr fazlasını yeni ürün/kanal testlerine yatırın. 6 aylık nakit rezervi oluşturun.',
+                    }
+                }
+            },
         },
         {
             id: 'roi',
@@ -588,6 +618,37 @@ const breakEvenCalculator: ToolConfig = {
             },
             isLocked: true,
             sentiment: (v) => (v as number) > 0 ? 'positive' : 'negative',
+            insight: (i) => {
+                const cm = i.selling_price - i.product_cost - i.shipping_per_unit
+                const totalFixed = i.fixed_costs + i.ad_spend_monthly
+                const beu = cm > 0 ? Math.ceil(totalFixed / cm) : 0
+                const cmPct = i.selling_price > 0 ? (cm / i.selling_price) * 100 : 0
+                if (beu > 200) {
+                    return {
+                        value: `${beu} adet/ay`,
+                        level: 'danger',
+                        title: 'Başa Baş Noktanız Çok Yüksek',
+                        message: `Ayda ${beu} adet satmadan kâra geçemezsiniz. Birim katkı payı sadece ₺${Math.round(cm)} (%${cmPct.toFixed(0)} marj). Sabit giderleriniz ₺${totalFixed.toLocaleString('tr-TR')}.`,
+                        recommendation: 'Fiyat artışı veya maliyet düşüşü şart. Sabit giderleri %20 azaltma planı yapın. Reklam bütçesini performans bazlı modele çevirin.',
+                    }
+                } else if (beu > 50) {
+                    return {
+                        value: `${beu} adet/ay`,
+                        level: 'warning',
+                        title: 'Ulaşılabilir Ama Dikkatli Olun',
+                        message: `Başa baş noktası: ${beu} adet/ay. Katkı payı ₺${Math.round(cm)} (%${cmPct.toFixed(0)}). Düşük satış aylarında zarar riski var.`,
+                        recommendation: 'Sabit giderleri gözden geçirin — gereksiz abonelikleri iptal edin. Bundle/upsell ile AOV artırarak başa baş noktasını düşürün.',
+                    }
+                } else {
+                    return {
+                        value: `${beu} adet/ay`,
+                        level: 'success',
+                        title: 'Düşük Başa Baş — Güçlü Pozisyon',
+                        message: `Sadece ${beu} adet satışla kâra geçiyorsunuz. Katkı payı ₺${Math.round(cm)} (%${cmPct.toFixed(0)} marj). Her ek satış doğrudan kâra dönüşür.`,
+                        recommendation: 'Bu avantajla agresif büyüyün. Reklam bütçesini artırarak hacmi yükseltin. Yeni ürün kategorileri ekleyin — düşük başa baş noktası risk toleransınızı artırır.',
+                    }
+                }
+            },
         },
         {
             id: 'profit_at_500',
@@ -687,6 +748,41 @@ const bfcmPlanner: ToolConfig = {
             },
             isLocked: true,
             sentiment: (v) => (v as number) >= 15 ? 'positive' : (v as number) >= 0 ? 'neutral' : 'negative',
+            insight: (i) => {
+                const gross = i.avg_order_value * i.expected_orders
+                const disc = gross * (i.discount_percent / 100)
+                const discounted = gross - disc
+                const retLoss = discounted * (i.return_rate / 100)
+                const netRev = discounted - retLoss
+                const prodCost = netRev * (i.product_cost_percent / 100)
+                const net = netRev - prodCost - i.ad_budget
+                const margin = netRev > 0 ? (net / netRev) * 100 : 0
+                if (margin < 0) {
+                    return {
+                        value: `%${margin.toFixed(1)}`,
+                        level: 'danger',
+                        title: 'BFCM Kampanyanız Zararda!',
+                        message: `Bu indirim + reklam + iade kombinasyonunda kampanya ₺${Math.abs(Math.round(net)).toLocaleString('tr-TR')} zarar üretir. İndirim çok yüksek veya reklam bütçesi orantısız.`,
+                        recommendation: 'İndirim oranını %5 düşürün veya bundle teklifine geçin. Reklam bütçesini sadece warm audience\'a yönlendirin. Yüksek marjlı ürünleri kampanyada öne çıkarın.',
+                    }
+                } else if (margin < 10) {
+                    return {
+                        value: `%${margin.toFixed(1)}`,
+                        level: 'warning',
+                        title: 'Kârlı Ama Riskli Kampanya',
+                        message: `Kampanya marjı %${margin.toFixed(1)} — kârlısınız ama iade oranı beklenenden yüksek gelirse zarara dönebilir. Net kâr: ₺${Math.round(net).toLocaleString('tr-TR')}.`,
+                        recommendation: 'İade oranı için %5 ekstra tampon ekleyin. Early-bird listesine özel indirim verin (daha düşük iade riski). Stok yönetimine dikkat edin.',
+                    }
+                } else {
+                    return {
+                        value: `%${margin.toFixed(1)}`,
+                        level: 'success',
+                        title: 'Güçlü BFCM Planı',
+                        message: `Kampanya marjı %${margin.toFixed(1)}, net kâr: ₺${Math.round(net).toLocaleString('tr-TR')}. İndirim ve giderler kontrol altında.`,
+                        recommendation: 'Bu planı uygulayın. Reklam bütçesini kademeli artırın. VIP müşterilere 24 saat erken erişim vererek ilk gün satışları artırın.',
+                    }
+                }
+            },
         },
         {
             id: 'roas_needed',
