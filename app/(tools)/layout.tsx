@@ -20,11 +20,8 @@ export default function ToolsLayout({
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-gray-200/80 bg-white/80 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-          <a href="https://tools.prificient.com" className="flex items-center gap-2.5 group">
+          <a href="https://tools.prificient.com" className="flex items-center group">
             <Image src="/toolslogo.png" alt="Prificient Araçlar" width={28} height={28} className="h-7 w-auto" />
-            <span className="text-sm font-semibold text-gray-800 group-hover:text-gray-600 transition-colors">
-              Prificient Araçlar
-            </span>
           </a>
           <ToolsUserMenu />
         </div>
