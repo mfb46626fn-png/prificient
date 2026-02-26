@@ -105,6 +105,28 @@ export const nextToolMap: Record<string, NextToolLink> = {
         message: 'İndirim simülasyonunuzu yaptınız. Şimdi genel kâr durumunuzu simüle edin.',
         ctaLabel: 'Kâr Simülatörüne Geç',
     },
+
+    // ── Platform-Specific Tools ──────────────
+    'amazon-fba-profit-calculator': {
+        slug: 'roas-calculator',
+        message: 'Amazon kârınızı hesapladınız. Peki Amazon PPC reklamlarınız kâr getiriyor mu?',
+        ctaLabel: 'ROAS Hesaplayıcıya Geç',
+    },
+    'trendyol-profit-calculator': {
+        slug: 'return-cost-calculator',
+        message: 'Trendyol kârınızı hesapladınız. Peki iadelerin maliyetini biliyor musunuz?',
+        ctaLabel: 'İade Maliyeti Analizörüne Geç',
+    },
+    'etsy-fee-calculator': {
+        slug: 'cross-border-currency-impact',
+        message: 'Etsy kesintilerinizi hesapladınız. Dolar kuru kârınızı nasıl etkiliyor?',
+        ctaLabel: 'Kur Etki Hesaplayıcıya Geç',
+    },
+    'cross-border-currency-impact': {
+        slug: 'breakeven-calculator',
+        message: 'Kur etkisini hesapladınız. Bu maliyetle kaç satış yapmanız gerekiyor?',
+        ctaLabel: 'Başa Baş Hesaplayıcıya Geç',
+    },
 }
 
 /** Get the next tool suggestion for a given slug */

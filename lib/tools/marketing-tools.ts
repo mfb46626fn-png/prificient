@@ -7,6 +7,7 @@ export const cpmCpcCalculator: ToolConfig = {
     title: 'CPM & CPC Hesaplayıcı',
     description: 'Reklam bütçenizi, gösterim ve tıklama sayılarını girin; birim maliyetlerinizi öğrenin.',
     category: 'marketing',
+    platforms: ['global'],
     color: 'indigo',
     icon: 'M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z',
     inputs: [
@@ -107,6 +108,7 @@ export const influencerRoiCalculator: ToolConfig = {
     title: 'Influencer ROI Hesaplayıcı',
     description: 'Fenomenlere ödediğiniz paranın geri dönüşünü hesaplayın.',
     category: 'marketing',
+    platforms: ['global'],
     color: 'pink',
     icon: 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z',
     inputs: [
@@ -192,6 +194,7 @@ export const emailMarketingRoi: ToolConfig = {
     title: 'E-Posta Pazarlama Getiri Analizi',
     description: 'Bültenlerinizin ve otomasyonlarınızın gerçek değerini ölçün.',
     category: 'marketing',
+    platforms: ['global'],
     color: 'teal',
     icon: 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75',
     inputs: [
@@ -278,6 +281,7 @@ export const conversionRateImpact: ToolConfig = {
     title: 'Dönüşüm Oranı Etki Simülatörü',
     description: 'Dönüşüm oranınız %1 artarsa cironuz ne kadar artar?',
     category: 'marketing',
+    platforms: ['global'],
     color: 'cyan',
     icon: 'M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941',
     inputs: [
@@ -370,6 +374,7 @@ export const tiktokVsMetaCost: ToolConfig = {
     title: 'TikTok vs. Meta Maliyet Kıyaslayıcı',
     description: 'Hangi platformda reklam vermek daha ucuz ve etkili?',
     category: 'marketing',
+    platforms: ['global'],
     color: 'fuchsia',
     icon: 'M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5',
     inputs: [

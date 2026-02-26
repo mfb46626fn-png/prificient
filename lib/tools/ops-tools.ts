@@ -7,6 +7,7 @@ export const stripePaypalFeeCalculator: ToolConfig = {
     title: 'Stripe & PayPal Komisyon Hesaplayıcı',
     description: 'Ödeme altyapılarının kestiği komisyonu ve cebinize giren net parayı hesaplayın.',
     category: 'operations',
+    platforms: ['global'],
     color: 'slate',
     icon: 'M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z',
     inputs: [
@@ -114,6 +115,7 @@ export const productPricingCalculator: ToolConfig = {
     title: 'Ürün Fiyatlandırma Sihirbazı',
     description: 'Maliyetinize göre ideal satış fiyatını bulun.',
     category: 'operations',
+    platforms: ['global'],
     color: 'lime',
     icon: 'M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z M6 6h.008v.008H6V6z',
     inputs: [
@@ -218,6 +220,7 @@ export const bundleProfitCalculator: ToolConfig = {
     title: 'Bundle (Paket) Kârlılık Hesaplayıcı',
     description: '"3 Al 2 Öde" kampanyalarının kârlılığını test edin.',
     category: 'operations',
+    platforms: ['global'],
     color: 'purple',
     icon: 'M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z',
     inputs: [
@@ -324,6 +327,7 @@ export const dropshippingProfitCalc: ToolConfig = {
     title: 'Dropshipping Kâr Analizörü',
     description: 'AliExpress/CJ maliyeti ile Shopify satış fiyatı arasındaki gerçek marjı görün.',
     category: 'operations',
+    platforms: ['global'],
     color: 'red',
     icon: 'M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.136-.504 1.136-1.125v-2.625M2.25 14.25V5.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.625m3.375-4.5h3c.621 0 1.125.504 1.125 1.125v3.375',
     inputs: [
@@ -417,6 +421,7 @@ export const inventoryHoldingCost: ToolConfig = {
     title: 'Stok Tutma Maliyeti Hesaplayıcı',
     description: 'Depoda bekleyen ürünlerin size gizli maliyeti nedir?',
     category: 'operations',
+    platforms: ['global'],
     color: 'yellow',
     icon: 'M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125',
     inputs: [
@@ -516,6 +521,7 @@ export const utmBuilder: ToolConfig = {
     title: 'UTM Link Oluşturucu',
     description: 'Reklamlarınız için takip edilebilir linkler oluşturun.',
     category: 'utility',
+    platforms: ['global'],
     color: 'zinc',
     icon: 'M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244',
     inputs: [
@@ -583,6 +589,7 @@ export const bfcmDiscountPlanner: ToolConfig = {
     title: 'BFCM İndirim Hacim Planlayıcı',
     description: 'İndirim dönemlerinde zarar etmemek için gereken satış hacmini hesaplayın.',
     category: 'marketing',
+    platforms: ['global'],
     color: 'stone',
     icon: 'M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z',
     inputs: [

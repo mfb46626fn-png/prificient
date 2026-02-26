@@ -15,8 +15,22 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const { slug } = await params
     const tool = getToolBySlug(slug)
     if (!tool) return {}
+
+    // Platform-aware SEO title
+    const platformNames: Record<string, string> = {
+        amazon: 'Amazon',
+        trendyol: 'Trendyol',
+        hepsiburada: 'Hepsiburada',
+        etsy: 'Etsy',
+        shopify: 'Shopify',
+    }
+    const specificPlatforms = tool.platforms.filter((p) => p !== 'global')
+    const platformSuffix = specificPlatforms.length > 0
+        ? ` | ${specificPlatforms.map((p) => platformNames[p] || p).join(' & ')}`
+        : ''
+
     return {
-        title: `${tool.title} | Prificient Araçlar`,
+        title: `${tool.title}${platformSuffix} | Prificient`,
         description: tool.description,
         openGraph: {
             title: `${tool.title} — Ücretsiz E-Ticaret Hesaplama`,

@@ -3,6 +3,7 @@
 export type InputType = 'number' | 'currency' | 'percent' | 'text'
 export type ResultType = 'currency' | 'percent' | 'number' | 'text'
 export type ToolCategory = 'finance' | 'marketing' | 'operations' | 'utility'
+export type PlatformType = 'global' | 'shopify' | 'amazon' | 'trendyol' | 'hepsiburada' | 'etsy'
 
 // ─── Insight Engine ─────────────────────────────────────
 
@@ -53,6 +54,7 @@ export interface ToolConfig {
     title: string
     description: string
     category: ToolCategory
+    platforms: PlatformType[]
     color: string
     icon: string // SVG path d attribute for hero icon
     inputs: ToolInput[]
