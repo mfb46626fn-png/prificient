@@ -63,17 +63,6 @@ export default function ManifestoPage() {
                         </div>
                     </motion.div>
                 </div>
-
-                {/* Scroll Down Indicator */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1, duration: 1 }}
-                    className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
-                >
-                    <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/30">Acı Gerçekler</span>
-                    <div className="w-px h-12 bg-gradient-to-b from-white/20 to-transparent" />
-                </motion.div>
             </section>
 
             {/* ═══════════════════════════════════════════ */}
