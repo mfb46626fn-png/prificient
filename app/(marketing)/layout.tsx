@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import GlobalHeader from '@/components/marketing/GlobalHeader'
+import GlobalFooter from '@/components/marketing/GlobalFooter'
 
 export const metadata: Metadata = {
   title: 'Prificient — E-Ticarette Gerçek Kâr Devrimi',
@@ -18,8 +20,12 @@ export default function MarketingLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white antialiased">
-      {children}
+    <div className="min-h-screen bg-[#050505] text-white antialiased flex flex-col selection:bg-red-500/30 selection:text-white">
+      <GlobalHeader />
+      <main className="flex-1">
+        {children}
+      </main>
+      <GlobalFooter />
     </div>
   )
 }
