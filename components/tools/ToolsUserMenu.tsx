@@ -31,8 +31,7 @@ export default function ToolsUserMenu() {
                 setUser(data.user)
                 // Fetch display_name from profiles
                 const profile = await getLobbyProfile(supabase, data.user.id)
-                const name = profile?.display_name
-                    || data.user.user_metadata?.full_name
+                const name = data.user.user_metadata?.full_name
                     || data.user.email?.split('@')[0]
                     || 'Kullanıcı'
                 setDisplayName(name)
@@ -42,8 +41,7 @@ export default function ToolsUserMenu() {
             setUser(session?.user ?? null)
             if (session?.user) {
                 const profile = await getLobbyProfile(supabase, session.user.id)
-                const name = profile?.display_name
-                    || session.user.user_metadata?.full_name
+                const name = session.user.user_metadata?.full_name
                     || session.user.email?.split('@')[0]
                     || 'Kullanıcı'
                 setDisplayName(name)

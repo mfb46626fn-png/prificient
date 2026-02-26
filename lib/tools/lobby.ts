@@ -7,7 +7,6 @@ export interface LobbyProfile {
     store_revenue_range: string | null
     store_platform: string | null
     referral_code: string | null
-    display_name: string | null
 }
 
 export interface ToolUsageRecord {
@@ -28,7 +27,7 @@ export async function getLobbyProfile(
 
     const { data } = await supabase
         .from('profiles')
-        .select('waitlist_position, store_revenue_range, store_platform, referral_code, display_name')
+        .select('waitlist_position, store_revenue_range, store_platform, referral_code')
         .eq('id', userId)
         .maybeSingle()
 
@@ -69,11 +68,9 @@ export async function updateDisplayName(
     userId: string,
     name: string
 ): Promise<boolean> {
-
-    const { error } = await supabase
-        .from('profiles')
-        .update({ display_name: name.trim() })
-        .eq('id', userId)
+    const { error } = await supabase.auth.updateUser({
+        data: { full_name: name.trim() }
+    })
 
     return !error
 }

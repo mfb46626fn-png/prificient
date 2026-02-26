@@ -150,15 +150,15 @@ export default function LobbyClient() {
     }
 
     // ─── Main Lobby ─────────────────────────
-    const displayName = profile?.display_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Kullanıcı'
+    const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Kullanıcı'
 
     const handleSaveName = async () => {
         if (!nameInput.trim() || !user) return
         setNameSaving(true)
         const ok = await updateDisplayName(supabase, user.id, nameInput)
         if (ok) {
-            const p = await getLobbyProfile(supabase, user.id)
-            setProfile(p)
+            const { data: { user: updatedUser } } = await supabase.auth.getUser()
+            if (updatedUser) setUser(updatedUser)
             setEditingName(false)
         }
         setNameSaving(false)
@@ -440,7 +440,7 @@ export default function LobbyClient() {
                                         {displayName}
                                     </div>
                                     <button
-                                        onClick={() => { setNameInput(profile?.display_name || ''); setEditingName(true) }}
+                                        onClick={() => { setNameInput(user.user_metadata?.full_name || ''); setEditingName(true) }}
                                         className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
                                     >
                                         Düzenle
