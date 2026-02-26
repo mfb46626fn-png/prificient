@@ -151,28 +151,11 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
         setInputValues((prev) => ({ ...prev, [id]: value }))
     }
 
-    const colorMap: Record<string, { primary: string; bg: string; border: string; ring: string; text: string; light: string }> = {
-        violet: { primary: 'bg-violet-600 hover:bg-violet-500', bg: 'bg-violet-500/10', border: 'border-violet-500/20', ring: 'focus:ring-violet-500 focus:border-violet-500', text: 'text-violet-400', light: 'bg-violet-500/20 text-violet-300' },
-        blue: { primary: 'bg-blue-600 hover:bg-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20', ring: 'focus:ring-blue-500 focus:border-blue-500', text: 'text-blue-400', light: 'bg-blue-500/20 text-blue-300' },
-        emerald: { primary: 'bg-emerald-600 hover:bg-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', ring: 'focus:ring-emerald-500 focus:border-emerald-500', text: 'text-emerald-400', light: 'bg-emerald-500/20 text-emerald-300' },
-        amber: { primary: 'bg-amber-600 hover:bg-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', ring: 'focus:ring-amber-500 focus:border-amber-500', text: 'text-amber-400', light: 'bg-amber-500/20 text-amber-300' },
-        rose: { primary: 'bg-rose-600 hover:bg-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/20', ring: 'focus:ring-rose-500 focus:border-rose-500', text: 'text-rose-400', light: 'bg-rose-500/20 text-rose-300' },
-        sky: { primary: 'bg-sky-600 hover:bg-sky-500', bg: 'bg-sky-500/10', border: 'border-sky-500/20', ring: 'focus:ring-sky-500 focus:border-sky-500', text: 'text-sky-400', light: 'bg-sky-500/20 text-sky-300' },
-        orange: { primary: 'bg-orange-600 hover:bg-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20', ring: 'focus:ring-orange-500 focus:border-orange-500', text: 'text-orange-400', light: 'bg-orange-500/20 text-orange-300' },
-        indigo: { primary: 'bg-indigo-600 hover:bg-indigo-500', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', ring: 'focus:ring-indigo-500 focus:border-indigo-500', text: 'text-indigo-400', light: 'bg-indigo-500/20 text-indigo-300' },
-        pink: { primary: 'bg-pink-600 hover:bg-pink-500', bg: 'bg-pink-500/10', border: 'border-pink-500/20', ring: 'focus:ring-pink-500 focus:border-pink-500', text: 'text-pink-400', light: 'bg-pink-500/20 text-pink-300' },
-        teal: { primary: 'bg-teal-600 hover:bg-teal-500', bg: 'bg-teal-500/10', border: 'border-teal-500/20', ring: 'focus:ring-teal-500 focus:border-teal-500', text: 'text-teal-400', light: 'bg-teal-500/20 text-teal-300' },
-        cyan: { primary: 'bg-cyan-600 hover:bg-cyan-500', bg: 'bg-cyan-500/10', border: 'border-cyan-500/20', ring: 'focus:ring-cyan-500 focus:border-cyan-500', text: 'text-cyan-400', light: 'bg-cyan-500/20 text-cyan-300' },
-        fuchsia: { primary: 'bg-fuchsia-600 hover:bg-fuchsia-500', bg: 'bg-fuchsia-500/10', border: 'border-fuchsia-500/20', ring: 'focus:ring-fuchsia-500 focus:border-fuchsia-500', text: 'text-fuchsia-400', light: 'bg-fuchsia-500/20 text-fuchsia-300' },
-        slate: { primary: 'bg-slate-600 hover:bg-slate-500', bg: 'bg-slate-500/10', border: 'border-slate-500/20', ring: 'focus:ring-slate-500 focus:border-slate-500', text: 'text-slate-400', light: 'bg-slate-500/20 text-slate-300' },
-        lime: { primary: 'bg-lime-600 hover:bg-lime-500', bg: 'bg-lime-500/10', border: 'border-lime-500/20', ring: 'focus:ring-lime-500 focus:border-lime-500', text: 'text-lime-400', light: 'bg-lime-500/20 text-lime-300' },
-        purple: { primary: 'bg-purple-600 hover:bg-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20', ring: 'focus:ring-purple-500 focus:border-purple-500', text: 'text-purple-400', light: 'bg-purple-500/20 text-purple-300' },
-        red: { primary: 'bg-red-600 hover:bg-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20', ring: 'focus:ring-red-500 focus:border-red-500', text: 'text-red-400', light: 'bg-red-500/20 text-red-300' },
-        yellow: { primary: 'bg-yellow-600 hover:bg-yellow-500', bg: 'bg-yellow-500/10', border: 'border-yellow-500/20', ring: 'focus:ring-yellow-500 focus:border-yellow-500', text: 'text-yellow-400', light: 'bg-yellow-500/20 text-yellow-300' },
-        zinc: { primary: 'bg-zinc-600 hover:bg-zinc-500', bg: 'bg-zinc-500/10', border: 'border-zinc-500/20', ring: 'focus:ring-zinc-500 focus:border-zinc-500', text: 'text-zinc-400', light: 'bg-zinc-500/20 text-zinc-300' },
-        stone: { primary: 'bg-stone-600 hover:bg-stone-500', bg: 'bg-stone-500/10', border: 'border-stone-500/20', ring: 'focus:ring-stone-500 focus:border-stone-500', text: 'text-stone-400', light: 'bg-stone-500/20 text-stone-300' },
+        const colorMap: Record<string, { primary: string; bg: string; border: string; ring: string; text: string; light: string }> = {
+        // Redefined to use True Dark theme (Black/White/Neutral)
+        default: { primary: 'bg-white hover:bg-neutral-200 text-black', bg: 'bg-white/5', border: 'border-white/10', ring: 'focus:ring-white focus:border-white', text: 'text-white', light: 'bg-white/10 text-white' }
     }
-    const c = colorMap[config.color] || colorMap.violet
+    const c = colorMap.default
 
     // Separate public & locked results
     const publicResults = config.results.filter((r) => !r.isLocked)
@@ -189,7 +172,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
     }
 
     const getSentimentColor = (result: (typeof config.results)[0], value: number | string) => {
-        if (!result.sentiment) return 'text-slate-100'
+        if (!result.sentiment) return 'text-white'
         const s = result.sentiment(value)
         if (s === 'positive') return 'text-emerald-400'
         if (s === 'negative') return 'text-red-400'
@@ -215,7 +198,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                     <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-3">
                         {config.title}
                     </h1>
-                    <p className="text-sm text-slate-400 leading-relaxed max-w-2xl">
+                    <p className="text-sm text-neutral-400 leading-relaxed max-w-2xl">
                         {config.content.intro}
                     </p>
                 </div>
@@ -224,19 +207,19 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                 <div className="grid gap-8 lg:grid-cols-5">
                     {/* ─── Left: Input Panel ─── */}
                     <div className="lg:col-span-2">
-                        <div className="rounded-2xl border border-white/10 bg-slate-900/50 p-6 sm:p-8 lg:sticky lg:top-20">
+                        <div className="rounded-2xl border border-white/10 bg-[#0A0A0A] p-6 sm:p-8 lg:sticky lg:top-20">
                             <h2 className="text-sm font-semibold text-white mb-5">Verilerinizi Girin</h2>
                             <div className="space-y-6">
                                 {config.inputs.map((input) => (
                                     <div key={input.id}>
-                                        <label className="flex items-center gap-2 text-xs font-medium text-slate-400 mb-2">
+                                        <label className="flex items-center gap-2 text-xs font-medium text-neutral-400 mb-2">
                                             {input.label}
                                             {input.tooltip && (
                                                 <span className="group relative cursor-help">
-                                                    <svg className="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-3.5 h-3.5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M12 18.75h.008v.008H12v-.008z" />
                                                     </svg>
-                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 text-[11px] text-white bg-slate-800 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 text-[11px] text-white bg-neutral-800 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                                                         {input.tooltip}
                                                     </span>
                                                 </span>
@@ -244,18 +227,18 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                         </label>
                                         <div className="relative">
                                             {input.type === 'currency' && (
-                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">₺</span>
+                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500">₺</span>
                                             )}
                                             <input
                                                 type={input.type === 'text' ? 'text' : 'number'}
                                                 value={inputValues[input.id]}
                                                 onChange={(e) => updateInput(input.id, e.target.value)}
                                                 placeholder={input.placeholder || String(input.defaultValue)}
-                                                className={`w-full py-2.5 rounded-xl border border-white/10 bg-black/20 text-slate-100 placeholder:text-slate-600 text-sm focus:outline-none focus:ring-1 focus:border-slate-500 focus:ring-slate-500 transition-all ${input.type === 'currency' ? 'pl-8 pr-4' : input.type === 'percent' ? 'pl-4 pr-8' : 'px-4'
+                                                className={`w-full py-2.5 rounded-xl border border-white/10 bg-black/20 text-white placeholder:text-neutral-600 text-sm focus:outline-none focus:ring-1 focus:border-neutral-500 focus:ring-slate-500 transition-all ${input.type === 'currency' ? 'pl-8 pr-4' : input.type === 'percent' ? 'pl-4 pr-8' : 'px-4'
                                                     }`}
                                             />
                                             {input.type === 'percent' && (
-                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">%</span>
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500">%</span>
                                             )}
                                         </div>
                                     </div>
@@ -263,7 +246,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                             </div>
                             <button
                                 onClick={handleCalculate}
-                                className={`mt-8 w-full py-3 rounded-xl ${c.primary} text-white text-sm font-semibold transition-all hover:bg-slate-800 hover:border-slate-500`}
+                                className={`mt-8 w-full py-3 rounded-xl ${c.primary} text-white text-sm font-semibold transition-all hover:bg-neutral-800 hover:border-neutral-500`}
                             >
                                 Hesapla
                             </button>
@@ -274,19 +257,19 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                     <div className="lg:col-span-3 space-y-6">
                         {!calculated ? (
                             /* Empty State */
-                            <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/20 p-12 text-center">
+                            <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-12 text-center">
                                 <div className={`w-14 h-14 rounded-2xl ${c.bg} border ${c.border} flex items-center justify-center mx-auto mb-4`}>
                                     <svg className={`w-7 h-7 ${c.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={config.icon} />
                                     </svg>
                                 </div>
-                                <h3 className="text-sm font-semibold text-slate-400 mb-1">Sonuçlar Burada Görünecek</h3>
-                                <p className="text-xs text-slate-500">Soldaki formu doldurup &quot;Hesapla&quot; butonuna basın</p>
+                                <h3 className="text-sm font-semibold text-neutral-400 mb-1">Sonuçlar Burada Görünecek</h3>
+                                <p className="text-xs text-neutral-500">Soldaki formu doldurup &quot;Hesapla&quot; butonuna basın</p>
                             </div>
                         ) : (
                             <>
                                 {/* Public Results */}
-                                <div className="rounded-2xl border border-white/10 bg-slate-900/50 p-6 sm:p-8">
+                                <div className="rounded-2xl border border-white/10 bg-[#0A0A0A] p-6 sm:p-8">
                                     <h2 className="text-lg font-semibold text-white mb-5">Sonuçlar</h2>
                                     <div className={`grid gap-4 ${publicResults.length > 2 ? 'sm:grid-cols-2' : ''}`}>
                                         {publicResults.map((result) => {
@@ -297,12 +280,12 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                                     key={result.id}
                                                     className="p-4 rounded-xl bg-black/20 border border-white/5"
                                                 >
-                                                    <p className="text-xs font-medium text-slate-400 mb-1">{result.label}</p>
+                                                    <p className="text-xs font-medium text-neutral-400 mb-1">{result.label}</p>
                                                     <p className={`text-2xl font-medium tracking-tight ${getSentimentColor(result, value)}`}>
                                                         {formatValue(value, result.type)}
                                                     </p>
                                                     {result.description && (
-                                                        <p className="text-[11px] text-slate-500 mt-1">{result.description}</p>
+                                                        <p className="text-[11px] text-neutral-500 mt-1">{result.description}</p>
                                                     )}
                                                 </div>
                                             )
@@ -312,9 +295,9 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 
                                 {/* ─── Intelligence Card (Insight) ─── */}
                                 {computedInsight && (
-                                    <div className={`relative rounded-2xl border overflow-hidden ${!user ? 'min-h-[380px]' : ''} ${computedInsight.level === 'danger' ? 'border-red-500/20 bg-red-500/5' :
-                                        computedInsight.level === 'warning' ? 'border-amber-500/20 bg-amber-500/5' :
-                                            'border-emerald-500/20 bg-emerald-500/5'
+                                    <div className={`relative rounded-2xl border overflow-hidden ${!user ? 'min-h-[380px]' : ''} ${computedInsight.level === 'danger' ? 'border-red-500/20 bg-[#0A0A0A]' :
+                                        computedInsight.level === 'warning' ? 'border-amber-500/20 bg-[#0A0A0A]' :
+                                            'border-emerald-500/20 bg-[#0A0A0A]'
                                         }`}>
                                         <div className={!user ? 'blur-md select-none pointer-events-none' : ''}>
                                             {/* Card Header */}
@@ -349,7 +332,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 
                                             {/* Card Body */}
                                             <div className="px-6 py-6 sm:px-8">
-                                                <p className="text-[15px] text-slate-300 leading-relaxed font-medium">{computedInsight.message}</p>
+                                                <p className="text-[15px] text-neutral-300 leading-relaxed font-medium">{computedInsight.message}</p>
                                             </div>
 
                                             {/* Card Footer — Recommendation */}
@@ -360,7 +343,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                                     <span className="text-xl">💡</span>
                                                     <div>
                                                         <p className="text-[11px] font-bold tracking-[0.1em] uppercase text-white/70 mb-1">Prificient Önerisi</p>
-                                                        <p className="text-sm text-slate-300 leading-relaxed">{computedInsight.recommendation}</p>
+                                                        <p className="text-sm text-neutral-300 leading-relaxed">{computedInsight.recommendation}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -405,9 +388,9 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                                             insight: computedInsight,
                                                         })
                                                     }}
-                                                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border border-white/10 bg-transparent text-sm font-semibold text-slate-300 hover:bg-white/5 transition-all shadow-sm"
+                                                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border border-white/10 bg-transparent text-sm font-semibold text-neutral-300 hover:bg-white/5 transition-all shadow-sm"
                                                 >
-                                                    <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                                                     </svg>
                                                     CFO Raporu Olarak İndir (PDF)
@@ -417,7 +400,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 
                                         {/* Soft-Gate Overlay */}
                                         {!user && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-slate-950/60 backdrop-blur-[2px] rounded-2xl">
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px] rounded-2xl">
                                                 <div className="text-center max-w-sm px-6">
                                                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 border ${computedInsight.level === 'danger' ? 'bg-red-500/10 border-red-500/20' :
                                                         computedInsight.level === 'warning' ? 'bg-amber-500/10 border-amber-500/20' : 'bg-emerald-500/10 border-emerald-500/20'
@@ -427,7 +410,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                                         {computedInsight.level === 'success' && <svg className="w-7 h-7 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
                                                     </div>
                                                     <h3 className="text-xl font-bold text-white mb-2 tracking-tight">Prificient Analizini Gör</h3>
-                                                    <p className="text-sm text-slate-400 mb-6 font-medium">Size özel finansal analiz ve aksiyon tavsiyesi hazır. Ücretsiz giriş yapın.</p>
+                                                    <p className="text-sm text-neutral-400 mb-6 font-medium">Size özel finansal analiz ve aksiyon tavsiyesi hazır. Ücretsiz giriş yapın.</p>
 
                                                     {authMode !== 'otp-verify' && (
                                                         <button onClick={handleGoogleAuth} disabled={authLoading} className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl border border-white/10 bg-white/5 text-sm font-bold text-white hover:bg-white/10 transition-colors mb-3 shadow-sm">
@@ -439,21 +422,21 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                                     {authMode === 'idle' && <button onClick={() => setAuthMode('email-input')} className={`w-full py-3.5 rounded-xl border border-white/5 bg-transparent text-white text-sm font-semibold transition-colors hover:bg-white/5`}>E-posta ile Giriş Yap</button>}
                                                     {authMode === 'email-input' && (
                                                         <div className="flex gap-2">
-                                                            <input type="email" placeholder="ornek@email.com" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmit()} className={`flex-1 px-4 py-3 rounded-xl border border-white/10 bg-black/40 text-white placeholder:text-slate-600 text-sm focus:outline-none focus:ring-1 focus:border-slate-500 focus:ring-slate-500`} />
+                                                            <input type="email" placeholder="ornek@email.com" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmit()} className={`flex-1 px-4 py-3 rounded-xl border border-white/10 bg-black/40 text-white placeholder:text-neutral-600 text-sm focus:outline-none focus:ring-1 focus:border-neutral-500 focus:ring-slate-500`} />
                                                             <button onClick={handleEmailSubmit} disabled={authLoading || !emailInput} className={`px-5 py-3 rounded-xl border border-white/10 bg-white/10 text-white text-sm font-bold disabled:opacity-50 hover:bg-white/20`}>Gönder</button>
                                                         </div>
                                                     )}
                                                     {authMode === 'otp-verify' && (
                                                         <div>
-                                                            <p className="text-xs text-slate-400 mb-3"><strong>{authEmail}</strong> adresine 8 haneli kod gönderildi.</p>
+                                                            <p className="text-xs text-neutral-400 mb-3"><strong>{authEmail}</strong> adresine 8 haneli kod gönderildi.</p>
                                                             <div className="flex gap-2">
-                                                                <input type="text" maxLength={8} placeholder="00000000" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} onKeyDown={(e) => e.key === 'Enter' && handleOtpVerify()} className={`flex-1 px-4 py-3 rounded-xl border border-white/10 bg-black/40 text-white placeholder:text-slate-600 text-sm text-center tracking-[0.3em] font-mono focus:outline-none focus:ring-1 focus:border-slate-500 focus:ring-slate-500`} />
+                                                                <input type="text" maxLength={8} placeholder="00000000" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} onKeyDown={(e) => e.key === 'Enter' && handleOtpVerify()} className={`flex-1 px-4 py-3 rounded-xl border border-white/10 bg-black/40 text-white placeholder:text-neutral-600 text-sm text-center tracking-[0.3em] font-mono focus:outline-none focus:ring-1 focus:border-neutral-500 focus:ring-slate-500`} />
                                                                 <button onClick={handleOtpVerify} disabled={authLoading || otpCode.length < 8} className={`px-5 py-3 rounded-xl border border-white/10 bg-white/10 text-white text-sm font-bold disabled:opacity-50 hover:bg-white/20`}>Doğrula</button>
                                                             </div>
-                                                            <button onClick={() => { setAuthMode('email-input'); setOtpCode('') }} className="text-xs text-slate-500 hover:text-white mt-3 transition-colors">Farklı e-posta kullan</button>
+                                                            <button onClick={() => { setAuthMode('email-input'); setOtpCode('') }} className="text-xs text-neutral-500 hover:text-white mt-3 transition-colors">Farklı e-posta kullan</button>
                                                         </div>
                                                     )}
-                                                    <p className="text-[11px] text-slate-600 mt-5">Ücretsiz. Ana uygulamaya yönlendirilmezsiniz.</p>
+                                                    <p className="text-[11px] text-neutral-600 mt-5">Ücretsiz. Ana uygulamaya yönlendirilmezsiniz.</p>
                                                 </div>
                                             </div>
                                         )}
@@ -462,7 +445,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 
                                 {/* Legacy Locked Results (tools without insight) */}
                                 {!computedInsight && lockedResults.length > 0 && (
-                                    <div className={`relative rounded-2xl border border-white/10 bg-slate-900/50 p-6 sm:p-8 overflow-hidden ${!user ? 'min-h-[420px]' : ''}`}>
+                                    <div className={`relative rounded-2xl border border-white/10 bg-[#0A0A0A] p-6 sm:p-8 overflow-hidden ${!user ? 'min-h-[420px]' : ''}`}>
                                         <div className="flex items-center gap-2 mb-5">
                                             <h2 className="text-lg font-semibold text-white">Detaylı Analiz</h2>
                                             <span className={`text-[10px] font-semibold tracking-wider px-2 py-0.5 rounded-full ${c.light}`}>PRO</span>
@@ -478,12 +461,12 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                                             key={result.id}
                                                             className={`p-5 rounded-xl bg-black/20 border border-white/5`}
                                                         >
-                                                            <p className="text-xs font-medium text-slate-400 mb-1">{result.label}</p>
+                                                            <p className="text-xs font-medium text-neutral-400 mb-1">{result.label}</p>
                                                             <p className={`text-2xl font-medium tracking-tight ${getSentimentColor(result, value)}`}>
                                                                 {formatValue(value, result.type)}
                                                             </p>
                                                             {result.description && (
-                                                                <p className="text-[11px] text-slate-500 mt-1.5">{result.description}</p>
+                                                                <p className="text-[11px] text-neutral-500 mt-1.5">{result.description}</p>
                                                             )}
                                                         </div>
                                                     )
@@ -493,7 +476,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 
                                         {/* Soft-Gate Overlay */}
                                         {!user && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-slate-950/60 backdrop-blur-md rounded-2xl">
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-md rounded-2xl">
                                                 <div className="text-center max-w-sm px-6">
                                                     <div className={`w-14 h-14 rounded-2xl border ${c.border} ${c.bg} flex items-center justify-center mx-auto mb-4`}>
                                                         <svg className={`w-7 h-7 ${c.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -501,7 +484,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                                         </svg>
                                                     </div>
                                                     <h3 className="text-xl font-bold text-white mb-2 tracking-tight">Detaylı Analizi Görmek İçin</h3>
-                                                    <p className="text-sm text-slate-400 mb-6 font-medium">Ücretsiz giriş yapın ve ileri seviye sonuçlara erişin.</p>
+                                                    <p className="text-sm text-neutral-400 mb-6 font-medium">Ücretsiz giriş yapın ve ileri seviye sonuçlara erişin.</p>
 
                                                     {authMode !== 'otp-verify' && (
                                                         <button onClick={handleGoogleAuth} disabled={authLoading} className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl border border-white/10 bg-white/5 text-sm font-bold text-white hover:bg-white/10 transition-colors mb-3">
@@ -513,21 +496,21 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                                     {authMode === 'idle' && <button onClick={() => setAuthMode('email-input')} className={`w-full py-3.5 rounded-xl border border-white/5 bg-transparent text-white text-sm font-semibold transition-colors hover:bg-white/5`}>E-posta ile Giriş Yap</button>}
                                                     {authMode === 'email-input' && (
                                                         <div className="flex gap-2">
-                                                            <input type="email" placeholder="ornek@email.com" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmit()} className={`flex-1 px-4 py-3 rounded-xl border border-white/10 bg-black/40 text-white placeholder:text-slate-600 text-sm focus:outline-none focus:ring-1 focus:border-slate-500 focus:ring-slate-500`} />
+                                                            <input type="email" placeholder="ornek@email.com" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmit()} className={`flex-1 px-4 py-3 rounded-xl border border-white/10 bg-black/40 text-white placeholder:text-neutral-600 text-sm focus:outline-none focus:ring-1 focus:border-neutral-500 focus:ring-slate-500`} />
                                                             <button onClick={handleEmailSubmit} disabled={authLoading || !emailInput} className={`px-5 py-3 rounded-xl border border-white/10 bg-white/10 text-white text-sm font-bold disabled:opacity-50 hover:bg-white/20`}>Gönder</button>
                                                         </div>
                                                     )}
                                                     {authMode === 'otp-verify' && (
                                                         <div>
-                                                            <p className="text-xs text-slate-400 mb-3"><strong>{authEmail}</strong> adresine 8 haneli kod gönderildi.</p>
+                                                            <p className="text-xs text-neutral-400 mb-3"><strong>{authEmail}</strong> adresine 8 haneli kod gönderildi.</p>
                                                             <div className="flex gap-2">
-                                                                <input type="text" maxLength={8} placeholder="00000000" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} onKeyDown={(e) => e.key === 'Enter' && handleOtpVerify()} className={`flex-1 px-4 py-3 rounded-xl border border-white/10 bg-black/40 text-white placeholder:text-slate-600 text-sm text-center tracking-[0.3em] font-mono focus:outline-none focus:ring-1 focus:border-slate-500 focus:ring-slate-500`} />
+                                                                <input type="text" maxLength={8} placeholder="00000000" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} onKeyDown={(e) => e.key === 'Enter' && handleOtpVerify()} className={`flex-1 px-4 py-3 rounded-xl border border-white/10 bg-black/40 text-white placeholder:text-neutral-600 text-sm text-center tracking-[0.3em] font-mono focus:outline-none focus:ring-1 focus:border-neutral-500 focus:ring-slate-500`} />
                                                                 <button onClick={handleOtpVerify} disabled={authLoading || otpCode.length < 8} className={`px-5 py-3 rounded-xl border border-white/10 bg-white/10 text-white text-sm font-bold disabled:opacity-50 hover:bg-white/20`}>Doğrula</button>
                                                             </div>
-                                                            <button onClick={() => { setAuthMode('email-input'); setOtpCode('') }} className="text-xs text-slate-500 hover:text-white mt-3 transition-colors">Farklı e-posta kullan</button>
+                                                            <button onClick={() => { setAuthMode('email-input'); setOtpCode('') }} className="text-xs text-neutral-500 hover:text-white mt-3 transition-colors">Farklı e-posta kullan</button>
                                                         </div>
                                                     )}
-                                                    <p className="text-[11px] text-slate-600 mt-5">Ücretsiz. Ana uygulamaya yönlendirilmezsiniz.</p>
+                                                    <p className="text-[11px] text-neutral-600 mt-5">Ücretsiz. Ana uygulamaya yönlendirilmezsiniz.</p>
                                                 </div>
                                             </div>
                                         )}
@@ -569,19 +552,19 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                 <svg className={`w-4 h-4 ${c.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M12 18.75h.008v.008H12v-.008z" />
                                 </svg>
-                                <h2 className="text-sm font-bold text-slate-100">Bu Araç Ne İşe Yarar?</h2>
+                                <h2 className="text-sm font-bold text-white">Bu Araç Ne İşe Yarar?</h2>
                             </div>
-                            <p className="text-[13px] text-slate-400 leading-relaxed">{config.content.howItWorks}</p>
+                            <p className="text-[13px] text-neutral-400 leading-relaxed">{config.content.howItWorks}</p>
                         </div>
                     )}
 
                     {/* SEO Content */}
-                    <div className="text-[13px] text-slate-400 leading-relaxed" dangerouslySetInnerHTML={{ __html: markdownToHtml(config.content.details) }} />
+                    <div className="text-[13px] text-neutral-400 leading-relaxed" dangerouslySetInnerHTML={{ __html: markdownToHtml(config.content.details) }} />
 
                     {/* FAQ */}
                     {config.content.faq && config.content.faq.length > 0 && (
                         <div>
-                            <h2 className="text-sm font-bold text-slate-100 mb-4 px-1">Sıkça Sorulan Sorular</h2>
+                            <h2 className="text-sm font-bold text-white mb-4 px-1">Sıkça Sorulan Sorular</h2>
                             <div className="space-y-3">
                                 {config.content.faq.map((item, idx) => (
                                     <FAQItem key={idx} question={item.question} answer={item.answer} color={c} />
@@ -599,14 +582,14 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 function FAQItem({ question, answer, color }: { question: string; answer: string; color: { bg: string; border: string; text: string } }) {
     const [open, setOpen] = useState(false)
     return (
-        <div className={`rounded-xl border ${open ? color.border : 'border-white/5'} bg-slate-900/50 overflow-hidden transition-colors`}>
+        <div className={`rounded-xl border ${open ? color.border : 'border-white/5'} bg-[#0A0A0A] overflow-hidden transition-colors`}>
             <button
                 onClick={() => setOpen(!open)}
-                className="w-full flex items-center justify-between p-4 text-left hover:bg-slate-800/50 transition-colors focus:outline-none"
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-neutral-800/50 transition-colors focus:outline-none"
             >
-                <span className="text-[13px] font-medium text-slate-200 pr-4">{question}</span>
+                <span className="text-[13px] font-medium text-neutral-200 pr-4">{question}</span>
                 <svg
-                    className={`w-4 h-4 flex-shrink-0 text-slate-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 flex-shrink-0 text-neutral-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
                     fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -614,7 +597,7 @@ function FAQItem({ question, answer, color }: { question: string; answer: string
             </button>
             {open && (
                 <div className="px-4 pb-4 pt-0">
-                    <p className="text-[13px] text-slate-400 leading-relaxed">{answer}</p>
+                    <p className="text-[13px] text-neutral-400 leading-relaxed">{answer}</p>
                 </div>
             )}
         </div>
@@ -624,11 +607,11 @@ function FAQItem({ question, answer, color }: { question: string; answer: string
 // ─── Simple Markdown to HTML ──────────────────
 function markdownToHtml(md: string): string {
     return md
-        .replace(/^### (.*$)/gm, '<h3 class="text-[13px] font-semibold text-slate-200 mt-4 mb-2">$1</h3>')
+        .replace(/^### (.*$)/gm, '<h3 class="text-[13px] font-semibold text-neutral-200 mt-4 mb-2">$1</h3>')
         .replace(/^## (.*$)/gm, '<h2 class="text-sm font-bold text-white mt-6 mb-2">$1</h2>')
-        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-200">$1</strong>')
-        .replace(/^\d+\.\s(.*$)/gm, '<li class="text-[13px] text-slate-400 ml-4 mb-1 list-decimal">$1</li>')
-        .replace(/^- (.*$)/gm, '<li class="text-[13px] text-slate-400 ml-4 mb-1 list-disc">$1</li>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-neutral-200">$1</strong>')
+        .replace(/^\d+\.\s(.*$)/gm, '<li class="text-[13px] text-neutral-400 ml-4 mb-1 list-decimal">$1</li>')
+        .replace(/^- (.*$)/gm, '<li class="text-[13px] text-neutral-400 ml-4 mb-1 list-disc">$1</li>')
         .replace(/\n\n/g, '<br/>')
         .replace(/\n/g, '\n')
 }

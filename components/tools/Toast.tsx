@@ -40,11 +40,11 @@ export default function ToastContainer() {
                 : 'translate-x-full opacity-0'
                 }`}
         >
-            <div className="rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl shadow-xl shadow-black/50 p-5">
+            <div className="rounded-2xl border border-white/10 bg-[#0A0A0A] backdrop-blur-xl shadow-xl shadow-black/50 p-5">
                 <div className="flex items-start gap-4">
                     {/* Icon */}
-                    <div className="w-10 h-10 rounded-xl bg-violet-500/20 border border-white/5 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg className="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
@@ -54,12 +54,12 @@ export default function ToastContainer() {
                             {toast.message}
                         </p>
                         {toast.subtext && (
-                            <p className="text-xs text-slate-400 mt-1">{toast.subtext}</p>
+                            <p className="text-xs text-neutral-400 mt-1">{toast.subtext}</p>
                         )}
                         {toast.action && (
                             <a
                                 href={toast.action.href}
-                                className="inline-flex items-center gap-1 mt-2.5 text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors uppercase tracking-wider"
+                                className="inline-flex items-center gap-1 mt-2.5 text-xs font-semibold text-neutral-400 hover:text-white transition-colors uppercase tracking-wider"
                             >
                                 {toast.action.label}
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,7 +72,7 @@ export default function ToastContainer() {
                     {/* Close */}
                     <button
                         onClick={() => { setVisible(false); setTimeout(() => setToast(null), 400) }}
-                        className="text-slate-500 hover:text-white transition-colors flex-shrink-0 p-1"
+                        className="text-neutral-500 hover:text-white transition-colors flex-shrink-0 p-1"
                     >
                         <svg className="w-4 h-4 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
