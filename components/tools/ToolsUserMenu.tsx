@@ -11,9 +11,9 @@ const toolTitleMap: Record<string, string> = {}
 toolRegistry.forEach((t) => { toolTitleMap[t.slug] = t.title })
 
 const levelConfig: Record<string, { label: string; color: string; dot: string }> = {
-    danger: { label: 'Kritik', color: 'text-red-600', dot: 'bg-red-500' },
-    warning: { label: 'Uyarı', color: 'text-amber-600', dot: 'bg-amber-500' },
-    success: { label: 'Stabil', color: 'text-emerald-600', dot: 'bg-emerald-500' },
+    danger: { label: 'Kritik', color: 'text-red-400', dot: 'bg-red-500' },
+    warning: { label: 'Uyarı', color: 'text-amber-400', dot: 'bg-amber-500' },
+    success: { label: 'Stabil', color: 'text-emerald-400', dot: 'bg-emerald-500' },
 }
 
 export default function ToolsUserMenu() {
@@ -88,12 +88,12 @@ export default function ToolsUserMenu() {
         <div className="flex items-center gap-2.5">
             {/* User Info */}
             <div className="hidden sm:flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-violet-100 flex items-center justify-center">
-                    <span className="text-xs font-semibold text-violet-600">
+                <div className="w-6 h-6 rounded-full bg-violet-500/20 flex items-center justify-center">
+                    <span className="text-xs font-semibold text-violet-400">
                         {displayName.charAt(0).toUpperCase()}
                     </span>
                 </div>
-                <span className="text-xs text-gray-500 max-w-[120px] truncate">
+                <span className="text-xs text-slate-400 max-w-[120px] truncate">
                     {displayName}
                 </span>
             </div>
@@ -101,7 +101,7 @@ export default function ToolsUserMenu() {
             {/* Vault Link */}
             <a
                 href="/my-vault"
-                className="flex items-center gap-1 text-xs font-medium text-violet-600 hover:text-violet-700 transition-colors"
+                className="flex items-center gap-1 text-xs font-medium text-violet-400 hover:text-violet-300 transition-colors"
             >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
@@ -113,7 +113,7 @@ export default function ToolsUserMenu() {
             <div className="relative" ref={dropdownRef}>
                 <button
                     onClick={toggleDropdown}
-                    className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                    className="flex items-center gap-1 text-xs font-medium text-slate-400 hover:text-white transition-colors"
                 >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -125,22 +125,22 @@ export default function ToolsUserMenu() {
                 </button>
 
                 {dropdownOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-72 rounded-xl border border-gray-200/80 bg-white/95 backdrop-blur-xl shadow-xl shadow-gray-200/40 z-50 overflow-hidden">
-                        <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
-                            <p className="text-xs font-semibold text-gray-900">Finansal Sicilim</p>
-                            <a href="/my-vault" className="text-[10px] text-violet-600 hover:underline">Kasaya Git</a>
+                    <div className="absolute right-0 top-full mt-2 w-72 rounded-xl border border-white/10 bg-slate-900/95 backdrop-blur-xl shadow-xl shadow-black/50 z-50 overflow-hidden">
+                        <div className="px-4 py-3 border-b border-white/5 flex justify-between items-center">
+                            <p className="text-xs font-semibold text-white">Finansal Sicilim</p>
+                            <a href="/my-vault" className="text-[10px] text-violet-400 hover:underline">Kasaya Git</a>
                         </div>
 
                         {!historyLoaded ? (
                             <div className="p-4 text-center">
-                                <div className="w-4 h-4 border-2 border-violet-200 border-t-violet-600 rounded-full animate-spin mx-auto" />
+                                <div className="w-4 h-4 border-2 border-violet-500/20 border-t-violet-400 rounded-full animate-spin mx-auto" />
                             </div>
                         ) : history.length === 0 ? (
                             <div className="p-4 text-center">
-                                <p className="text-xs text-gray-400">Henüz teşhis kaydınız yok.</p>
+                                <p className="text-xs text-slate-400">Henüz teşhis kaydınız yok.</p>
                                 <a
                                     href="/tools-home"
-                                    className="inline-block mt-2 text-xs font-semibold text-violet-600 hover:text-violet-700"
+                                    className="inline-block mt-2 text-xs font-semibold text-violet-400 hover:text-violet-300"
                                 >
                                     İlk teşhisini yap →
                                 </a>
@@ -154,21 +154,21 @@ export default function ToolsUserMenu() {
                                         <a
                                             key={record.id}
                                             href={`/tools/${record.tool_slug}`}
-                                            className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0"
+                                            className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0"
                                             onClick={() => setDropdownOpen(false)}
                                         >
                                             <div className={`w-2 h-2 rounded-full ${lc.dot} flex-shrink-0`} />
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-semibold text-gray-900 truncate">
+                                                <p className="text-xs font-semibold text-white truncate">
                                                     {toolTitle}
                                                 </p>
-                                                <p className="text-[10px] text-gray-400">
+                                                <p className="text-[10px] text-slate-500">
                                                     <span className={`font-medium ${lc.color}`}>{lc.label}</span>
                                                     {' · '}
                                                     {formatDate(record.created_at)}
                                                 </p>
                                             </div>
-                                            <svg className="w-3.5 h-3.5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                             </svg>
                                         </a>
@@ -176,7 +176,7 @@ export default function ToolsUserMenu() {
                                 })}
                                 <a
                                     href="/lobby"
-                                    className="flex items-center justify-center gap-1 px-4 py-2.5 bg-gray-50 text-xs font-semibold text-violet-600 hover:text-violet-700 hover:bg-gray-100 transition-colors"
+                                    className="flex items-center justify-center gap-1 px-4 py-2.5 bg-white/5 text-xs font-semibold text-violet-400 hover:text-violet-300 hover:bg-white/10 transition-colors"
                                     onClick={() => setDropdownOpen(false)}
                                 >
                                     Tüm Geçmişi Gör
@@ -193,7 +193,7 @@ export default function ToolsUserMenu() {
             {/* Sign Out */}
             <button
                 onClick={handleSignOut}
-                className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-xs text-slate-500 hover:text-white transition-colors"
             >
                 Çıkış
             </button>

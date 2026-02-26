@@ -152,25 +152,25 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
     }
 
     const colorMap: Record<string, { primary: string; bg: string; border: string; ring: string; text: string; light: string }> = {
-        violet: { primary: 'bg-violet-600 hover:bg-violet-700', bg: 'bg-violet-50', border: 'border-violet-200/60', ring: 'focus:ring-violet-500/20 focus:border-violet-400', text: 'text-violet-600', light: 'bg-violet-100 text-violet-700' },
-        blue: { primary: 'bg-blue-600 hover:bg-blue-700', bg: 'bg-blue-50', border: 'border-blue-200/60', ring: 'focus:ring-blue-500/20 focus:border-blue-400', text: 'text-blue-600', light: 'bg-blue-100 text-blue-700' },
-        emerald: { primary: 'bg-emerald-600 hover:bg-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200/60', ring: 'focus:ring-emerald-500/20 focus:border-emerald-400', text: 'text-emerald-600', light: 'bg-emerald-100 text-emerald-700' },
-        amber: { primary: 'bg-amber-600 hover:bg-amber-700', bg: 'bg-amber-50', border: 'border-amber-200/60', ring: 'focus:ring-amber-500/20 focus:border-amber-400', text: 'text-amber-600', light: 'bg-amber-100 text-amber-700' },
-        rose: { primary: 'bg-rose-600 hover:bg-rose-700', bg: 'bg-rose-50', border: 'border-rose-200/60', ring: 'focus:ring-rose-500/20 focus:border-rose-400', text: 'text-rose-600', light: 'bg-rose-100 text-rose-700' },
-        sky: { primary: 'bg-sky-600 hover:bg-sky-700', bg: 'bg-sky-50', border: 'border-sky-200/60', ring: 'focus:ring-sky-500/20 focus:border-sky-400', text: 'text-sky-600', light: 'bg-sky-100 text-sky-700' },
-        orange: { primary: 'bg-orange-600 hover:bg-orange-700', bg: 'bg-orange-50', border: 'border-orange-200/60', ring: 'focus:ring-orange-500/20 focus:border-orange-400', text: 'text-orange-600', light: 'bg-orange-100 text-orange-700' },
-        indigo: { primary: 'bg-indigo-600 hover:bg-indigo-700', bg: 'bg-indigo-50', border: 'border-indigo-200/60', ring: 'focus:ring-indigo-500/20 focus:border-indigo-400', text: 'text-indigo-600', light: 'bg-indigo-100 text-indigo-700' },
-        pink: { primary: 'bg-pink-600 hover:bg-pink-700', bg: 'bg-pink-50', border: 'border-pink-200/60', ring: 'focus:ring-pink-500/20 focus:border-pink-400', text: 'text-pink-600', light: 'bg-pink-100 text-pink-700' },
-        teal: { primary: 'bg-teal-600 hover:bg-teal-700', bg: 'bg-teal-50', border: 'border-teal-200/60', ring: 'focus:ring-teal-500/20 focus:border-teal-400', text: 'text-teal-600', light: 'bg-teal-100 text-teal-700' },
-        cyan: { primary: 'bg-cyan-600 hover:bg-cyan-700', bg: 'bg-cyan-50', border: 'border-cyan-200/60', ring: 'focus:ring-cyan-500/20 focus:border-cyan-400', text: 'text-cyan-600', light: 'bg-cyan-100 text-cyan-700' },
-        fuchsia: { primary: 'bg-fuchsia-600 hover:bg-fuchsia-700', bg: 'bg-fuchsia-50', border: 'border-fuchsia-200/60', ring: 'focus:ring-fuchsia-500/20 focus:border-fuchsia-400', text: 'text-fuchsia-600', light: 'bg-fuchsia-100 text-fuchsia-700' },
-        slate: { primary: 'bg-slate-600 hover:bg-slate-700', bg: 'bg-slate-50', border: 'border-slate-200/60', ring: 'focus:ring-slate-500/20 focus:border-slate-400', text: 'text-slate-600', light: 'bg-slate-100 text-slate-700' },
-        lime: { primary: 'bg-lime-600 hover:bg-lime-700', bg: 'bg-lime-50', border: 'border-lime-200/60', ring: 'focus:ring-lime-500/20 focus:border-lime-400', text: 'text-lime-600', light: 'bg-lime-100 text-lime-700' },
-        purple: { primary: 'bg-purple-600 hover:bg-purple-700', bg: 'bg-purple-50', border: 'border-purple-200/60', ring: 'focus:ring-purple-500/20 focus:border-purple-400', text: 'text-purple-600', light: 'bg-purple-100 text-purple-700' },
-        red: { primary: 'bg-red-600 hover:bg-red-700', bg: 'bg-red-50', border: 'border-red-200/60', ring: 'focus:ring-red-500/20 focus:border-red-400', text: 'text-red-600', light: 'bg-red-100 text-red-700' },
-        yellow: { primary: 'bg-yellow-600 hover:bg-yellow-700', bg: 'bg-yellow-50', border: 'border-yellow-200/60', ring: 'focus:ring-yellow-500/20 focus:border-yellow-400', text: 'text-yellow-600', light: 'bg-yellow-100 text-yellow-700' },
-        zinc: { primary: 'bg-zinc-600 hover:bg-zinc-700', bg: 'bg-zinc-50', border: 'border-zinc-200/60', ring: 'focus:ring-zinc-500/20 focus:border-zinc-400', text: 'text-zinc-600', light: 'bg-zinc-100 text-zinc-700' },
-        stone: { primary: 'bg-stone-600 hover:bg-stone-700', bg: 'bg-stone-50', border: 'border-stone-200/60', ring: 'focus:ring-stone-500/20 focus:border-stone-400', text: 'text-stone-600', light: 'bg-stone-100 text-stone-700' },
+        violet: { primary: 'bg-violet-600 hover:bg-violet-500', bg: 'bg-violet-500/10', border: 'border-violet-500/20', ring: 'focus:ring-violet-500 focus:border-violet-500', text: 'text-violet-400', light: 'bg-violet-500/20 text-violet-300' },
+        blue: { primary: 'bg-blue-600 hover:bg-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20', ring: 'focus:ring-blue-500 focus:border-blue-500', text: 'text-blue-400', light: 'bg-blue-500/20 text-blue-300' },
+        emerald: { primary: 'bg-emerald-600 hover:bg-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', ring: 'focus:ring-emerald-500 focus:border-emerald-500', text: 'text-emerald-400', light: 'bg-emerald-500/20 text-emerald-300' },
+        amber: { primary: 'bg-amber-600 hover:bg-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', ring: 'focus:ring-amber-500 focus:border-amber-500', text: 'text-amber-400', light: 'bg-amber-500/20 text-amber-300' },
+        rose: { primary: 'bg-rose-600 hover:bg-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/20', ring: 'focus:ring-rose-500 focus:border-rose-500', text: 'text-rose-400', light: 'bg-rose-500/20 text-rose-300' },
+        sky: { primary: 'bg-sky-600 hover:bg-sky-500', bg: 'bg-sky-500/10', border: 'border-sky-500/20', ring: 'focus:ring-sky-500 focus:border-sky-500', text: 'text-sky-400', light: 'bg-sky-500/20 text-sky-300' },
+        orange: { primary: 'bg-orange-600 hover:bg-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20', ring: 'focus:ring-orange-500 focus:border-orange-500', text: 'text-orange-400', light: 'bg-orange-500/20 text-orange-300' },
+        indigo: { primary: 'bg-indigo-600 hover:bg-indigo-500', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', ring: 'focus:ring-indigo-500 focus:border-indigo-500', text: 'text-indigo-400', light: 'bg-indigo-500/20 text-indigo-300' },
+        pink: { primary: 'bg-pink-600 hover:bg-pink-500', bg: 'bg-pink-500/10', border: 'border-pink-500/20', ring: 'focus:ring-pink-500 focus:border-pink-500', text: 'text-pink-400', light: 'bg-pink-500/20 text-pink-300' },
+        teal: { primary: 'bg-teal-600 hover:bg-teal-500', bg: 'bg-teal-500/10', border: 'border-teal-500/20', ring: 'focus:ring-teal-500 focus:border-teal-500', text: 'text-teal-400', light: 'bg-teal-500/20 text-teal-300' },
+        cyan: { primary: 'bg-cyan-600 hover:bg-cyan-500', bg: 'bg-cyan-500/10', border: 'border-cyan-500/20', ring: 'focus:ring-cyan-500 focus:border-cyan-500', text: 'text-cyan-400', light: 'bg-cyan-500/20 text-cyan-300' },
+        fuchsia: { primary: 'bg-fuchsia-600 hover:bg-fuchsia-500', bg: 'bg-fuchsia-500/10', border: 'border-fuchsia-500/20', ring: 'focus:ring-fuchsia-500 focus:border-fuchsia-500', text: 'text-fuchsia-400', light: 'bg-fuchsia-500/20 text-fuchsia-300' },
+        slate: { primary: 'bg-slate-600 hover:bg-slate-500', bg: 'bg-slate-500/10', border: 'border-slate-500/20', ring: 'focus:ring-slate-500 focus:border-slate-500', text: 'text-slate-400', light: 'bg-slate-500/20 text-slate-300' },
+        lime: { primary: 'bg-lime-600 hover:bg-lime-500', bg: 'bg-lime-500/10', border: 'border-lime-500/20', ring: 'focus:ring-lime-500 focus:border-lime-500', text: 'text-lime-400', light: 'bg-lime-500/20 text-lime-300' },
+        purple: { primary: 'bg-purple-600 hover:bg-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20', ring: 'focus:ring-purple-500 focus:border-purple-500', text: 'text-purple-400', light: 'bg-purple-500/20 text-purple-300' },
+        red: { primary: 'bg-red-600 hover:bg-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20', ring: 'focus:ring-red-500 focus:border-red-500', text: 'text-red-400', light: 'bg-red-500/20 text-red-300' },
+        yellow: { primary: 'bg-yellow-600 hover:bg-yellow-500', bg: 'bg-yellow-500/10', border: 'border-yellow-500/20', ring: 'focus:ring-yellow-500 focus:border-yellow-500', text: 'text-yellow-400', light: 'bg-yellow-500/20 text-yellow-300' },
+        zinc: { primary: 'bg-zinc-600 hover:bg-zinc-500', bg: 'bg-zinc-500/10', border: 'border-zinc-500/20', ring: 'focus:ring-zinc-500 focus:border-zinc-500', text: 'text-zinc-400', light: 'bg-zinc-500/20 text-zinc-300' },
+        stone: { primary: 'bg-stone-600 hover:bg-stone-500', bg: 'bg-stone-500/10', border: 'border-stone-500/20', ring: 'focus:ring-stone-500 focus:border-stone-500', text: 'text-stone-400', light: 'bg-stone-500/20 text-stone-300' },
     }
     const c = colorMap[config.color] || colorMap.violet
 
@@ -189,11 +189,11 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
     }
 
     const getSentimentColor = (result: (typeof config.results)[0], value: number | string) => {
-        if (!result.sentiment) return 'text-gray-900'
+        if (!result.sentiment) return 'text-slate-100'
         const s = result.sentiment(value)
-        if (s === 'positive') return 'text-emerald-700'
-        if (s === 'negative') return 'text-red-600'
-        return 'text-amber-600'
+        if (s === 'positive') return 'text-emerald-400'
+        if (s === 'negative') return 'text-red-400'
+        return 'text-amber-400'
     }
 
     // ─── Render ────────────────────────────
@@ -212,10 +212,10 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                             {config.category === 'finance' ? 'Finans' : config.category === 'marketing' ? 'Pazarlama' : config.category === 'operations' ? 'Operasyon' : 'Araç'}
                         </span>
                     </div>
-                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 mb-3">
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-3">
                         {config.title}
                     </h1>
-                    <p className="text-sm text-gray-500 leading-relaxed max-w-2xl">
+                    <p className="text-sm text-slate-400 leading-relaxed max-w-2xl">
                         {config.content.intro}
                     </p>
                 </div>
@@ -224,19 +224,19 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                 <div className="grid gap-8 lg:grid-cols-5">
                     {/* ─── Left: Input Panel ─── */}
                     <div className="lg:col-span-2">
-                        <div className="rounded-2xl border border-gray-200/80 bg-white p-6 sm:p-8 lg:sticky lg:top-20">
-                            <h2 className="text-sm font-semibold text-gray-700 mb-5">Verilerinizi Girin</h2>
-                            <div className="space-y-4">
+                        <div className="rounded-2xl border border-white/10 bg-slate-900/50 p-6 sm:p-8 lg:sticky lg:top-20">
+                            <h2 className="text-sm font-semibold text-white mb-5">Verilerinizi Girin</h2>
+                            <div className="space-y-6">
                                 {config.inputs.map((input) => (
                                     <div key={input.id}>
-                                        <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600 mb-1.5">
+                                        <label className="flex items-center gap-2 text-xs font-medium text-slate-400 mb-2">
                                             {input.label}
                                             {input.tooltip && (
                                                 <span className="group relative cursor-help">
-                                                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M12 18.75h.008v.008H12v-.008z" />
                                                     </svg>
-                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 text-[11px] text-white bg-gray-800 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 text-[11px] text-white bg-slate-800 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                                                         {input.tooltip}
                                                     </span>
                                                 </span>
@@ -244,18 +244,18 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                         </label>
                                         <div className="relative">
                                             {input.type === 'currency' && (
-                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">₺</span>
+                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">₺</span>
                                             )}
                                             <input
                                                 type={input.type === 'text' ? 'text' : 'number'}
                                                 value={inputValues[input.id]}
                                                 onChange={(e) => updateInput(input.id, e.target.value)}
                                                 placeholder={input.placeholder || String(input.defaultValue)}
-                                                className={`w-full py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 ${c.ring} transition-all ${input.type === 'currency' ? 'pl-8 pr-4' : input.type === 'percent' ? 'pl-4 pr-8' : 'px-4'
+                                                className={`w-full py-2.5 rounded-xl border border-white/10 bg-black/20 text-slate-100 placeholder:text-slate-600 text-sm focus:outline-none focus:ring-1 focus:border-slate-500 focus:ring-slate-500 transition-all ${input.type === 'currency' ? 'pl-8 pr-4' : input.type === 'percent' ? 'pl-4 pr-8' : 'px-4'
                                                     }`}
                                             />
                                             {input.type === 'percent' && (
-                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">%</span>
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">%</span>
                                             )}
                                         </div>
                                     </div>
@@ -263,7 +263,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                             </div>
                             <button
                                 onClick={handleCalculate}
-                                className={`mt-6 w-full py-3 rounded-xl ${c.primary} text-white text-sm font-semibold transition-all hover:shadow-lg`}
+                                className={`mt-8 w-full py-3 rounded-xl ${c.primary} text-white text-sm font-semibold transition-all hover:bg-slate-800 hover:border-slate-500`}
                             >
                                 Hesapla
                             </button>
@@ -274,20 +274,20 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                     <div className="lg:col-span-3 space-y-6">
                         {!calculated ? (
                             /* Empty State */
-                            <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-12 text-center">
+                            <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/20 p-12 text-center">
                                 <div className={`w-14 h-14 rounded-2xl ${c.bg} border ${c.border} flex items-center justify-center mx-auto mb-4`}>
                                     <svg className={`w-7 h-7 ${c.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={config.icon} />
                                     </svg>
                                 </div>
-                                <h3 className="text-sm font-semibold text-gray-600 mb-1">Sonuçlar Burada Görünecek</h3>
-                                <p className="text-xs text-gray-400">Soldaki formu doldurup &quot;Hesapla&quot; butonuna basın</p>
+                                <h3 className="text-sm font-semibold text-slate-400 mb-1">Sonuçlar Burada Görünecek</h3>
+                                <p className="text-xs text-slate-500">Soldaki formu doldurup &quot;Hesapla&quot; butonuna basın</p>
                             </div>
                         ) : (
                             <>
                                 {/* Public Results */}
-                                <div className="rounded-2xl border border-gray-200/80 bg-white p-6 sm:p-8">
-                                    <h2 className="text-lg font-semibold text-gray-900 mb-5">Sonuçlar</h2>
+                                <div className="rounded-2xl border border-white/10 bg-slate-900/50 p-6 sm:p-8">
+                                    <h2 className="text-lg font-semibold text-white mb-5">Sonuçlar</h2>
                                     <div className={`grid gap-4 ${publicResults.length > 2 ? 'sm:grid-cols-2' : ''}`}>
                                         {publicResults.map((result) => {
                                             const value = computedResults[result.id]
@@ -295,14 +295,14 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                             return (
                                                 <div
                                                     key={result.id}
-                                                    className="p-4 rounded-xl bg-gray-50 border border-gray-200/60"
+                                                    className="p-4 rounded-xl bg-black/20 border border-white/5"
                                                 >
-                                                    <p className="text-xs font-medium text-gray-500 mb-1">{result.label}</p>
-                                                    <p className={`text-2xl font-bold ${getSentimentColor(result, value)}`}>
+                                                    <p className="text-xs font-medium text-slate-400 mb-1">{result.label}</p>
+                                                    <p className={`text-2xl font-medium tracking-tight ${getSentimentColor(result, value)}`}>
                                                         {formatValue(value, result.type)}
                                                     </p>
                                                     {result.description && (
-                                                        <p className="text-[11px] text-gray-400 mt-1">{result.description}</p>
+                                                        <p className="text-[11px] text-slate-500 mt-1">{result.description}</p>
                                                     )}
                                                 </div>
                                             )
@@ -312,55 +312,55 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 
                                 {/* ─── Intelligence Card (Insight) ─── */}
                                 {computedInsight && (
-                                    <div className={`relative rounded-2xl border overflow-hidden ${!user ? 'min-h-[380px]' : ''} ${computedInsight.level === 'danger' ? 'border-red-200/80 bg-gradient-to-br from-red-50 to-white' :
-                                        computedInsight.level === 'warning' ? 'border-amber-200/80 bg-gradient-to-br from-amber-50 to-white' :
-                                            'border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-white'
+                                    <div className={`relative rounded-2xl border overflow-hidden ${!user ? 'min-h-[380px]' : ''} ${computedInsight.level === 'danger' ? 'border-red-500/20 bg-red-500/5' :
+                                        computedInsight.level === 'warning' ? 'border-amber-500/20 bg-amber-500/5' :
+                                            'border-emerald-500/20 bg-emerald-500/5'
                                         }`}>
                                         <div className={!user ? 'blur-md select-none pointer-events-none' : ''}>
                                             {/* Card Header */}
-                                            <div className="px-6 pt-6 pb-4 sm:px-8 sm:pt-8">
-                                                <div className="flex items-start gap-3">
-                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${computedInsight.level === 'danger' ? 'bg-red-100' :
-                                                        computedInsight.level === 'warning' ? 'bg-amber-100' : 'bg-emerald-100'
+                                            <div className="px-6 pt-6 pb-4 sm:px-8 sm:pt-8 border-b border-white/5">
+                                                <div className="flex items-start gap-4">
+                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${computedInsight.level === 'danger' ? 'bg-red-500/10 border-red-500/20' :
+                                                        computedInsight.level === 'warning' ? 'bg-amber-500/10 border-amber-500/20' : 'bg-emerald-500/10 border-emerald-500/20'
                                                         }`}>
                                                         {computedInsight.level === 'danger' && (
-                                                            <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                                                            <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
                                                         )}
                                                         {computedInsight.level === 'warning' && (
-                                                            <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+                                                            <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
                                                         )}
                                                         {computedInsight.level === 'success' && (
-                                                            <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                            <svg className="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <p className={`text-[11px] font-semibold tracking-wider uppercase mb-1 ${computedInsight.level === 'danger' ? 'text-red-500' :
-                                                            computedInsight.level === 'warning' ? 'text-amber-500' : 'text-emerald-500'
+                                                        <p className={`text-[10px] font-bold tracking-[0.2em] uppercase mb-1.5 ${computedInsight.level === 'danger' ? 'text-red-500/80' :
+                                                            computedInsight.level === 'warning' ? 'text-amber-500/80' : 'text-emerald-500/80'
                                                             }`}>Prificient Analizi</p>
-                                                        <h3 className="text-lg font-bold text-gray-900">{computedInsight.title}</h3>
+                                                        <h3 className="text-xl font-bold text-white tracking-tight">{computedInsight.title}</h3>
                                                     </div>
                                                 </div>
-                                                <div className={`mt-4 text-3xl font-bold ${computedInsight.level === 'danger' ? 'text-red-700' :
-                                                    computedInsight.level === 'warning' ? 'text-amber-700' : 'text-emerald-700'
+                                                <div className={`mt-6 text-4xl font-black tracking-tight ${computedInsight.level === 'danger' ? 'text-red-400' :
+                                                    computedInsight.level === 'warning' ? 'text-amber-400' : 'text-emerald-400'
                                                     }`}>
                                                     {computedInsight.value}
                                                 </div>
                                             </div>
 
                                             {/* Card Body */}
-                                            <div className="px-6 pb-4 sm:px-8">
-                                                <p className="text-sm text-gray-600 leading-relaxed">{computedInsight.message}</p>
+                                            <div className="px-6 py-6 sm:px-8">
+                                                <p className="text-[15px] text-slate-300 leading-relaxed font-medium">{computedInsight.message}</p>
                                             </div>
 
                                             {/* Card Footer — Recommendation */}
-                                            <div className={`mx-4 mb-4 sm:mx-6 sm:mb-6 p-4 rounded-xl border ${computedInsight.level === 'danger' ? 'bg-red-50/50 border-red-100' :
-                                                computedInsight.level === 'warning' ? 'bg-amber-50/50 border-amber-100' : 'bg-emerald-50/50 border-emerald-100'
+                                            <div className={`mx-4 mb-4 sm:mx-6 sm:mb-6 p-5 rounded-xl border ${computedInsight.level === 'danger' ? 'bg-red-500/10 border-red-500/20' :
+                                                computedInsight.level === 'warning' ? 'bg-amber-500/10 border-amber-500/20' : 'bg-emerald-500/10 border-emerald-500/20'
                                                 }`}>
-                                                <div className="flex items-start gap-2">
-                                                    <span className="text-base mt-0.5">💡</span>
+                                                <div className="flex items-start gap-3">
+                                                    <span className="text-xl">💡</span>
                                                     <div>
-                                                        <p className="text-xs font-semibold text-gray-700 mb-1">Prificient Önerisi</p>
-                                                        <p className="text-sm text-gray-600 leading-relaxed">{computedInsight.recommendation}</p>
+                                                        <p className="text-[11px] font-bold tracking-[0.1em] uppercase text-white/70 mb-1">Prificient Önerisi</p>
+                                                        <p className="text-sm text-slate-300 leading-relaxed">{computedInsight.recommendation}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -372,9 +372,9 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                                 <button
                                                     onClick={handleSaveToVault}
                                                     disabled={isSavingToVault || vaultSaved}
-                                                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all shadow-sm border ${vaultSaved
-                                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                                            : 'bg-violet-600 border-violet-600 text-white hover:bg-violet-700 hover:border-violet-700'
+                                                    className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-semibold transition-all shadow-sm border ${vaultSaved
+                                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                                        : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
                                                         }`}
                                                 >
                                                     {vaultSaved ? (
@@ -405,9 +405,9 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                                             insight: computedInsight,
                                                         })
                                                     }}
-                                                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+                                                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border border-white/10 bg-transparent text-sm font-semibold text-slate-300 hover:bg-white/5 transition-all shadow-sm"
                                                 >
-                                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                                                     </svg>
                                                     CFO Raporu Olarak İndir (PDF)
@@ -417,43 +417,43 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 
                                         {/* Soft-Gate Overlay */}
                                         {!user && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-[2px] rounded-2xl">
+                                            <div className="absolute inset-0 flex items-center justify-center bg-slate-950/60 backdrop-blur-[2px] rounded-2xl">
                                                 <div className="text-center max-w-sm px-6">
-                                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 ${computedInsight.level === 'danger' ? 'bg-red-100' :
-                                                        computedInsight.level === 'warning' ? 'bg-amber-100' : 'bg-emerald-100'
+                                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 border ${computedInsight.level === 'danger' ? 'bg-red-500/10 border-red-500/20' :
+                                                        computedInsight.level === 'warning' ? 'bg-amber-500/10 border-amber-500/20' : 'bg-emerald-500/10 border-emerald-500/20'
                                                         }`}>
-                                                        {computedInsight.level === 'danger' && <svg className="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>}
-                                                        {computedInsight.level === 'warning' && <svg className="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>}
-                                                        {computedInsight.level === 'success' && <svg className="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+                                                        {computedInsight.level === 'danger' && <svg className="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>}
+                                                        {computedInsight.level === 'warning' && <svg className="w-7 h-7 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>}
+                                                        {computedInsight.level === 'success' && <svg className="w-7 h-7 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
                                                     </div>
-                                                    <h3 className="text-lg font-bold text-gray-900 mb-2">Prificient Analizini Gör</h3>
-                                                    <p className="text-sm text-gray-500 mb-6">Size özel finansal analiz ve aksiyon tavsiyesi hazır. Ücretsiz giriş yapın.</p>
+                                                    <h3 className="text-xl font-bold text-white mb-2 tracking-tight">Prificient Analizini Gör</h3>
+                                                    <p className="text-sm text-slate-400 mb-6 font-medium">Size özel finansal analiz ve aksiyon tavsiyesi hazır. Ücretsiz giriş yapın.</p>
 
                                                     {authMode !== 'otp-verify' && (
-                                                        <button onClick={handleGoogleAuth} disabled={authLoading} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors mb-3 shadow-sm">
-                                                            <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
+                                                        <button onClick={handleGoogleAuth} disabled={authLoading} className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl border border-white/10 bg-white/5 text-sm font-bold text-white hover:bg-white/10 transition-colors mb-3 shadow-sm">
+                                                            <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
                                                             Google ile Giriş Yap
                                                         </button>
                                                     )}
                                                     {authMode === 'google-waiting' && <p className={`text-xs ${c.text} mb-3 animate-pulse`}>Yeni sekmede giriş yapın, bu sayfa otomatik güncellenecek...</p>}
-                                                    {authMode === 'idle' && <button onClick={() => setAuthMode('email-input')} className={`w-full py-3 rounded-xl ${c.primary} text-white text-sm font-semibold transition-colors`}>E-posta ile Giriş Yap</button>}
+                                                    {authMode === 'idle' && <button onClick={() => setAuthMode('email-input')} className={`w-full py-3.5 rounded-xl border border-white/5 bg-transparent text-white text-sm font-semibold transition-colors hover:bg-white/5`}>E-posta ile Giriş Yap</button>}
                                                     {authMode === 'email-input' && (
                                                         <div className="flex gap-2">
-                                                            <input type="email" placeholder="ornek@email.com" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmit()} className={`flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 ${c.ring}`} />
-                                                            <button onClick={handleEmailSubmit} disabled={authLoading || !emailInput} className={`px-4 py-3 rounded-xl ${c.primary} text-white text-sm font-semibold disabled:opacity-50`}>Gönder</button>
+                                                            <input type="email" placeholder="ornek@email.com" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmit()} className={`flex-1 px-4 py-3 rounded-xl border border-white/10 bg-black/40 text-white placeholder:text-slate-600 text-sm focus:outline-none focus:ring-1 focus:border-slate-500 focus:ring-slate-500`} />
+                                                            <button onClick={handleEmailSubmit} disabled={authLoading || !emailInput} className={`px-5 py-3 rounded-xl border border-white/10 bg-white/10 text-white text-sm font-bold disabled:opacity-50 hover:bg-white/20`}>Gönder</button>
                                                         </div>
                                                     )}
                                                     {authMode === 'otp-verify' && (
                                                         <div>
-                                                            <p className="text-xs text-gray-500 mb-3"><strong>{authEmail}</strong> adresine 8 haneli kod gönderildi.</p>
+                                                            <p className="text-xs text-slate-400 mb-3"><strong>{authEmail}</strong> adresine 8 haneli kod gönderildi.</p>
                                                             <div className="flex gap-2">
-                                                                <input type="text" maxLength={8} placeholder="00000000" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} onKeyDown={(e) => e.key === 'Enter' && handleOtpVerify()} className={`flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm text-center tracking-[0.3em] font-mono focus:outline-none focus:ring-2 ${c.ring}`} />
-                                                                <button onClick={handleOtpVerify} disabled={authLoading || otpCode.length < 8} className={`px-4 py-3 rounded-xl ${c.primary} text-white text-sm font-semibold disabled:opacity-50`}>Doğrula</button>
+                                                                <input type="text" maxLength={8} placeholder="00000000" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} onKeyDown={(e) => e.key === 'Enter' && handleOtpVerify()} className={`flex-1 px-4 py-3 rounded-xl border border-white/10 bg-black/40 text-white placeholder:text-slate-600 text-sm text-center tracking-[0.3em] font-mono focus:outline-none focus:ring-1 focus:border-slate-500 focus:ring-slate-500`} />
+                                                                <button onClick={handleOtpVerify} disabled={authLoading || otpCode.length < 8} className={`px-5 py-3 rounded-xl border border-white/10 bg-white/10 text-white text-sm font-bold disabled:opacity-50 hover:bg-white/20`}>Doğrula</button>
                                                             </div>
-                                                            <button onClick={() => { setAuthMode('email-input'); setOtpCode('') }} className="text-xs text-gray-400 hover:text-gray-600 mt-2">Farklı e-posta kullan</button>
+                                                            <button onClick={() => { setAuthMode('email-input'); setOtpCode('') }} className="text-xs text-slate-500 hover:text-white mt-3 transition-colors">Farklı e-posta kullan</button>
                                                         </div>
                                                     )}
-                                                    <p className="text-[11px] text-gray-400 mt-4">Ücretsiz. Ana uygulamaya yönlendirilmezsiniz.</p>
+                                                    <p className="text-[11px] text-slate-600 mt-5">Ücretsiz. Ana uygulamaya yönlendirilmezsiniz.</p>
                                                 </div>
                                             </div>
                                         )}
@@ -462,10 +462,10 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 
                                 {/* Legacy Locked Results (tools without insight) */}
                                 {!computedInsight && lockedResults.length > 0 && (
-                                    <div className={`relative rounded-2xl border border-gray-200/80 bg-white p-6 sm:p-8 overflow-hidden ${!user ? 'min-h-[420px]' : ''}`}>
+                                    <div className={`relative rounded-2xl border border-white/10 bg-slate-900/50 p-6 sm:p-8 overflow-hidden ${!user ? 'min-h-[420px]' : ''}`}>
                                         <div className="flex items-center gap-2 mb-5">
-                                            <h2 className="text-lg font-semibold text-gray-900">Detaylı Analiz</h2>
-                                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${c.light}`}>PRO</span>
+                                            <h2 className="text-lg font-semibold text-white">Detaylı Analiz</h2>
+                                            <span className={`text-[10px] font-semibold tracking-wider px-2 py-0.5 rounded-full ${c.light}`}>PRO</span>
                                         </div>
 
                                         <div className={!user ? 'blur-md select-none pointer-events-none' : ''}>
@@ -476,14 +476,14 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                                     return (
                                                         <div
                                                             key={result.id}
-                                                            className={`p-5 rounded-xl ${c.bg} border ${c.border}`}
+                                                            className={`p-5 rounded-xl bg-black/20 border border-white/5`}
                                                         >
-                                                            <p className="text-xs font-medium text-gray-500 mb-1">{result.label}</p>
-                                                            <p className={`text-2xl font-bold ${getSentimentColor(result, value)}`}>
+                                                            <p className="text-xs font-medium text-slate-400 mb-1">{result.label}</p>
+                                                            <p className={`text-2xl font-medium tracking-tight ${getSentimentColor(result, value)}`}>
                                                                 {formatValue(value, result.type)}
                                                             </p>
                                                             {result.description && (
-                                                                <p className="text-[11px] text-gray-400 mt-1.5">{result.description}</p>
+                                                                <p className="text-[11px] text-slate-500 mt-1.5">{result.description}</p>
                                                             )}
                                                         </div>
                                                     )
@@ -493,41 +493,41 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 
                                         {/* Soft-Gate Overlay */}
                                         {!user && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-2xl">
+                                            <div className="absolute inset-0 flex items-center justify-center bg-slate-950/60 backdrop-blur-md rounded-2xl">
                                                 <div className="text-center max-w-sm px-6">
-                                                    <div className={`w-12 h-12 rounded-full ${c.bg} flex items-center justify-center mx-auto mb-4`}>
-                                                        <svg className={`w-6 h-6 ${c.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <div className={`w-14 h-14 rounded-2xl border ${c.border} ${c.bg} flex items-center justify-center mx-auto mb-4`}>
+                                                        <svg className={`w-7 h-7 ${c.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                                                         </svg>
                                                     </div>
-                                                    <h3 className="text-lg font-bold text-gray-900 mb-2">Detaylı Analizi Görmek İçin</h3>
-                                                    <p className="text-sm text-gray-500 mb-6">Ücretsiz giriş yapın ve ileri seviye sonuçlara erişin.</p>
+                                                    <h3 className="text-xl font-bold text-white mb-2 tracking-tight">Detaylı Analizi Görmek İçin</h3>
+                                                    <p className="text-sm text-slate-400 mb-6 font-medium">Ücretsiz giriş yapın ve ileri seviye sonuçlara erişin.</p>
 
                                                     {authMode !== 'otp-verify' && (
-                                                        <button onClick={handleGoogleAuth} disabled={authLoading} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors mb-3 shadow-sm">
-                                                            <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
+                                                        <button onClick={handleGoogleAuth} disabled={authLoading} className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl border border-white/10 bg-white/5 text-sm font-bold text-white hover:bg-white/10 transition-colors mb-3">
+                                                            <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
                                                             Google ile Giriş Yap
                                                         </button>
                                                     )}
                                                     {authMode === 'google-waiting' && <p className={`text-xs ${c.text} mb-3 animate-pulse`}>Yeni sekmede giriş yapın, bu sayfa otomatik güncellenecek...</p>}
-                                                    {authMode === 'idle' && <button onClick={() => setAuthMode('email-input')} className={`w-full py-3 rounded-xl ${c.primary} text-white text-sm font-semibold transition-colors`}>E-posta ile Giriş Yap</button>}
+                                                    {authMode === 'idle' && <button onClick={() => setAuthMode('email-input')} className={`w-full py-3.5 rounded-xl border border-white/5 bg-transparent text-white text-sm font-semibold transition-colors hover:bg-white/5`}>E-posta ile Giriş Yap</button>}
                                                     {authMode === 'email-input' && (
                                                         <div className="flex gap-2">
-                                                            <input type="email" placeholder="ornek@email.com" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmit()} className={`flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 ${c.ring}`} />
-                                                            <button onClick={handleEmailSubmit} disabled={authLoading || !emailInput} className={`px-4 py-3 rounded-xl ${c.primary} text-white text-sm font-semibold disabled:opacity-50`}>Gönder</button>
+                                                            <input type="email" placeholder="ornek@email.com" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmit()} className={`flex-1 px-4 py-3 rounded-xl border border-white/10 bg-black/40 text-white placeholder:text-slate-600 text-sm focus:outline-none focus:ring-1 focus:border-slate-500 focus:ring-slate-500`} />
+                                                            <button onClick={handleEmailSubmit} disabled={authLoading || !emailInput} className={`px-5 py-3 rounded-xl border border-white/10 bg-white/10 text-white text-sm font-bold disabled:opacity-50 hover:bg-white/20`}>Gönder</button>
                                                         </div>
                                                     )}
                                                     {authMode === 'otp-verify' && (
                                                         <div>
-                                                            <p className="text-xs text-gray-500 mb-3"><strong>{authEmail}</strong> adresine 8 haneli kod gönderildi.</p>
+                                                            <p className="text-xs text-slate-400 mb-3"><strong>{authEmail}</strong> adresine 8 haneli kod gönderildi.</p>
                                                             <div className="flex gap-2">
-                                                                <input type="text" maxLength={8} placeholder="00000000" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} onKeyDown={(e) => e.key === 'Enter' && handleOtpVerify()} className={`flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm text-center tracking-[0.3em] font-mono focus:outline-none focus:ring-2 ${c.ring}`} />
-                                                                <button onClick={handleOtpVerify} disabled={authLoading || otpCode.length < 8} className={`px-4 py-3 rounded-xl ${c.primary} text-white text-sm font-semibold disabled:opacity-50`}>Doğrula</button>
+                                                                <input type="text" maxLength={8} placeholder="00000000" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} onKeyDown={(e) => e.key === 'Enter' && handleOtpVerify()} className={`flex-1 px-4 py-3 rounded-xl border border-white/10 bg-black/40 text-white placeholder:text-slate-600 text-sm text-center tracking-[0.3em] font-mono focus:outline-none focus:ring-1 focus:border-slate-500 focus:ring-slate-500`} />
+                                                                <button onClick={handleOtpVerify} disabled={authLoading || otpCode.length < 8} className={`px-5 py-3 rounded-xl border border-white/10 bg-white/10 text-white text-sm font-bold disabled:opacity-50 hover:bg-white/20`}>Doğrula</button>
                                                             </div>
-                                                            <button onClick={() => { setAuthMode('email-input'); setOtpCode('') }} className="text-xs text-gray-400 hover:text-gray-600 mt-2">Farklı e-posta kullan</button>
+                                                            <button onClick={() => { setAuthMode('email-input'); setOtpCode('') }} className="text-xs text-slate-500 hover:text-white mt-3 transition-colors">Farklı e-posta kullan</button>
                                                         </div>
                                                     )}
-                                                    <p className="text-[11px] text-gray-400 mt-4">Ücretsiz. Ana uygulamaya yönlendirilmezsiniz.</p>
+                                                    <p className="text-[11px] text-slate-600 mt-5">Ücretsiz. Ana uygulamaya yönlendirilmezsiniz.</p>
                                                 </div>
                                             </div>
                                         )}
@@ -569,20 +569,20 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                 <svg className={`w-4 h-4 ${c.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M12 18.75h.008v.008H12v-.008z" />
                                 </svg>
-                                <h2 className="text-sm font-bold text-gray-900">Bu Araç Ne İşe Yarar?</h2>
+                                <h2 className="text-sm font-bold text-slate-100">Bu Araç Ne İşe Yarar?</h2>
                             </div>
-                            <p className="text-[13px] text-gray-600 leading-relaxed">{config.content.howItWorks}</p>
+                            <p className="text-[13px] text-slate-400 leading-relaxed">{config.content.howItWorks}</p>
                         </div>
                     )}
 
                     {/* SEO Content */}
-                    <div className="text-[13px] text-gray-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: markdownToHtml(config.content.details) }} />
+                    <div className="text-[13px] text-slate-400 leading-relaxed" dangerouslySetInnerHTML={{ __html: markdownToHtml(config.content.details) }} />
 
                     {/* FAQ */}
                     {config.content.faq && config.content.faq.length > 0 && (
                         <div>
-                            <h2 className="text-sm font-bold text-gray-900 mb-3">Sıkça Sorulan Sorular</h2>
-                            <div className="space-y-2">
+                            <h2 className="text-sm font-bold text-slate-100 mb-4 px-1">Sıkça Sorulan Sorular</h2>
+                            <div className="space-y-3">
                                 {config.content.faq.map((item, idx) => (
                                     <FAQItem key={idx} question={item.question} answer={item.answer} color={c} />
                                 ))}
@@ -599,22 +599,22 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 function FAQItem({ question, answer, color }: { question: string; answer: string; color: { bg: string; border: string; text: string } }) {
     const [open, setOpen] = useState(false)
     return (
-        <div className={`rounded-lg border ${open ? color.border : 'border-gray-200/80'} bg-white overflow-hidden transition-colors`}>
+        <div className={`rounded-xl border ${open ? color.border : 'border-white/5'} bg-slate-900/50 overflow-hidden transition-colors`}>
             <button
                 onClick={() => setOpen(!open)}
-                className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-50/50 transition-colors"
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-slate-800/50 transition-colors focus:outline-none"
             >
-                <span className="text-[13px] font-medium text-gray-800 pr-4">{question}</span>
+                <span className="text-[13px] font-medium text-slate-200 pr-4">{question}</span>
                 <svg
-                    className={`w-3.5 h-3.5 flex-shrink-0 text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 flex-shrink-0 text-slate-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
                     fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
             </button>
             {open && (
-                <div className="px-4 pb-3 pt-0">
-                    <p className="text-[13px] text-gray-500 leading-relaxed">{answer}</p>
+                <div className="px-4 pb-4 pt-0">
+                    <p className="text-[13px] text-slate-400 leading-relaxed">{answer}</p>
                 </div>
             )}
         </div>
@@ -624,11 +624,11 @@ function FAQItem({ question, answer, color }: { question: string; answer: string
 // ─── Simple Markdown to HTML ──────────────────
 function markdownToHtml(md: string): string {
     return md
-        .replace(/^### (.*$)/gm, '<h3 class="text-[13px] font-semibold text-gray-800 mt-3 mb-1">$1</h3>')
-        .replace(/^## (.*$)/gm, '<h2 class="text-sm font-bold text-gray-900 mt-5 mb-1.5">$1</h2>')
-        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-700">$1</strong>')
-        .replace(/^\d+\.\s(.*$)/gm, '<li class="text-[13px] text-gray-600 ml-4 mb-0.5 list-decimal">$1</li>')
-        .replace(/^- (.*$)/gm, '<li class="text-[13px] text-gray-600 ml-4 mb-0.5 list-disc">$1</li>')
+        .replace(/^### (.*$)/gm, '<h3 class="text-[13px] font-semibold text-slate-200 mt-4 mb-2">$1</h3>')
+        .replace(/^## (.*$)/gm, '<h2 class="text-sm font-bold text-white mt-6 mb-2">$1</h2>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-200">$1</strong>')
+        .replace(/^\d+\.\s(.*$)/gm, '<li class="text-[13px] text-slate-400 ml-4 mb-1 list-decimal">$1</li>')
+        .replace(/^- (.*$)/gm, '<li class="text-[13px] text-slate-400 ml-4 mb-1 list-disc">$1</li>')
         .replace(/\n\n/g, '<br/>')
         .replace(/\n/g, '\n')
 }
