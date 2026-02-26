@@ -67,20 +67,20 @@ export function LegalSheet({ type, triggerText, triggerClassName }: LegalSheetPr
                 <div className="p-6 border-b border-white/10 shrink-0 bg-[#0A0A0A]">
                     <SheetHeader>
                         <SheetTitle className="text-xl font-bold text-white tracking-tight">{getTitle()}</SheetTitle>
-                        <SheetDescription className="text-neutral-500">
+                        <SheetDescription className="text-neutral-400">
                             Prificient yasal aydınlatma metni.
                         </SheetDescription>
                     </SheetHeader>
                 </div>
 
                 <div className="p-6 md:p-8 overflow-y-auto flex-1 custom-scrollbar">
-                    <div className="prose prose-invert prose-neutral max-w-none 
-                                  prose-h1:text-2xl prose-h1:font-bold prose-h1:mb-6 prose-h1:text-white
-                                  prose-h3:text-lg prose-h3:font-semibold prose-h3:text-white prose-h3:mt-8 prose-h3:mb-3
-                                  prose-p:text-neutral-400 prose-p:leading-relaxed prose-p:mb-5
-                                  prose-ul:text-neutral-400 prose-li:mb-2 prose-li:leading-relaxed
-                                  prose-strong:text-white prose-strong:font-semibold
-                                  prose-a:text-white hover:prose-a:text-neutral-300">
+                    <div className="text-base text-neutral-300
+                                  [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-white [&_h1]:mb-6
+                                  [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-white [&_h3]:mt-8 [&_h3]:mb-3
+                                  [&_p]:text-neutral-400 [&_p]:leading-relaxed [&_p]:mb-5
+                                  [&_ul]:text-neutral-400 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-5 [&_li]:mb-2 [&_li]:leading-relaxed
+                                  [&_strong]:text-white [&_strong]:font-semibold
+                                  [&_a]:text-white [&_a]:underline hover:[&_a]:text-neutral-300">
                         <ReactMarkdown>{getContent()}</ReactMarkdown>
                     </div>
                 </div>
