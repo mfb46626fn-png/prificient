@@ -67,9 +67,9 @@ export default function LobbyClient() {
         setUser(u)
 
         const [p, h, slugs] = await Promise.all([
-            getLobbyProfile(supabase),
-            getToolUsageHistory(supabase),
-            getUsedToolSlugs(supabase),
+            getLobbyProfile(supabase, u.id),
+            getToolUsageHistory(supabase, u.id),
+            getUsedToolSlugs(supabase, u.id),
         ])
         setProfile(p)
         setHistory(h)
@@ -81,13 +81,13 @@ export default function LobbyClient() {
     useEffect(() => { loadData() }, [loadData])
 
     const handleSaveStoreInfo = async () => {
-        if (!selectedPlatform || !selectedRevenue) return
+        if (!selectedPlatform || !selectedRevenue || !user) return
         setSaving(true)
-        const ok = await updateStoreInfo(supabase, selectedPlatform, selectedRevenue)
+        const ok = await updateStoreInfo(supabase, user.id, selectedPlatform, selectedRevenue)
         if (ok) {
             setStoreInfoSaved(true)
             // Refresh profile for updated waitlist position
-            const p = await getLobbyProfile(supabase)
+            const p = await getLobbyProfile(supabase, user.id)
             setProfile(p)
         }
         setSaving(false)
@@ -153,11 +153,11 @@ export default function LobbyClient() {
     const displayName = profile?.display_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Kullanıcı'
 
     const handleSaveName = async () => {
-        if (!nameInput.trim()) return
+        if (!nameInput.trim() || !user) return
         setNameSaving(true)
-        const ok = await updateDisplayName(supabase, nameInput)
+        const ok = await updateDisplayName(supabase, user.id, nameInput)
         if (ok) {
-            const p = await getLobbyProfile(supabase)
+            const p = await getLobbyProfile(supabase, user.id)
             setProfile(p)
             setEditingName(false)
         }

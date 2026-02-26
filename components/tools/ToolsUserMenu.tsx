@@ -30,7 +30,7 @@ export default function ToolsUserMenu() {
             if (data.user) {
                 setUser(data.user)
                 // Fetch display_name from profiles
-                const profile = await getLobbyProfile(supabase)
+                const profile = await getLobbyProfile(supabase, data.user.id)
                 const name = profile?.display_name
                     || data.user.user_metadata?.full_name
                     || data.user.email?.split('@')[0]
@@ -41,7 +41,7 @@ export default function ToolsUserMenu() {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             setUser(session?.user ?? null)
             if (session?.user) {
-                const profile = await getLobbyProfile(supabase)
+                const profile = await getLobbyProfile(supabase, session.user.id)
                 const name = profile?.display_name
                     || session.user.user_metadata?.full_name
                     || session.user.email?.split('@')[0]
@@ -54,8 +54,8 @@ export default function ToolsUserMenu() {
 
     // Load history on first dropdown open
     const loadHistory = useCallback(async () => {
-        if (historyLoaded) return
-        const h = await getToolUsageHistory(supabase, 3)
+        if (historyLoaded || !user) return
+        const h = await getToolUsageHistory(supabase, user.id, 3)
         setHistory(h)
         setHistoryLoaded(true)
     }, [supabase, historyLoaded])

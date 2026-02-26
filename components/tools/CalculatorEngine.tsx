@@ -55,7 +55,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 
                 // After-auth: show toast with waitlist position
                 if (wasLoggedOut) {
-                    const profile = await getLobbyProfile(supabase)
+                    const profile = await getLobbyProfile(supabase, session.user.id)
                     const pos = profile?.waitlist_position ?? '?'
                     triggerToast({
                         message: `Aramıza hoş geldin! \nErken Erişim listesinde #${pos}. sıradasın.`,
@@ -74,8 +74,8 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                     }).catch(() => { /* silent */ })
 
                     // Save current calculation to tool usage history
-                    if (computedInsight) {
-                        saveToolUsage(supabase, config.slug, inputValues, computedInsight.level, computedInsight.title)
+                    if (computedInsight?.title) {
+                        saveToolUsage(supabase, session.user.id, config.slug, inputValues, computedInsight.level, computedInsight.title)
                     }
                 }
             }
@@ -147,8 +147,8 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
 
             // Save to tool_usage_history (for Lobby dashboard)
             const insightForSave = insightResult?.insight?.(numericInputs)
-            if (insightForSave) {
-                saveToolUsage(supabase, config.slug, inputValues, insightForSave.level, insightForSave.title)
+            if (insightForSave?.title) {
+                saveToolUsage(supabase, user.id, config.slug, inputValues, insightForSave.level, insightForSave.title)
             }
         }
     }

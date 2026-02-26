@@ -22,15 +22,14 @@ export interface ToolUsageRecord {
 // ─── Profile / Waitlist ─────────────────────────────────
 
 export async function getLobbyProfile(
-    supabase: SupabaseClient
+    supabase: SupabaseClient,
+    userId: string
 ): Promise<LobbyProfile | null> {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return null
 
     const { data } = await supabase
         .from('profiles')
         .select('waitlist_position, store_revenue_range, store_platform, referral_code, display_name')
-        .eq('id', user.id)
+        .eq('id', userId)
         .maybeSingle()
 
     return data as LobbyProfile | null
@@ -38,17 +37,16 @@ export async function getLobbyProfile(
 
 export async function updateStoreInfo(
     supabase: SupabaseClient,
+    userId: string,
     platform: string,
     revenueRange: string
 ): Promise<boolean> {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return false
 
     // Boost waitlist position by 500
     const { data: profile } = await supabase
         .from('profiles')
         .select('waitlist_position')
-        .eq('id', user.id)
+        .eq('id', userId)
         .maybeSingle()
 
     const currentPos = profile?.waitlist_position ?? 9999
@@ -61,22 +59,21 @@ export async function updateStoreInfo(
             store_revenue_range: revenueRange,
             waitlist_position: newPos,
         })
-        .eq('id', user.id)
+        .eq('id', userId)
 
     return !error
 }
 
 export async function updateDisplayName(
     supabase: SupabaseClient,
+    userId: string,
     name: string
 ): Promise<boolean> {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return false
 
     const { error } = await supabase
         .from('profiles')
         .update({ display_name: name.trim() })
-        .eq('id', user.id)
+        .eq('id', userId)
 
     return !error
 }
@@ -85,16 +82,15 @@ export async function updateDisplayName(
 
 export async function saveToolUsage(
     supabase: SupabaseClient,
+    userId: string,
     toolSlug: string,
     inputs: Record<string, string>,
     resultLevel: string,
     insightTitle: string | null
 ): Promise<void> {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
 
     await supabase.from('tool_usage_history').insert({
-        user_id: user.id,
+        user_id: userId,
         tool_slug: toolSlug,
         inputs,
         result_level: resultLevel,
@@ -104,11 +100,13 @@ export async function saveToolUsage(
 
 export async function getToolUsageHistory(
     supabase: SupabaseClient,
+    userId: string,
     limit = 20
 ): Promise<ToolUsageRecord[]> {
     const { data } = await supabase
         .from('tool_usage_history')
         .select('id, tool_slug, inputs, result_level, insight_title, created_at')
+        .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(limit)
 
@@ -116,11 +114,13 @@ export async function getToolUsageHistory(
 }
 
 export async function getUsedToolSlugs(
-    supabase: SupabaseClient
+    supabase: SupabaseClient,
+    userId: string
 ): Promise<string[]> {
     const { data } = await supabase
         .from('tool_usage_history')
         .select('tool_slug')
+        .eq('user_id', userId)
 
     if (!data) return []
     return [...new Set(data.map((d: { tool_slug: string }) => d.tool_slug))]
