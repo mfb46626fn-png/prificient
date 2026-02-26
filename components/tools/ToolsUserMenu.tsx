@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
-import { getToolUsageHistory, type ToolUsageRecord } from '@/lib/tools/lobby'
+import { getToolUsageHistory, getLobbyProfile, type ToolUsageRecord } from '@/lib/tools/lobby'
 import { toolRegistry } from '@/lib/tools/registry'
 
 // Build slug → title map
@@ -19,15 +19,35 @@ const levelConfig: Record<string, { label: string; color: string; dot: string }>
 export default function ToolsUserMenu() {
     const supabase = createClient()
     const [user, setUser] = useState<User | null>(null)
+    const [displayName, setDisplayName] = useState<string>('')
     const [dropdownOpen, setDropdownOpen] = useState(false)
     const [history, setHistory] = useState<ToolUsageRecord[]>([])
     const [historyLoaded, setHistoryLoaded] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        supabase.auth.getUser().then(({ data }) => setUser(data.user))
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        supabase.auth.getUser().then(async ({ data }) => {
+            if (data.user) {
+                setUser(data.user)
+                // Fetch display_name from profiles
+                const profile = await getLobbyProfile(supabase)
+                const name = profile?.display_name
+                    || data.user.user_metadata?.full_name
+                    || data.user.email?.split('@')[0]
+                    || 'Kullanıcı'
+                setDisplayName(name)
+            }
+        })
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             setUser(session?.user ?? null)
+            if (session?.user) {
+                const profile = await getLobbyProfile(supabase)
+                const name = profile?.display_name
+                    || session.user.user_metadata?.full_name
+                    || session.user.email?.split('@')[0]
+                    || 'Kullanıcı'
+                setDisplayName(name)
+            }
         })
         return () => subscription.unsubscribe()
     }, [supabase])
@@ -58,8 +78,6 @@ export default function ToolsUserMenu() {
         setUser(null)
     }
 
-    const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Kullanıcı'
-
     const formatDate = (iso: string) => {
         const d = new Date(iso)
         return d.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' })
@@ -72,7 +90,8 @@ export default function ToolsUserMenu() {
     }
 
     return (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+            {/* User Info */}
             <div className="hidden sm:flex items-center gap-2">
                 <div className="w-6 h-6 rounded-full bg-violet-100 flex items-center justify-center">
                     <span className="text-xs font-semibold text-violet-600">
@@ -84,11 +103,22 @@ export default function ToolsUserMenu() {
                 </span>
             </div>
 
+            {/* Lobby Link */}
+            <a
+                href="/lobby"
+                className="flex items-center gap-1 text-xs font-medium text-violet-600 hover:text-violet-700 transition-colors"
+            >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M18.75 4.236c.982.143 1.954.317 2.916.52A6.003 6.003 0 0016.27 9.728M18.75 4.236V4.5c0 2.108-.966 3.99-2.48 5.228m0 0a6.023 6.023 0 01-2.77.704 6.023 6.023 0 01-2.77-.704" />
+                </svg>
+                Lobim
+            </a>
+
             {/* Recent Scenarios Dropdown */}
             <div className="relative" ref={dropdownRef}>
                 <button
                     onClick={toggleDropdown}
-                    className="flex items-center gap-1.5 text-xs font-medium text-violet-600 hover:text-violet-700 transition-colors"
+                    className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
                 >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -153,7 +183,7 @@ export default function ToolsUserMenu() {
                                     className="flex items-center justify-center gap-1 px-4 py-2.5 bg-gray-50 text-xs font-semibold text-violet-600 hover:text-violet-700 hover:bg-gray-100 transition-colors"
                                     onClick={() => setDropdownOpen(false)}
                                 >
-                                    Lobimi Gör
+                                    Tüm Geçmişi Gör
                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                                     </svg>
@@ -164,6 +194,7 @@ export default function ToolsUserMenu() {
                 )}
             </div>
 
+            {/* Sign Out */}
             <button
                 onClick={handleSignOut}
                 className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
