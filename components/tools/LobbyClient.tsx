@@ -155,13 +155,26 @@ export default function LobbyClient() {
     const handleSaveName = async () => {
         if (!nameInput.trim() || !user) return
         setNameSaving(true)
-        const ok = await updateDisplayName(supabase, user.id, nameInput)
-        if (ok) {
-            const { data: { user: updatedUser } } = await supabase.auth.getUser()
-            if (updatedUser) setUser(updatedUser)
-            setEditingName(false)
+
+        try {
+            const ok = await updateDisplayName(supabase, user.id, nameInput)
+            if (ok) {
+                // Force a session refresh to get the new user_metadata immediately
+                const { data: { session }, error } = await supabase.auth.refreshSession()
+                if (session?.user && !error) {
+                    setUser(session.user)
+                } else {
+                    // Fallback to getUser if refresh fails
+                    const { data: { user: updatedUser } } = await supabase.auth.getUser()
+                    if (updatedUser) setUser(updatedUser)
+                }
+                setEditingName(false)
+            }
+        } catch (err) {
+            console.error('Error saving name:', err)
+        } finally {
+            setNameSaving(false)
         }
-        setNameSaving(false)
     }
 
     return (
