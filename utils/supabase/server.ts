@@ -16,12 +16,10 @@ export async function createClient() {
         },
         setAll(cookiesToSet) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, {
-                ...options,
-                domain: process.env.NODE_ENV === 'production' ? '.prificient.com' : undefined,
-              })
-            )
+            cookiesToSet.forEach(({ name, value, options }) => {
+              const opts = { ...options, domain: process.env.NODE_ENV === 'production' ? '.prificient.com' : undefined }
+              cookieStore.set(name, value, opts)
+            })
           } catch {
             // Hata yutulur
           }

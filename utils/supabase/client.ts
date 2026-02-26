@@ -7,10 +7,7 @@ export function createClient() {
     {
       cookieOptions: {
         domain: process.env.NODE_ENV === 'production' ? '.prificient.com' : undefined,
-        path: '/',
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-      }
+      },
     }
   )
 }

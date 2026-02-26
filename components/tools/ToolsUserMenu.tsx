@@ -126,11 +126,11 @@ export default function ToolsUserMenu() {
 
                 {dropdownOpen && (
                     <div className="absolute right-0 top-full mt-2 w-72 rounded-xl border border-white/10 bg-[#0A0A0A]/95 backdrop-blur-xl shadow-xl shadow-black/50 z-50 overflow-hidden">
-                        <div className="px-4 py-3 border-b border-white/5 flex gap-2 justify-between items-center">
+                        <div className="px-4 py-3 border-b border-white/5 flex justify-between items-center">
                             <p className="text-xs font-semibold text-white">Finansal Sicilim</p>
-                            <div className="flex gap-3">
-                                <a href="/profile" className="text-[10px] text-neutral-400 hover:text-white transition-colors underline">Profil</a>
-                                <a href="/my-vault" className="text-[10px] text-neutral-400 hover:text-white transition-colors underline">Kasaya Git</a>
+                            <div className="flex items-center gap-3">
+                                <a href="/tools-profile" className="text-[10px] text-neutral-400 hover:text-white transition-colors underline">Profil</a>
+                                <a href="/my-vault" className="text-[10px] text-neutral-400 hover:text-white transition-colors underline">Kasa</a>
                             </div>
                         </div>
 
