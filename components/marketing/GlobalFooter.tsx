@@ -22,8 +22,8 @@ export default function GlobalFooter() {
                     {/* Column 2 */}
                     <div className="flex flex-col gap-4">
                         <span className="text-white/80 font-semibold mb-2">Prificient</span>
-                        <Link href="/#vision" className="text-white/40 hover:text-white transition-colors">Vizyon Manifestosu</Link>
-                        <Link href="/#beta" className="text-white/40 hover:text-white transition-colors">Kapalı Beta Süreci</Link>
+                        <Link href="/marketing-home#vision" className="text-white/40 hover:text-white transition-colors">Vizyon Manifestosu</Link>
+                        <Link href="/marketing-home#beta-application-form" className="text-white/40 hover:text-white transition-colors">Kapalı Beta Süreci</Link>
                         <a href="mailto:destek@prificient.com" className="text-white/40 hover:text-white transition-colors">İletişim Kurun</a>
                     </div>
 

@@ -1,6 +1,8 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion'
 import { useState } from 'react'
 
@@ -8,14 +10,28 @@ export default function GlobalHeader() {
     const { scrollY } = useScroll()
     const [scrolled, setScrolled] = useState(false)
 
+    const pathname = usePathname()
+    const router = useRouter()
+
     useMotionValueEvent(scrollY, "change", (latest) => {
         if (latest > 50) setScrolled(true)
         else setScrolled(false)
     })
 
+    const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+        if (pathname === '/marketing-home') {
+            e.preventDefault()
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+        }
+    }
+
     const scrollToBeta = (e: React.MouseEvent) => {
         e.preventDefault()
-        document.getElementById('beta-application-form')?.scrollIntoView({ behavior: 'smooth' })
+        if (pathname === '/marketing-home') {
+            document.getElementById('beta-application-form')?.scrollIntoView({ behavior: 'smooth' })
+        } else {
+            router.push('/marketing-home#beta-application-form')
+        }
     }
 
     return (
@@ -27,8 +43,8 @@ export default function GlobalHeader() {
         >
             <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
                 {/* Logo */}
-                <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center overflow-hidden">
+                <Link href="/marketing-home" className="flex items-center gap-3 group">
+                    <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
                         <Image
                             src="/logo.png"
                             alt="Prificient"
@@ -40,12 +56,12 @@ export default function GlobalHeader() {
                     <span className="text-xl font-bold tracking-tight text-white">
                         Prificient
                     </span>
-                </div>
+                </Link>
 
                 {/* Middle Links (Hidden on small screens) */}
                 <nav className="hidden md:flex items-center gap-8">
-                    <a href="#vision" className="text-sm font-medium text-white/60 hover:text-white transition-colors">Vizyonumuz</a>
-                    <a href="#illusion" className="text-sm font-medium text-white/60 hover:text-white transition-colors">Neler Çözüyoruz?</a>
+                    <Link href="/marketing-home#vision" onClick={(e) => handleNavClick(e, 'vision')} className="text-sm font-medium text-white/60 hover:text-white transition-colors">Vizyonumuz</Link>
+                    <Link href="/marketing-home#illusion" onClick={(e) => handleNavClick(e, 'illusion')} className="text-sm font-medium text-white/60 hover:text-white transition-colors">Neler Çözüyoruz?</Link>
                     <a href="https://tools.prificient.com" className="text-sm font-medium text-white/60 hover:text-white transition-colors">Ücretsiz Araçlar</a>
                 </nav>
 
