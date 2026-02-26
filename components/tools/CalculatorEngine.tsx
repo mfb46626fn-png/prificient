@@ -8,6 +8,7 @@ import { saveCalculation } from '@/lib/tools/calculations'
 import { saveToolUsage, getLobbyProfile } from '@/lib/tools/lobby'
 import { triggerToast } from './Toast'
 import CalculationHistory from './CalculationHistory'
+import NextLogicalStep from './NextLogicalStep'
 import type { ToolInsight } from '@/lib/tools/types'
 import type { ToolConfig } from '@/lib/tools/types'
 
@@ -61,6 +62,16 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                         subtext: 'Lobinde seni bekleyen görevler var.',
                         action: { label: 'Lobini Gör', href: '/lobby' },
                     })
+
+                    // Trigger waitlist welcome email (fire-and-forget)
+                    fetch('/api/waitlist-welcome', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: session.user.email,
+                            waitlistPosition: profile?.waitlist_position,
+                        }),
+                    }).catch(() => { /* silent */ })
 
                     // Save current calculation to tool usage history
                     if (computedInsight) {
@@ -510,6 +521,11 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                     </div>
                                 )}
                             </>
+                        )}
+
+                        {/* Cross-Pollination: Next Logical Step */}
+                        {calculated && (
+                            <NextLogicalStep currentSlug={config.slug} />
                         )}
 
                         {/* History Panel */}
