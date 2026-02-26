@@ -62,7 +62,7 @@ export function LegalSheet({ type, triggerText, triggerClassName }: LegalSheetPr
             </SheetTrigger>
             <SheetContent
                 side="right"
-                className="w-full sm:max-w-xl md:max-w-2xl bg-[#050505] border-l border-white/10 p-0 flex flex-col h-full"
+                className="dark w-full sm:max-w-xl md:max-w-2xl bg-[#050505] border-l border-white/10 p-0 flex flex-col h-full"
             >
                 <div className="p-6 border-b border-white/10 shrink-0 bg-[#0A0A0A]">
                     <SheetHeader>
