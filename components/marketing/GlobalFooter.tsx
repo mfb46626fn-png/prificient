@@ -30,16 +30,15 @@ export default function GlobalFooter() {
                     {/* Column 3 */}
                     <div className="flex flex-col gap-4">
                         <span className="text-white/80 font-semibold mb-2">Yasal</span>
-                        <a href="https://app.prificient.com/legal/privacy" className="text-white/40 hover:text-white transition-colors">Gizlilik Politikası</a>
-                        <a href="https://app.prificient.com/legal/terms" className="text-white/40 hover:text-white transition-colors">Kullanım Şartları</a>
-                        <a href="https://app.prificient.com/legal/cookie" className="text-white/40 hover:text-white transition-colors">Çerez Politikası</a>
+                        <a href="https://prificient.com/legal/privacy" className="text-white/40 hover:text-white transition-colors">Gizlilik Politikası</a>
+                        <a href="https://prificient.com/legal/terms" className="text-white/40 hover:text-white transition-colors">Kullanım Şartları</a>
+                        <a href="https://prificient.com/legal/cookie" className="text-white/40 hover:text-white transition-colors">Çerez Politikası</a>
                     </div>
                 </div>
 
-                {/* Bottom Signature */}
                 <div className="w-full flex w-full flex-col sm:flex-row items-center justify-between gap-6">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center grayscale opacity-60">
+                        <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center overflow-hidden">
                             <Image
                                 src="/logo.png"
                                 alt="Prificient"

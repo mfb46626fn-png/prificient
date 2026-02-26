@@ -21,8 +21,8 @@ export default function GlobalHeader() {
     return (
         <header
             className={`fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300 ${scrolled
-                    ? 'border-white/5 bg-[#050505]/80 backdrop-blur-xl h-16'
-                    : 'border-transparent bg-transparent h-20'
+                ? 'border-white/5 bg-[#050505]/80 backdrop-blur-xl h-16'
+                : 'border-transparent bg-transparent h-20'
                 }`}
         >
             <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
@@ -37,10 +37,8 @@ export default function GlobalHeader() {
                             className="object-contain"
                         />
                     </div>
-                    <span className="text-xl font-bold tracking-tight text-white flex gap-2 items-center">
-                        WeCahan
-                        <span className="w-1 h-1 rounded-full bg-white/20" />
-                        <span className="text-white/50 text-sm font-medium">Prificient</span>
+                    <span className="text-xl font-bold tracking-tight text-white">
+                        Prificient
                     </span>
                 </div>
 
