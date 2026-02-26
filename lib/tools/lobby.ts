@@ -9,11 +9,11 @@ export interface LobbyProfile {
     referral_code: string | null
 }
 
-export interface ToolUsageRecord {
+export interface FinancialAuditRecord {
     id: string
     tool_slug: string
     inputs: Record<string, string>
-    result_level: string
+    severity_level: string
     insight_title: string | null
     created_at: string
 }
@@ -34,34 +34,7 @@ export async function getLobbyProfile(
     return data as LobbyProfile | null
 }
 
-export async function updateStoreInfo(
-    supabase: SupabaseClient,
-    userId: string,
-    platform: string,
-    revenueRange: string
-): Promise<boolean> {
 
-    // Boost waitlist position by 500
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('waitlist_position')
-        .eq('id', userId)
-        .maybeSingle()
-
-    const currentPos = profile?.waitlist_position ?? 9999
-    const newPos = Math.max(1, currentPos - 500)
-
-    const { error } = await supabase
-        .from('profiles')
-        .update({
-            store_platform: platform,
-            store_revenue_range: revenueRange,
-            waitlist_position: newPos,
-        })
-        .eq('id', userId)
-
-    return !error
-}
 
 export async function updateDisplayName(
     supabase: SupabaseClient,
@@ -75,39 +48,39 @@ export async function updateDisplayName(
     return !error
 }
 
-// ─── Tool Usage History ─────────────────────────────────
+// ─── Financial Audits ─────────────────────────────────
 
-export async function saveToolUsage(
+export async function saveFinancialAudit(
     supabase: SupabaseClient,
     userId: string,
     toolSlug: string,
     inputs: Record<string, string>,
-    resultLevel: string,
+    severityLevel: string,
     insightTitle: string | null
 ): Promise<void> {
 
-    await supabase.from('tool_usage_history').insert({
+    await supabase.from('financial_audits').insert({
         user_id: userId,
         tool_slug: toolSlug,
         inputs,
-        result_level: resultLevel,
+        severity_level: severityLevel,
         insight_title: insightTitle,
     })
 }
 
-export async function getToolUsageHistory(
+export async function getAuditHistory(
     supabase: SupabaseClient,
     userId: string,
     limit = 20
-): Promise<ToolUsageRecord[]> {
+): Promise<FinancialAuditRecord[]> {
     const { data } = await supabase
-        .from('tool_usage_history')
-        .select('id, tool_slug, inputs, result_level, insight_title, created_at')
+        .from('financial_audits')
+        .select('id, tool_slug, inputs, severity_level, insight_title, created_at')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(limit)
 
-    return (data as ToolUsageRecord[]) || []
+    return (data as FinancialAuditRecord[]) || []
 }
 
 export async function getUsedToolSlugs(
@@ -115,7 +88,7 @@ export async function getUsedToolSlugs(
     userId: string
 ): Promise<string[]> {
     const { data } = await supabase
-        .from('tool_usage_history')
+        .from('financial_audits')
         .select('tool_slug')
         .eq('user_id', userId)
 

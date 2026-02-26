@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { getToolBySlug } from '@/lib/tools/registry'
 import { saveCalculation } from '@/lib/tools/calculations'
-import { saveToolUsage, getLobbyProfile } from '@/lib/tools/lobby'
+import { saveFinancialAudit } from '@/lib/tools/lobby'
 import { triggerToast } from './Toast'
 import CalculationHistory from './CalculationHistory'
 import NextLogicalStep from './NextLogicalStep'
@@ -38,6 +38,23 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
     const [computedResults, setComputedResults] = useState<Record<string, number | string>>({})
     const [computedInsight, setComputedInsight] = useState<ToolInsight | null>(null)
 
+    // Vault save state
+    const [isSavingToVault, setIsSavingToVault] = useState(false)
+    const [vaultSaved, setVaultSaved] = useState(false)
+
+    const handleSaveToVault = async () => {
+        if (!user || !computedInsight?.title || vaultSaved) return
+        setIsSavingToVault(true)
+        try {
+            await saveFinancialAudit(supabase, user.id, config.slug, inputValues, computedInsight.level, computedInsight.title)
+            setVaultSaved(true)
+        } catch (e) {
+            console.error('Error saving to vault', e)
+        } finally {
+            setIsSavingToVault(false)
+        }
+    }
+
     // ─── Auth ──────────────────────────────
     const checkUser = useCallback(async () => {
         const { data } = await supabase.auth.getUser()
@@ -52,32 +69,7 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
             if (session?.user) {
                 const wasLoggedOut = !user
                 setUser(session.user); setAuthMode('idle')
-
-                // After-auth: show toast with waitlist position
-                if (wasLoggedOut) {
-                    const profile = await getLobbyProfile(supabase, session.user.id)
-                    const pos = profile?.waitlist_position ?? '?'
-                    triggerToast({
-                        message: `Aramıza hoş geldin! \nErken Erişim listesinde #${pos}. sıradasın.`,
-                        subtext: 'Lobinde seni bekleyen görevler var.',
-                        action: { label: 'Lobini Gör', href: '/lobby' },
-                    })
-
-                    // Trigger waitlist welcome email (fire-and-forget)
-                    fetch('/api/waitlist-welcome', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            email: session.user.email,
-                            waitlistPosition: profile?.waitlist_position,
-                        }),
-                    }).catch(() => { /* silent */ })
-
-                    // Save current calculation to tool usage history
-                    if (computedInsight?.title) {
-                        saveToolUsage(supabase, session.user.id, config.slug, inputValues, computedInsight.level, computedInsight.title)
-                    }
-                }
+                // No automatic redirects or gamified toasts anymore!
             }
         })
         return () => { document.removeEventListener('visibilitychange', handleVisibility); subscription.unsubscribe() }
@@ -139,17 +131,12 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
         }
 
         setCalculated(true)
+        setVaultSaved(false)
 
-        // Save to history
+        // Local history for anonymous sessions
         if (user) {
             saveCalculation(supabase, config.slug, inputValues, results as Record<string, number>)
                 .then(() => setHistoryRefresh((p) => p + 1))
-
-            // Save to tool_usage_history (for Lobby dashboard)
-            const insightForSave = insightResult?.insight?.(numericInputs)
-            if (insightForSave?.title) {
-                saveToolUsage(supabase, user.id, config.slug, inputValues, insightForSave.level, insightForSave.title)
-            }
         }
     }
 
@@ -379,9 +366,35 @@ export default function CalculatorEngine({ slug }: CalculatorEngineProps) {
                                             </div>
                                         </div>
 
-                                        {/* PDF Download — only for authenticated users */}
+                                        {/* Save to Vault & PDF Download — only for authenticated users */}
                                         {user && (
-                                            <div className="px-6 pb-6 sm:px-8 sm:pb-8">
+                                            <div className="px-6 pb-6 sm:px-8 sm:pb-8 space-y-3">
+                                                <button
+                                                    onClick={handleSaveToVault}
+                                                    disabled={isSavingToVault || vaultSaved}
+                                                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all shadow-sm border ${vaultSaved
+                                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                            : 'bg-violet-600 border-violet-600 text-white hover:bg-violet-700 hover:border-violet-700'
+                                                        }`}
+                                                >
+                                                    {vaultSaved ? (
+                                                        <>
+                                                            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                                            Kasaya Kaydedildi
+                                                        </>
+                                                    ) : isSavingToVault ? (
+                                                        <>
+                                                            <div className="w-4 h-4 shrink-0 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                            Kaydediliyor...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
+                                                            Bu Teşhisi Kasama Kaydet
+                                                        </>
+                                                    )}
+                                                </button>
+
                                                 <button
                                                     onClick={async () => {
                                                         const { generateCFOReport } = await import('@/lib/tools/generateReport')

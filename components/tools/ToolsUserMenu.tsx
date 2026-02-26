@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
-import { getToolUsageHistory, getLobbyProfile, type ToolUsageRecord } from '@/lib/tools/lobby'
+import { getAuditHistory, type FinancialAuditRecord } from '@/lib/tools/lobby'
 import { toolRegistry } from '@/lib/tools/registry'
 
 // Build slug → title map
@@ -21,7 +21,7 @@ export default function ToolsUserMenu() {
     const [user, setUser] = useState<User | null>(null)
     const [displayName, setDisplayName] = useState<string>('')
     const [dropdownOpen, setDropdownOpen] = useState(false)
-    const [history, setHistory] = useState<ToolUsageRecord[]>([])
+    const [history, setHistory] = useState<FinancialAuditRecord[]>([])
     const [historyLoaded, setHistoryLoaded] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -29,8 +29,6 @@ export default function ToolsUserMenu() {
         supabase.auth.getUser().then(async ({ data }) => {
             if (data.user) {
                 setUser(data.user)
-                // Fetch display_name from profiles
-                const profile = await getLobbyProfile(supabase, data.user.id)
                 const name = data.user.user_metadata?.full_name
                     || data.user.email?.split('@')[0]
                     || 'Kullanıcı'
@@ -40,7 +38,6 @@ export default function ToolsUserMenu() {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             setUser(session?.user ?? null)
             if (session?.user) {
-                const profile = await getLobbyProfile(supabase, session.user.id)
                 const name = session.user.user_metadata?.full_name
                     || session.user.email?.split('@')[0]
                     || 'Kullanıcı'
@@ -53,7 +50,7 @@ export default function ToolsUserMenu() {
     // Load history on first dropdown open
     const loadHistory = useCallback(async () => {
         if (historyLoaded || !user) return
-        const h = await getToolUsageHistory(supabase, user.id, 3)
+        const h = await getAuditHistory(supabase, user.id, 3)
         setHistory(h)
         setHistoryLoaded(true)
     }, [supabase, historyLoaded])
@@ -101,18 +98,18 @@ export default function ToolsUserMenu() {
                 </span>
             </div>
 
-            {/* Lobby Link */}
+            {/* Vault Link */}
             <a
-                href="/lobby"
+                href="/my-vault"
                 className="flex items-center gap-1 text-xs font-medium text-violet-600 hover:text-violet-700 transition-colors"
             >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M18.75 4.236c.982.143 1.954.317 2.916.52A6.003 6.003 0 0016.27 9.728M18.75 4.236V4.5c0 2.108-.966 3.99-2.48 5.228m0 0a6.023 6.023 0 01-2.77.704 6.023 6.023 0 01-2.77-.704" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                 </svg>
-                Lobim
+                Kasam
             </a>
 
-            {/* Recent Scenarios Dropdown */}
+            {/* Vault Dropdown */}
             <div className="relative" ref={dropdownRef}>
                 <button
                     onClick={toggleDropdown}
@@ -121,7 +118,7 @@ export default function ToolsUserMenu() {
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Geçmişim
+                    Finansal Sicilim
                     <svg className={`w-3 h-3 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
@@ -129,8 +126,9 @@ export default function ToolsUserMenu() {
 
                 {dropdownOpen && (
                     <div className="absolute right-0 top-full mt-2 w-72 rounded-xl border border-gray-200/80 bg-white/95 backdrop-blur-xl shadow-xl shadow-gray-200/40 z-50 overflow-hidden">
-                        <div className="px-4 py-3 border-b border-gray-100">
-                            <p className="text-xs font-semibold text-gray-900">Son Teşhislerim</p>
+                        <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+                            <p className="text-xs font-semibold text-gray-900">Finansal Sicilim</p>
+                            <a href="/my-vault" className="text-[10px] text-violet-600 hover:underline">Kasaya Git</a>
                         </div>
 
                         {!historyLoaded ? (
@@ -150,7 +148,7 @@ export default function ToolsUserMenu() {
                         ) : (
                             <div>
                                 {history.map((record) => {
-                                    const lc = levelConfig[record.result_level] || levelConfig.success
+                                    const lc = levelConfig[record.severity_level] || levelConfig.success
                                     const toolTitle = toolTitleMap[record.tool_slug] || record.tool_slug
                                     return (
                                         <a
