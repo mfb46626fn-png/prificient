@@ -2,6 +2,7 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 import ToolsUserMenu from '@/components/tools/ToolsUserMenu'
 import ToastContainer from '@/components/tools/Toast'
+import { LegalSheet } from '@/components/legal/LegalSheet'
 
 export const metadata: Metadata = {
   title: {
@@ -46,8 +47,8 @@ export default function ToolsLayout({
           </div>
           <div className="flex items-center gap-6 text-xs text-neutral-500 font-medium">
             <a href="https://prificient.com" className="hover:text-white transition-colors">Ana Sayfa</a>
-            <a href="https://prificient.com/legal/privacy" className="hover:text-white transition-colors">Gizlilik Şartları</a>
-            <a href="https://prificient.com/legal/terms" className="hover:text-white transition-colors">Kullanım Şartları</a>
+            <LegalSheet type="privacy" triggerText="Gizlilik Şartları" />
+            <LegalSheet type="terms" triggerText="Kullanım Şartları" />
             <a href="mailto:destek@prificient.com" className="hover:text-white transition-colors">İletişim Kur</a>
           </div>
         </div>

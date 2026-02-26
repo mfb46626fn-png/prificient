@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { LegalSheet } from '@/components/legal/LegalSheet'
 
 export default function GlobalFooter() {
     return (
@@ -30,9 +31,9 @@ export default function GlobalFooter() {
                     {/* Column 3 */}
                     <div className="flex flex-col gap-4">
                         <span className="text-white/80 font-semibold mb-2">Yasal</span>
-                        <a href="https://prificient.com/legal/privacy" className="text-white/40 hover:text-white transition-colors">Gizlilik Politikası</a>
-                        <a href="https://prificient.com/legal/terms" className="text-white/40 hover:text-white transition-colors">Kullanım Şartları</a>
-                        <a href="https://prificient.com/legal/cookie" className="text-white/40 hover:text-white transition-colors">Çerez Politikası</a>
+                        <LegalSheet type="privacy" triggerText="Gizlilik Politikası" triggerClassName="text-white/40 hover:text-white transition-colors text-left" />
+                        <LegalSheet type="terms" triggerText="Kullanım Şartları" triggerClassName="text-white/40 hover:text-white transition-colors text-left" />
+                        <LegalSheet type="cookie" triggerText="Çerez Politikası" triggerClassName="text-white/40 hover:text-white transition-colors text-left" />
                     </div>
                 </div>
 
