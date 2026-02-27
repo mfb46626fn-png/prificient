@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import ToolsUserMenu from '@/components/tools/ToolsUserMenu'
+import ToolsHeader from '@/components/tools/ToolsHeader'
 import ToastContainer from '@/components/tools/Toast'
 import { LegalSheet } from '@/components/legal/LegalSheet'
 
@@ -20,20 +21,10 @@ export default function ToolsLayout({
   return (
     <div className="min-h-screen bg-[#050505] text-white flex flex-col font-sans">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl h-16 flex items-center">
-        <div className="max-w-7xl w-full mx-auto px-6 flex items-center justify-between">
-          <a href="https://tools.prificient.com" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
-              <Image src="/toolslogo.png" alt="Prificient Araçlar" width={28} height={28} className="object-contain" />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-white">Prificient <span className="text-neutral-500">Tools</span></span>
-          </a>
-          <ToolsUserMenu />
-        </div>
-      </header>
+      <ToolsHeader />
 
       {/* Content */}
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 pt-20">{children}</main>
       <ToastContainer />
 
       <footer className="border-t border-white/10 bg-[#050505] py-8 px-6 mt-auto">
