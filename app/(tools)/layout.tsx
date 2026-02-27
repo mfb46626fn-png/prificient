@@ -20,15 +20,24 @@ export default function ToolsLayout({
   return (
     <div className="min-h-screen bg-[#050505] text-white flex flex-col font-sans">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050505]/80 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-          <a href="https://tools.prificient.com" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
-              <Image src="/toolslogo.png" alt="Prificient Araçlar" width={28} height={28} className="object-contain" />
-            </div>
-            <span className="text-lg font-bold tracking-tight text-white/90">Prificient <span className="text-neutral-500">Tools</span></span>
-          </a>
-          <ToolsUserMenu />
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050505]/80 backdrop-blur-xl transition-all duration-500">
+        <div className="max-w-[1600px] mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <a href="https://tools.prificient.com" className="hover:opacity-80 transition-opacity shrink-0 flex items-center gap-3 group">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 bg-white rounded-lg flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 shrink-0">
+                <Image src="/toolslogo.png" alt="Prificient Araçlar" width={24} height={24} className="object-contain sm:w-7 sm:h-7" />
+              </div>
+              <span className="text-base sm:text-lg font-bold tracking-tight text-white/90 whitespace-nowrap">Prificient <span className="text-neutral-500">Tools</span></span>
+            </a>
+          </div>
+
+          <div className="flex-1 px-8">
+            {/* Orta boşluk */}
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-4">
+            <ToolsUserMenu />
+          </div>
         </div>
       </header>
 
