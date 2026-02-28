@@ -1,0 +1,107 @@
+{
+    "MarketingHome": {
+        "hero": {
+            "badge": "Statükoya Meydan Okuyoruz",
+            "headline": "E-Ticarette Ciro Büyütmek Yetmez.",
+            "description": "Hangi ürünün çok sattığını değil, <white>hangi ürünün sizi batırdığını saniyesinde görün.</white> Boş ciro yaratan stokları sistemden hızla ayıklayın. Satış başı kargo farkları, iade firesi, kur dalgalanmaları ve pazaryeri ceza kesintileri... <white>Gizli komisyonları tek ekranda yakalayın</white> ve kârlılığınızı kordon altına alın. Shopify, Amazon, Etsy, Trendyol. Parça parça rapor ekranlarından kurtulun. <white>Tüm operasyonunuz tek bir 'Gerçek Kâr' defterinde birleşecek.</white>",
+            "ctaPrimary": "Erken Erişim Talep Et",
+            "ctaSecondary": "Ücretsiz Kâr Araçlarını Keşfet"
+        },
+        "illusion": {
+            "headlineLine1": "Gözden Kaçan Metriklerin",
+            "headlineLine2": "Maliyeti Vardır.",
+            "description": "Yüksek bir ROAS veya rekor bir ciro her zaman kârlılık anlamına gelmez. İadeler, kargo baremleri, gizli komisyonlar ve kur farkları birleştiğinde tablonun rengi değişebilir. Biz, bu karmaşık verileri alıp size saf ve net bir 'Net Kâr' gerçeği sunuyoruz.",
+            "card1": {
+                "title": "Brüt Ciro Tuzağı",
+                "description": "Shopify size bugün 50.000 TL sattığınızı söyler. İadeleri, kargo baremlerini, depolama giderlerini ve ödeme altyapısı kesintilerini <highlight>asla hesaba katmaz.</highlight> O cironun sadece bir yanılsama olduğunu ay sonunda fark edersiniz."
+            },
+            "card2": {
+                "title": "ROAS Yalanı",
+                "description": "Reklam panelinizde ROAS 4.0 görünebilir. Ancak o satıştan gelen iadeler, promosyon kodları ve platform bedelleri düşüldüğünde o reklam kampanyası <danger>aslında zarar yazıyordur.</danger> Meta sizin harcamanızı ister, kâr etmenizi değil."
+            },
+            "card3": {
+                "title": "Sessiz Kan Kaybı",
+                "description": "Ay sonu geldiğinde, ekrandaki yüksek ciro ile cebinizdeki nakit uyuşmaz. Çünkü sizin bir \"raporlama aracına\" değil, arka planda çalışan <highlight>dijital bir CFO'ya</highlight> ihtiyacınız var."
+            }
+        },
+        "vision": {
+            "badge": "Prificient Vizyonu",
+            "headline": "İşletim Sisteminiz Böyle Çalışmalı.",
+            "title": "Her Şeyi Tek Ekrandan Görün",
+            "description": "Geliştirme sürecimiz ne kadar sürerse sürsün, vizyonumuz net: <white>Shopify, Amazon, Etsy, Trendyol ve Hepsiburada.</white> Hangi platformda satarsanız satın, Prificient sizin tek finansal gerçeğiniz olacak. Şu an temelleri atıyoruz, çok yakında tüm ekosistemi bağlıyoruz.",
+            "comingSoon": "Coming Soon"
+        },
+        "beta": {
+            "badge": "Erken Erişim",
+            "headlineLine1": "Birlikte İnşa Ediyoruz:",
+            "headlineLine2": "Kapalı Beta Süreci",
+            "card1": {
+                "title": "Sınırlı Kontenjan",
+                "description": "Sistemin stabilitesini korumak ve her kullanıcıya maksimum değer sunmak için şimdilik sadece onaylanmış, sınırlı sayıda mağazayı içeri alıyoruz."
+            },
+            "card2": {
+                "title": "Birebir Onboarding",
+                "description": "Kabul edildiğinizde sizi yalnız bırakmıyoruz. Sistemin kurulumunu ve ilk finansal okumanızı birlikte yapıyoruz."
+            },
+            "card3": {
+                "title": "Sürekli İletişim",
+                "description": "Siz bizim ilk partnerlerimizsiniz. Özellikleri sizin geri bildirimlerinizle, sizin ihtiyaçlarınıza göre şekillendireceğiz."
+            },
+            "form": {
+                "badge": "Erken Erişim",
+                "title": "Başvuru Formu",
+                "description": "Detayları eksiksiz doldurarak kapalı beta inceleme sürecine katılın."
+            }
+        }
+    },
+    "GlobalHeader": {
+        "vision": "Vizyonumuz",
+        "illusion": "Neler Çözüyoruz?",
+        "tools": "Ücretsiz Araçlar",
+        "cta": "Kapalı Beta Başvurusu"
+    },
+    "GlobalFooter": {
+        "headline": "E-Ticaretin Finansal Geleceği",
+        "categories": {
+            "tools": "Ücretsiz Araçlar",
+            "prificient": "Prificient",
+            "legal": "Yasal"
+        },
+        "links": {
+            "roas": "ROAS Gerçeklik Kontrolü",
+            "profit": "Net Kâr Simülatörü",
+            "shipping": "Kargo Barem Zararı",
+            "allTools": "Tüm Araçlar &rarr;",
+            "vision": "Vizyon Manifestosu",
+            "beta": "Kapalı Beta Süreci",
+            "contact": "İletişim Kurun",
+            "privacy": "Gizlilik Politikası",
+            "terms": "Kullanım Şartları",
+            "cookie": "Çerez Politikası"
+        },
+        "rights": "Tüm hakları saklıdır."
+    },
+    "ToolsHeader": {
+        "tools": "Tools"
+    },
+    "ToolsHome": {
+        "badge": "Ücretsiz Araçlar",
+        "title": "E-Ticaretin Hangi Alanındasınız?",
+        "description": "Kârınızı gerçek verilerle hesaplayın. Platformunuzu seçin, size özel araçları keşfedin.",
+        "filters": {
+            "all": "Tümü",
+            "global": "Shopify / Global",
+            "amazon": "Amazon",
+            "trendyolDb": "Trendyol & HB",
+            "etsy": "Etsy"
+        },
+        "showing": "{count} ARAÇ GÖSTERİLİYOR",
+        "start": "Kullanmaya Başla",
+        "new": "YENİ",
+        "cta": {
+            "title": "Daha Fazlasını mı İstiyorsun?",
+            "description": "Prificient Dashboard ile tüm e-ticaret finansal verilerini tek panelden yönet.",
+            "button": "Erken Erişim Talep Et"
+        }
+    }
+}

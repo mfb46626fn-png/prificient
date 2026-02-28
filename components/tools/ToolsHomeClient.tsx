@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { toolRegistry } from '@/lib/tools/registry'
 import type { PlatformType } from '@/lib/tools/types'
+import { useTranslations } from 'next-intl'
 
 const colorMap: Record<string, { bg: string; border: string; text: string; badge: string }> = {
     // Override previously colored icons with true dark neutral styles
@@ -27,14 +28,15 @@ const platformLabels: Record<string, string> = {
 }
 
 const platformFilters = [
-    { id: 'all', label: 'Tümü', icon: '🌍' },
-    { id: 'global', label: 'Shopify / Global', icon: '🛒' },
-    { id: 'amazon', label: 'Amazon', icon: '📦' },
-    { id: 'trendyol-hb', label: 'Trendyol & HB', icon: '🛍️' },
-    { id: 'etsy', label: 'Etsy', icon: '🎨' },
+    { id: 'all', translationKey: 'all', icon: '🌍' },
+    { id: 'global', translationKey: 'global', icon: '🛒' },
+    { id: 'amazon', translationKey: 'amazon', icon: '📦' },
+    { id: 'trendyol-hb', translationKey: 'trendyolDb', icon: '🛍️' },
+    { id: 'etsy', translationKey: 'etsy', icon: '🎨' },
 ]
 
 export default function ToolsHomeClient() {
+    const t = useTranslations('ToolsHome')
     const [activeFilter, setActiveFilter] = useState('all')
 
     const filteredTools = useMemo(() => {
@@ -55,13 +57,13 @@ export default function ToolsHomeClient() {
                 {/* Header */}
                 <div className="text-center mb-10">
                     <p className="text-xs font-bold tracking-[0.2em] uppercase text-neutral-500 mb-3">
-                        Ücretsiz Araçlar
+                        {t('badge')}
                     </p>
                     <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white mb-4">
-                        E-Ticaretin Hangi Alanındasınız?
+                        {t('title')}
                     </h1>
                     <p className="text-base text-neutral-400 max-w-xl mx-auto">
-                        Kârınızı gerçek verilerle hesaplayın. Platformunuzu seçin, size özel araçları keşfedin.
+                        {t('description')}
                     </p>
                 </div>
 
@@ -77,14 +79,14 @@ export default function ToolsHomeClient() {
                                 }`}
                         >
                             <span className="text-sm">{filter.icon}</span>
-                            {filter.label}
+                            {t(`filters.${filter.translationKey}` as any)}
                         </button>
                     ))}
                 </div>
 
                 {/* Tool Count */}
                 <p className="text-xs font-semibold text-neutral-500 mb-6 text-center">
-                    {filteredTools.length} ARAÇ GÖSTERİLİYOR
+                    {t('showing', { count: filteredTools.length })}
                 </p>
 
                 {/* Tool Cards Grid */}
@@ -101,7 +103,7 @@ export default function ToolsHomeClient() {
                                 <div className="absolute top-4 right-4 flex gap-1.5">
                                     {isNew && (
                                         <span className="text-[9px] font-bold tracking-wider px-2 py-0.5 rounded-full bg-white/10 border border-white/20 text-white">
-                                            YENİ
+                                            {t('new')}
                                         </span>
                                     )}
                                     {tool.platforms.filter((p) => p !== 'global').map((p) => (
@@ -136,7 +138,7 @@ export default function ToolsHomeClient() {
 
                                 {/* Arrow */}
                                 <span className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide text-neutral-400 group-hover:text-white transition-colors uppercase">
-                                    Kullanmaya Başla
+                                    {t('start')}
                                     <svg className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                                     </svg>
@@ -146,18 +148,17 @@ export default function ToolsHomeClient() {
                     })}
                 </div>
 
-                {/* CTA Banner */}
                 <div className="mt-16 rounded-2xl bg-[#0A0A0A] border border-white/10 p-8 sm:p-10 text-center relative overflow-hidden">
                     <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay pointer-events-none" />
-                    <h3 className="text-xl font-bold text-white mb-2 relative z-10">Daha Fazlasını mı İstiyorsun?</h3>
+                    <h3 className="text-xl font-bold text-white mb-2 relative z-10">{t('cta.title')}</h3>
                     <p className="text-sm text-neutral-400 mb-6 relative z-10">
-                        Prificient Dashboard ile tüm e-ticaret finansal verilerini tek panelden yönet.
+                        {t('cta.description')}
                     </p>
                     <a
                         href="https://prificient.com"
                         className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-black text-sm font-bold hover:bg-neutral-200 transition-colors relative z-10"
                     >
-                        Erken Erişim Talep Et
+                        {t('cta.button')}
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                         </svg>

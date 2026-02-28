@@ -1,0 +1,107 @@
+{
+    "MarketingHome": {
+        "hero": {
+            "badge": "Challenging the Status Quo",
+            "headline": "Growing Revenue is Not Enough in E-Commerce.",
+            "description": "Don't just see what sells well, <white>see what's draining your budget instantly.</white> Quickly eliminate stock that generates empty revenue. Shipping differences per sale, return waste, currency fluctuations, and marketplace penalties... <white>Catch hidden commissions on a single screen</white> and secure your profitability. Shopify, Amazon, Etsy, Trendyol. Get rid of fragmented reporting screens. <white>Your whole operation will merge into a single 'True Profit' ledger.</white>",
+            "ctaPrimary": "Request Early Access",
+            "ctaSecondary": "Discover Free Profit Tools"
+        },
+        "illusion": {
+            "headlineLine1": "Overlooked Metrics Have",
+            "headlineLine2": "A Cost.",
+            "description": "A high ROAS or record revenue does not always mean profitability. When returns, shipping brackets, hidden commissions, and currency differences combine, the picture can change. We take these complex data points and present you with the pure and clear 'Net Profit' reality.",
+            "card1": {
+                "title": "The Gross Revenue Trap",
+                "description": "Shopify tells you that you sold $50,000 today. It <highlight>never accounts for</highlight> returns, shipping brackets, warehousing expenses, and payment infrastructure deductions. You only realize at the end of the month that this revenue was just an illusion."
+            },
+            "card2": {
+                "title": "The ROAS Lie",
+                "description": "Your ad panel might show a 4.0 ROAS. But when returns from that sale, promo codes, and platform fees are deducted, that ad campaign is <danger>actually operating at a loss.</danger> Meta wants you to spend, not profit."
+            },
+            "card3": {
+                "title": "Silent Bleeding",
+                "description": "When the end of the month arrives, the high revenue on the screen doesn't match the cash in your pocket. Because you don't need a \"reporting tool\", you need a <highlight>digital CFO</highlight> working in the background."
+            }
+        },
+        "vision": {
+            "badge": "Prificient Vision",
+            "headline": "This is How Your Operating System Should Work.",
+            "title": "See Everything From One Screen",
+            "description": "No matter how long our development process takes, our vision is clear: <white>Shopify, Amazon, Etsy, Trendyol and Hepsiburada.</white> Whichever platform you sell on, Prificient will be your single financial truth. We are laying the foundations now, connecting the entire ecosystem very soon.",
+            "comingSoon": "Coming Soon"
+        },
+        "beta": {
+            "badge": "Early Access",
+            "headlineLine1": "We Are Building Together:",
+            "headlineLine2": "Closed Beta Process",
+            "card1": {
+                "title": "Limited Quota",
+                "description": "To maintain system stability and offer maximum value to each user, we are currently only admitting approved, a limited number of stores."
+            },
+            "card2": {
+                "title": "One-on-One Onboarding",
+                "description": "When accepted, we don't leave you alone. We do the system setup and your first financial reading together."
+            },
+            "card3": {
+                "title": "Continuous Communication",
+                "description": "You are our first partners. We will shape the features based on your feedback and your needs."
+            },
+            "form": {
+                "badge": "Early Access",
+                "title": "Application Form",
+                "description": "Join the closed beta review process by filling out the details completely."
+            }
+        }
+    },
+    "GlobalHeader": {
+        "vision": "Our Vision",
+        "illusion": "What Do We Solve?",
+        "tools": "Free Tools",
+        "cta": "Closed Beta Application"
+    },
+    "GlobalFooter": {
+        "headline": "The Financial Future of E-Commerce",
+        "categories": {
+            "tools": "Free Tools",
+            "prificient": "Prificient",
+            "legal": "Legal"
+        },
+        "links": {
+            "roas": "ROAS Reality Check",
+            "profit": "Net Profit Simulator",
+            "shipping": "Shipping Bracket Loss",
+            "allTools": "All Tools &rarr;",
+            "vision": "Vision Manifesto",
+            "beta": "Closed Beta Process",
+            "contact": "Contact Us",
+            "privacy": "Privacy Policy",
+            "terms": "Terms of Service",
+            "cookie": "Cookie Policy"
+        },
+        "rights": "All rights reserved."
+    },
+    "ToolsHeader": {
+        "tools": "Tools"
+    },
+    "ToolsHome": {
+        "badge": "Free Tools",
+        "title": "Which area of e-commerce are you in?",
+        "description": "Calculate your profit with real data. Choose your platform, discover tools tailored to you.",
+        "filters": {
+            "all": "All",
+            "global": "Shopify / Global",
+            "amazon": "Amazon",
+            "trendyolDb": "Trendyol & HB",
+            "etsy": "Etsy"
+        },
+        "showing": "{count} TOOLS SHOWING",
+        "start": "Get Started",
+        "new": "NEW",
+        "cta": {
+            "title": "Do You Want More?",
+            "description": "Manage all your e-commerce financial data from a single dashboard with Prificient.",
+            "button": "Request Early Access"
+        }
+    }
+}

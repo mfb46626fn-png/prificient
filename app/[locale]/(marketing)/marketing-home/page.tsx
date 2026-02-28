@@ -4,8 +4,10 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { ArrowRight, BarChart2 } from 'lucide-react'
 import BetaApplicationForm from '@/components/marketing/BetaApplicationForm'
+import { useTranslations } from 'next-intl'
 
 export default function ManifestoPage() {
+    const t = useTranslations('MarketingHome');
     const scrollToForm = (e: React.MouseEvent) => {
         e.preventDefault()
         document.getElementById('beta-application-form')?.scrollIntoView({ behavior: 'smooth' })
@@ -33,16 +35,18 @@ export default function ManifestoPage() {
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 mb-8 backdrop-blur-md">
                             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                             <span className="text-xs font-bold text-white/70 tracking-[0.2em] uppercase">
-                                Statükoya Meydan Okuyoruz
+                                {t('hero.badge')}
                             </span>
                         </div>
 
                         <h1 className="text-5xl sm:text-6xl md:text-8xl font-black tracking-tighter leading-[1.05] mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60">
-                            E-Ticarette Ciro Büyütmek Yetmez.
+                            {t('hero.headline')}
                         </h1>
 
                         <p className="text-lg sm:text-xl md:text-2xl text-white/50 max-w-4xl mx-auto leading-relaxed mb-12 font-medium">
-                            Hangi ürünün çok sattığını değil, <strong className="text-white">hangi ürünün sizi batırdığını saniyesinde görün.</strong> Boş ciro yaratan stokları sistemden hızla ayıklayın. Satış başı kargo farkları, iade firesi, kur dalgalanmaları ve pazaryeri ceza kesintileri... <strong className="text-white">Gizli komisyonları tek ekranda yakalayın</strong> ve kârlılığınızı kordon altına alın. Shopify, Amazon, Etsy, Trendyol. Parça parça rapor ekranlarından kurtulun. <strong className="text-white">Tüm operasyonunuz tek bir &apos;Gerçek Kâr&apos; defterinde birleşecek.</strong>
+                            {t.rich('hero.description', {
+                                white: (chunks) => <strong className="text-white">{chunks}</strong>
+                            })}
                         </p>
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
@@ -50,7 +54,7 @@ export default function ManifestoPage() {
                                 onClick={scrollToForm}
                                 className="w-full sm:w-auto px-8 py-4 sm:py-5 rounded-full bg-white text-black text-base sm:text-lg font-bold hover:bg-gray-200 transition-all flex items-center justify-center gap-3"
                             >
-                                Erken Erişim Talep Et
+                                {t('hero.ctaPrimary')}
                                 <ArrowRight className="w-5 h-5" />
                             </button>
                             <a
@@ -58,7 +62,7 @@ export default function ManifestoPage() {
                                 className="w-full sm:w-auto px-8 py-4 sm:py-5 rounded-full border border-white/20 bg-transparent text-white text-base sm:text-lg font-bold hover:bg-white/5 transition-all flex items-center justify-center gap-3"
                             >
                                 <BarChart2 className="w-5 h-5 text-red-500" />
-                                Ücretsiz Kâr Araçlarını Keşfet
+                                {t('hero.ctaSecondary')}
                             </a>
                         </div>
                     </motion.div>
@@ -77,11 +81,11 @@ export default function ManifestoPage() {
                         className="mb-20 text-center sm:text-left"
                     >
                         <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white mb-6">
-                            Gözden Kaçan Metriklerin <br className="hidden sm:block" />
-                            <span className="text-red-500">Maliyeti Vardır.</span>
+                            {t('illusion.headlineLine1')} <br className="hidden sm:block" />
+                            <span className="text-red-500">{t('illusion.headlineLine2')}</span>
                         </h2>
                         <p className="text-lg text-white/40 max-w-3xl leading-relaxed">
-                            Yüksek bir ROAS veya rekor bir ciro her zaman kârlılık anlamına gelmez. İadeler, kargo baremleri, gizli komisyonlar ve kur farkları birleştiğinde tablonun rengi değişebilir. Biz, bu karmaşık verileri alıp size saf ve net bir &apos;Net Kâr&apos; gerçeği sunuyoruz.
+                            {t('illusion.description')}
                         </p>
                     </motion.div>
 
@@ -97,9 +101,11 @@ export default function ManifestoPage() {
                             <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-8 group-hover:bg-white/10 transition-colors">
                                 <span className="font-bold text-white/50 group-hover:text-white transition-colors">01</span>
                             </div>
-                            <h3 className="text-2xl font-bold text-white mb-4">Brüt Ciro Tuzağı</h3>
+                            <h3 className="text-2xl font-bold text-white mb-4">{t('illusion.card1.title')}</h3>
                             <p className="text-white/40 leading-relaxed font-medium">
-                                Shopify size bugün 50.000 TL sattığınızı söyler. İadeleri, kargo baremlerini, depolama giderlerini ve ödeme altyapısı kesintilerini <strong className="text-white/80 font-semibold">asla hesaba katmaz.</strong> O cironun sadece bir yanılsama olduğunu ay sonunda fark edersiniz.
+                                {t.rich('illusion.card1.description', {
+                                    highlight: (chunks) => <strong className="text-white/80 font-semibold">{chunks}</strong>
+                                })}
                             </p>
                         </motion.div>
 
@@ -114,9 +120,11 @@ export default function ManifestoPage() {
                             <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-8 group-hover:bg-white/10 transition-colors">
                                 <span className="font-bold text-white/50 group-hover:text-white transition-colors">02</span>
                             </div>
-                            <h3 className="text-2xl font-bold text-white mb-4">ROAS Yalanı</h3>
+                            <h3 className="text-2xl font-bold text-white mb-4">{t('illusion.card2.title')}</h3>
                             <p className="text-white/40 leading-relaxed font-medium">
-                                Reklam panelinizde ROAS 4.0 görünebilir. Ancak o satıştan gelen iadeler, promosyon kodları ve platform bedelleri düşüldüğünde o reklam kampanyası <strong className="text-red-400 font-semibold">aslında zarar yazıyordur.</strong> Meta sizin harcamanızı ister, kâr etmenizi değil.
+                                {t.rich('illusion.card2.description', {
+                                    danger: (chunks) => <strong className="text-red-400 font-semibold">{chunks}</strong>
+                                })}
                             </p>
                         </motion.div>
 
@@ -134,9 +142,11 @@ export default function ManifestoPage() {
                                 <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-8 group-hover:bg-white/10 transition-colors">
                                     <span className="font-bold text-white/50 group-hover:text-white transition-colors">03</span>
                                 </div>
-                                <h3 className="text-2xl font-bold text-white mb-4">Sessiz Kan Kaybı</h3>
+                                <h3 className="text-2xl font-bold text-white mb-4">{t('illusion.card3.title')}</h3>
                                 <p className="text-white/40 leading-relaxed font-medium">
-                                    Ay sonu geldiğinde, ekrandaki yüksek ciro ile cebinizdeki nakit uyuşmaz. Çünkü sizin bir &quot;raporlama aracına&quot; değil, arka planda çalışan <strong className="text-white/80 font-semibold">dijital bir CFO&apos;ya</strong> ihtiyacınız var.
+                                    {t.rich('illusion.card3.description', {
+                                        highlight: (chunks) => <strong className="text-white/80 font-semibold">{chunks}</strong>
+                                    })}
                                 </p>
                             </div>
                         </motion.div>
@@ -153,16 +163,18 @@ export default function ManifestoPage() {
 
                 <div className="relative max-w-4xl mx-auto">
                     <div className="mb-24">
-                        <span className="text-red-500 font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Prificient Vizyonu</span>
-                        <h2 className="text-4xl sm:text-6xl font-black text-white tracking-tighter">İşletim Sisteminiz <br className="hidden sm:block" />Böyle Çalışmalı.</h2>
+                        <span className="text-red-500 font-bold tracking-[0.2em] uppercase text-sm mb-4 block">{t('vision.badge')}</span>
+                        <h2 className="text-4xl sm:text-6xl font-black text-white tracking-tighter">{t('vision.headline')}</h2>
                     </div>
 
                     <div className="flex flex-col md:flex-row items-center gap-16 mt-32">
                         {/* Text Content */}
                         <div className="flex-1">
-                            <h3 className="text-3xl sm:text-4xl font-bold text-white mb-6">Her Şeyi Tek Ekrandan Görün</h3>
+                            <h3 className="text-3xl sm:text-4xl font-bold text-white mb-6">{t('vision.title')}</h3>
                             <p className="text-xl text-white/50 leading-relaxed font-medium">
-                                Geliştirme sürecimiz ne kadar sürerse sürsün, vizyonumuz net: <strong className="text-white">Shopify, Amazon, Etsy, Trendyol ve Hepsiburada.</strong> Hangi platformda satarsanız satın, Prificient sizin tek finansal gerçeğiniz olacak. Şu an temelleri atıyoruz, çok yakında tüm ekosistemi bağlıyoruz.
+                                {t.rich('vision.description', {
+                                    white: (chunks) => <strong className="text-white">{chunks}</strong>
+                                })}
                             </p>
                         </div>
 
@@ -176,17 +188,17 @@ export default function ManifestoPage() {
 
                             <div className="aspect-video bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center relative overflow-hidden opacity-50">
                                 <span className="text-white/40 font-bold text-lg">Amazon</span>
-                                <div className="absolute bottom-3 right-3 text-[10px] uppercase font-bold text-white/30 tracking-wider">Coming Soon</div>
+                                <div className="absolute bottom-3 right-3 text-[10px] uppercase font-bold text-white/30 tracking-wider">{t('vision.comingSoon')}</div>
                             </div>
 
                             <div className="aspect-video bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center relative overflow-hidden opacity-50">
                                 <span className="text-white/40 font-bold text-lg">Etsy</span>
-                                <div className="absolute bottom-3 right-3 text-[10px] uppercase font-bold text-white/30 tracking-wider">Coming Soon</div>
+                                <div className="absolute bottom-3 right-3 text-[10px] uppercase font-bold text-white/30 tracking-wider">{t('vision.comingSoon')}</div>
                             </div>
 
                             <div className="aspect-video bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center relative overflow-hidden opacity-50">
                                 <span className="text-white/40 font-bold text-lg">Trendyol</span>
-                                <div className="absolute bottom-3 right-3 text-[10px] uppercase font-bold text-white/30 tracking-wider">Coming Soon</div>
+                                <div className="absolute bottom-3 right-3 text-[10px] uppercase font-bold text-white/30 tracking-wider">{t('vision.comingSoon')}</div>
                             </div>
                         </div>
                     </div>
@@ -208,31 +220,31 @@ export default function ManifestoPage() {
                         className="text-center mb-16"
                     >
                         <h2 className="text-4xl sm:text-5xl font-black text-white mb-6 tracking-tight">
-                            Birlikte İnşa Ediyoruz: <br className="hidden sm:block" />
-                            <span className="text-white/60">Kapalı Beta Süreci</span>
+                            {t('beta.headlineLine1')} <br className="hidden sm:block" />
+                            <span className="text-white/60">{t('beta.headlineLine2')}</span>
                         </h2>
                     </motion.div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
                         <div className="p-8 rounded-3xl border border-white/5 bg-white/[0.02]">
-                            <h4 className="text-white font-bold text-xl mb-3">Sınırlı Kontenjan</h4>
-                            <p className="text-white/50 leading-relaxed">Sistemin stabilitesini korumak ve her kullanıcıya maksimum değer sunmak için şimdilik sadece onaylanmış, sınırlı sayıda mağazayı içeri alıyoruz.</p>
+                            <h4 className="text-white font-bold text-xl mb-3">{t('beta.card1.title')}</h4>
+                            <p className="text-white/50 leading-relaxed">{t('beta.card1.description')}</p>
                         </div>
                         <div className="p-8 rounded-3xl border border-white/5 bg-white/[0.02]">
-                            <h4 className="text-white font-bold text-xl mb-3">Birebir Onboarding</h4>
-                            <p className="text-white/50 leading-relaxed">Kabul edildiğinizde sizi yalnız bırakmıyoruz. Sistemin kurulumunu ve ilk finansal okumanızı birlikte yapıyoruz.</p>
+                            <h4 className="text-white font-bold text-xl mb-3">{t('beta.card2.title')}</h4>
+                            <p className="text-white/50 leading-relaxed">{t('beta.card2.description')}</p>
                         </div>
                         <div className="p-8 rounded-3xl border border-white/5 bg-white/[0.02]">
-                            <h4 className="text-white font-bold text-xl mb-3">Sürekli İletişim</h4>
-                            <p className="text-white/50 leading-relaxed">Siz bizim ilk partnerlerimizsiniz. Özellikleri sizin geri bildirimlerinizle, sizin ihtiyaçlarınıza göre şekillendireceğiz.</p>
+                            <h4 className="text-white font-bold text-xl mb-3">{t('beta.card3.title')}</h4>
+                            <p className="text-white/50 leading-relaxed">{t('beta.card3.description')}</p>
                         </div>
                     </div>
 
                     <div id="beta-application-form" className="max-w-3xl mx-auto bg-black border border-white/10 rounded-3xl p-6 sm:p-12 shadow-2xl">
                         <div className="text-center mb-10">
-                            <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-white text-xs font-bold uppercase tracking-wider mb-4">Erken Erişim</span>
-                            <h3 className="text-2xl font-bold text-white mb-2">Başvuru Formu</h3>
-                            <p className="text-white/40">Detayları eksiksiz doldurarak kapalı beta inceleme sürecine katılın.</p>
+                            <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-white text-xs font-bold uppercase tracking-wider mb-4">{t('beta.form.badge')}</span>
+                            <h3 className="text-2xl font-bold text-white mb-2">{t('beta.form.title')}</h3>
+                            <p className="text-white/40">{t('beta.form.description')}</p>
                         </div>
                         <BetaApplicationForm />
                     </div>

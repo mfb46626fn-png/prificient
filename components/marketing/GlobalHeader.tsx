@@ -5,8 +5,11 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion'
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
+import LanguageSwitcher from '@/components/marketing/LanguageSwitcher'
 
 export default function GlobalHeader() {
+    const t = useTranslations('GlobalHeader')
     const { scrollY } = useScroll()
     const [scrolled, setScrolled] = useState(false)
 
@@ -60,18 +63,19 @@ export default function GlobalHeader() {
 
                 {/* Middle Links (Hidden on small screens) */}
                 <nav className="hidden md:flex items-center gap-8">
-                    <Link href="/marketing-home#vision" onClick={(e) => handleNavClick(e, 'vision')} className="text-sm font-medium text-white/60 hover:text-white transition-colors">Vizyonumuz</Link>
-                    <Link href="/marketing-home#illusion" onClick={(e) => handleNavClick(e, 'illusion')} className="text-sm font-medium text-white/60 hover:text-white transition-colors">Neler Çözüyoruz?</Link>
-                    <a href="https://tools.prificient.com" className="text-sm font-medium text-white/60 hover:text-white transition-colors">Ücretsiz Araçlar</a>
+                    <Link href="/marketing-home#vision" onClick={(e) => handleNavClick(e, 'vision')} className="text-sm font-medium text-white/60 hover:text-white transition-colors">{t('vision')}</Link>
+                    <Link href="/marketing-home#illusion" onClick={(e) => handleNavClick(e, 'illusion')} className="text-sm font-medium text-white/60 hover:text-white transition-colors">{t('illusion')}</Link>
+                    <a href="https://tools.prificient.com" className="text-sm font-medium text-white/60 hover:text-white transition-colors">{t('tools')}</a>
                 </nav>
 
-                {/* CTA */}
-                <div className="flex items-center gap-4">
+                {/* CTA & Language Switcher */}
+                <div className="flex items-center gap-3">
+                    <LanguageSwitcher />
                     <button
                         onClick={scrollToBeta}
                         className="text-sm font-bold text-black bg-white hover:bg-gray-200 px-5 py-2.5 rounded-full transition-all"
                     >
-                        Kapalı Beta Başvurusu
+                        {t('cta')}
                     </button>
                 </div>
             </div>

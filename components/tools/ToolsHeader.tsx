@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useScroll, useMotionValueEvent } from 'framer-motion'
 import { useState } from 'react'
 import ToolsUserMenu from '@/components/tools/ToolsUserMenu'
+import LanguageSwitcher from '@/components/marketing/LanguageSwitcher'
 
 export default function ToolsHeader() {
     const { scrollY } = useScroll()
@@ -41,6 +42,7 @@ export default function ToolsHeader() {
 
                 {/* Right Side - User Menu */}
                 <div className="flex items-center gap-4">
+                    <LanguageSwitcher />
                     <ToolsUserMenu />
                 </div>
             </div>

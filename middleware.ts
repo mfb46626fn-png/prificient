@@ -1,5 +1,9 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import createMiddleware from 'next-intl/middleware'
+import { routing } from './i18n/routing'
+
+const handleI18nRouting = createMiddleware(routing)
 
 export async function middleware(request: NextRequest) {
   let hostname = request.headers.get('host') || ''
@@ -11,25 +15,27 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname
 
-  // ─── TOOLS SUBDOMAIN (Fully Public, No Auth) ───
-  if (isTools) {
-    if (path === '/') {
-      return NextResponse.rewrite(new URL('/tools-home', request.url))
+  // 1. Run next-intl middleware for locale handling
+  let response = handleI18nRouting(request)
+
+  // 2. Intercept and adjust rewrites for Subdomains
+  const rewriteUrl = response.headers.get('x-middleware-rewrite')
+  if (rewriteUrl) {
+    const parsed = new URL(rewriteUrl)
+    const rewrittenPath = parsed.pathname
+
+    if (isTools && (rewrittenPath === '/tr' || rewrittenPath === '/en' || rewrittenPath === '/')) {
+      const base = rewrittenPath === '/' ? '' : rewrittenPath;
+      parsed.pathname = `${base}/tools-home`
+      response.headers.set('x-middleware-rewrite', parsed.toString())
+    } else if (isMarketing && (rewrittenPath === '/tr' || rewrittenPath === '/en' || rewrittenPath === '/')) {
+      const base = rewrittenPath === '/' ? '' : rewrittenPath;
+      parsed.pathname = `${base}/marketing-home`
+      response.headers.set('x-middleware-rewrite', parsed.toString())
     }
-    return NextResponse.next()
   }
 
-  // ─── MARKETING / ROOT DOMAIN (Fully Public, No Auth) ───
-  if (isMarketing) {
-    if (path === '/') {
-      return NextResponse.rewrite(new URL('/marketing-home', request.url))
-    }
-    return NextResponse.next()
-  }
-
-  // ─── APP SUBDOMAIN (Auth Required) ───
-  let supabaseResponse = NextResponse.next({ request })
-
+  // 3. Subdomain / Auth Protections
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -40,16 +46,13 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            response.cookies.set(name, value, options)
           )
         },
       },
     }
   )
-
-  const { data: { user } } = await supabase.auth.getUser()
 
   const isPublicRoute =
     path.startsWith('/login') ||
@@ -62,18 +65,23 @@ export async function middleware(request: NextRequest) {
     path.startsWith('/_next') ||
     path.includes('.')
 
-  if (!user && !isPublicRoute && path !== '/') {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirectedFrom', path)
-    return NextResponse.redirect(loginUrl)
+  if (!isTools && !isMarketing) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user && !isPublicRoute && path !== '/') {
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('redirectedFrom', path)
+      return NextResponse.redirect(loginUrl)
+    }
+
+    if (path === '/') {
+      if (user) {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+      }
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
   }
 
-  if (path === '/') {
-    if (user) return NextResponse.redirect(new URL('/dashboard', request.url))
-    return NextResponse.redirect(new URL('/login', request.url))
-  }
-
-  return supabaseResponse
+  return response
 }
 
 export const config = {
