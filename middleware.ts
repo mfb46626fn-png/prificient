@@ -18,20 +18,41 @@ export async function middleware(request: NextRequest) {
   // 1. Run next-intl middleware for locale handling
   let response = handleI18nRouting(request)
 
-  // 2. Intercept and adjust rewrites for Subdomains
-  const rewriteUrl = response.headers.get('x-middleware-rewrite')
-  if (rewriteUrl) {
-    const parsed = new URL(rewriteUrl)
-    const rewrittenPath = parsed.pathname
+  if (response.status >= 300 && response.status < 400) {
+    // If next-intl is redirecting (e.g. from / to /en), do not interfere
+  } else {
+    // 2. Intercept and adjust rewrites for Subdomains
+    const rewriteUrl = response.headers.get('x-middleware-rewrite')
+    const currentPath = rewriteUrl ? new URL(rewriteUrl).pathname : path
 
-    if (isTools && (rewrittenPath === '/tr' || rewrittenPath === '/en' || rewrittenPath === '/')) {
-      const base = rewrittenPath === '/' ? '' : rewrittenPath;
-      parsed.pathname = `${base}/tools-home`
-      response.headers.set('x-middleware-rewrite', parsed.toString())
-    } else if (isMarketing && (rewrittenPath === '/tr' || rewrittenPath === '/en' || rewrittenPath === '/')) {
-      const base = rewrittenPath === '/' ? '' : rewrittenPath;
-      parsed.pathname = `${base}/marketing-home`
-      response.headers.set('x-middleware-rewrite', parsed.toString())
+    if (isTools && (currentPath === '/tr' || currentPath === '/en' || currentPath === '/')) {
+      const base = currentPath === '/' ? '' : currentPath;
+      const targetPath = `${base}/tools-home`;
+
+      if (rewriteUrl) {
+        const parsed = new URL(rewriteUrl)
+        parsed.pathname = targetPath
+        response.headers.set('x-middleware-rewrite', parsed.toString())
+      } else {
+        const parsed = new URL(request.url)
+        parsed.pathname = targetPath
+        response.headers.delete('x-middleware-next')
+        response.headers.set('x-middleware-rewrite', parsed.toString())
+      }
+    } else if (isMarketing && (currentPath === '/tr' || currentPath === '/en' || currentPath === '/')) {
+      const base = currentPath === '/' ? '' : currentPath;
+      const targetPath = `${base}/marketing-home`;
+
+      if (rewriteUrl) {
+        const parsed = new URL(rewriteUrl)
+        parsed.pathname = targetPath
+        response.headers.set('x-middleware-rewrite', parsed.toString())
+      } else {
+        const parsed = new URL(request.url)
+        parsed.pathname = targetPath
+        response.headers.delete('x-middleware-next')
+        response.headers.set('x-middleware-rewrite', parsed.toString())
+      }
     }
   }
 
